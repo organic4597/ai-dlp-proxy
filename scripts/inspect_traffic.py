@@ -10,6 +10,7 @@ Phase 1 — 패킷 구조 확인용 mitmproxy addon (v2)
 import asyncio
 import json
 import logging
+import re
 import socket
 import textwrap
 import time
@@ -46,7 +47,7 @@ async def _engine_request(payload: dict) -> dict | None:
     """엔진 서버에 NDJSON 요청을 보내고 응답 수신. 연결 실패 시 None."""
     global _engine_reader, _engine_writer
     async with _engine_lock:
-        # 연결 확인/재연결
+        # 연결이 없거나 닫혔으면 재연결
         if _engine_writer is None or _engine_writer.is_closing():
             if await _engine_connect() is None:
                 return None
@@ -337,6 +338,22 @@ class InspectAddon:
             log.info("[CONFIG] ✓ HTTP/2 비활성화 → 업스트림 연결 HTTP/1.1 강제")
         except Exception as e:
             log.warning(f"[CONFIG] HTTP/2 옵션 설정 실패 (무시): {e}")
+
+        # 타겟 호스트만 TLS 인터셉트 — 나머지는 mitmproxy가 투명하게 터널링
+        # allow_hosts에 없는 호스트는 TLS 복호화 없이 TCP 터널로 그대로 통과
+        try:
+            _target_patterns = [
+                re.escape(host) for host in TARGET_HOSTS
+            ] + [r".*\.openai\.azure\.com"]  # Azure OpenAI 와일드카드
+            ctx.options.allow_hosts = _target_patterns
+            log.info(
+                f"[CONFIG] ✓ TLS 인터셉트 대상 {len(_target_patterns)}개 호스트로 제한"
+            )
+            for p in _target_patterns:
+                log.debug(f"[CONFIG]   allow: {p}")
+        except Exception as e:
+            log.warning(f"[CONFIG] allow_hosts 설정 실패 (무시): {e}")
+
         log.info(f"[CONFIG] DLP Engine 서버: UDS {_ENGINE_SOCK} (별도 프로세스)")
 
     async def request(self, flow: http.HTTPFlow) -> None:
