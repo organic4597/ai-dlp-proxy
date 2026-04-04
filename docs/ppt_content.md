@@ -131,7 +131,7 @@ AI Agent   =  비서
 [
   {"role": "user",      "content": "이번 달 매출 분석해줘"},
   {"role": "assistant", "tool_calls": [{"function": {"name": "query_database", ...}}]},
-  {"role": "tool",      "content": "{"rows": [{"주민번호": "900101-1234568", ...}]}"},
+  {"role": "tool",      "content": "{\"rows\": [{\"주민번호\": \"900101-1234568\", ...}]}"},
   {"role": "assistant", "content": "분석 결과입니다: ..."}
 ]
 ```
@@ -233,6 +233,7 @@ AI Agent 런타임
 
 > AI Agent 코드를 **단 한 줄도 수정하지 않고** 보호 가능
 
+---
 
 ## [슬라이드 6] 해결 아이디어
 
