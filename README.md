@@ -156,7 +156,161 @@ Windows PC에서 시스템 프록시를 `RPi_IP:4001`로 설정하면 LLM 트래
 
 ---
 
-## 성능
+## 실행 가이드
+
+> RPi IP를 `192.168.0.16` 기준으로 설명합니다. 실제 IP에 맞게 변경하세요.
+
+### 0. 공통 — RPi에서 서버 기동
+
+TUI를 실행하면 engine_server와 mitmdump가 **자동으로** 함께 시작됩니다.
+
+```bash
+# RPi SSH 접속 후
+cd /home1/ai-dlp-proxy
+source venv/bin/activate
+python3 scripts/tui.py
+```
+
+TUI 상단 Bar에 `Engine ●` `mitm ●` 이 **초록색**으로 표시되면 준비 완료.
+
+> 수동 기동이 필요한 경우:
+> ```bash
+> # 1. DLP 엔진 서버
+> PYTHONPATH=src python3 scripts/engine_server.py
+>
+> # 2. mitmproxy (명시적 프록시 모드)
+> mitmdump --listen-host 0.0.0.0 -p 4001 -s scripts/inspect_traffic.py
+> ```
+
+---
+
+### 모드 A — 명시적 프록시 (권장)
+
+클라이언트 측에서 프록시 주소를 직접 지정하는 방식입니다.  
+`HTTPS_PROXY` 환경변수 또는 시스템 프록시 설정을 이용합니다.
+
+#### CA 인증서 설치 (최초 1회)
+
+mitmproxy가 HTTPS를 복호화하려면 클라이언트에 CA 인증서를 신뢰시켜야 합니다.
+
+```bash
+# RPi에서 CA 파일 위치 확인
+ls ~/.mitmproxy/mitmproxy-ca-cert.pem
+# 또는 프로젝트 내 복사본
+ls /home1/ai-dlp-proxy/config/mitmproxy-ca-cert.pem
+```
+
+**Linux / macOS**
+```bash
+# 시스템 인증서 저장소에 추가
+sudo cp mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy-ca.crt
+sudo update-ca-certificates          # Ubuntu/Debian
+# sudo security add-trusted-cert ... # macOS
+```
+
+**Windows**
+1. `mitmproxy-ca-cert.pem`을 `.crt`로 복사 후 더블클릭
+2. "신뢰할 수 있는 루트 인증 기관" → 인증서 설치
+
+#### opencode (또는 AI 에이전트/CLI 도구)
+
+```bash
+# 환경변수로 프록시 지정
+export HTTPS_PROXY=http://192.168.0.16:4001
+export HTTP_PROXY=http://192.168.0.16:4001
+
+# opencode 실행 (환경변수 자동 적용)
+opencode
+
+# curl 테스트
+curl -x http://192.168.0.16:4001 https://api.openai.com/v1/models
+```
+
+#### Python / requests
+
+```python
+import openai
+
+client = openai.OpenAI(
+    api_key="sk-...",
+    http_client=httpx.Client(
+        proxies="http://192.168.0.16:4001",
+        verify=False,   # 또는 mitmproxy CA 경로 지정
+    ),
+)
+```
+
+#### 시스템 전체 프록시 (Windows)
+
+설정 → 네트워크 → 프록시 → 수동 프록시 설정:
+- 서버: `192.168.0.16`  포트: `4001`
+
+---
+
+### 모드 B — 투명 게이트웨이 (네트워크 레벨 차단)
+
+클라이언트 설정 변경 없이 **RPi를 기본 게이트웨이로** 사용하는 방식입니다.  
+모든 TCP 443 트래픽이 자동으로 mitmproxy를 경유합니다.
+
+#### RPi 설정
+
+```bash
+# 1. mitmproxy를 투명 프록시 모드로 실행
+mitmdump --mode transparent \
+         --listen-host 0.0.0.0 -p 4002 \
+         -s scripts/inspect_traffic.py
+
+# 2. IP 포워딩 활성화
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+# 영구 적용: /etc/sysctl.conf 에 net.ipv4.ip_forward=1 추가
+
+# 3. iptables — HTTPS(443) 및 HTTP(80) 트래픽을 mitmproxy로 리다이렉트
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 4002
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport  80 -j REDIRECT --to-port 4002
+
+# 규칙 확인
+sudo iptables -t nat -L PREROUTING -n --line-numbers
+```
+
+> TUI에서 자동 기동할 경우 mitmdump 명령에 `--mode transparent -p 4002`를 추가해야 합니다.
+
+#### 클라이언트 설정
+
+클라이언트(PC/스마트폰)의 **기본 게이트웨이**를 RPi IP(`192.168.0.16`)로 변경합니다.
+
+| 항목 | 값 |
+|------|----|
+| 기본 게이트웨이 | `192.168.0.16` |
+| DNS | 기존 공유기 IP 또는 `8.8.8.8` |
+
+CA 인증서는 동일하게 설치 필요 (→ 모드 A 참고).
+
+#### 게이트웨이 모드 종료 (iptables 초기화)
+
+```bash
+# 특정 규칙 삭제
+sudo iptables -t nat -D PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 4002
+sudo iptables -t nat -D PREROUTING -i eth0 -p tcp --dport  80 -j REDIRECT --to-port 4002
+
+# 또는 전체 NAT 테이블 초기화
+sudo iptables -t nat -F
+```
+
+---
+
+### 모드 비교
+
+| | 명시적 프록시 (A) | 투명 게이트웨이 (B) |
+|---|---|---|
+| 포트 | 4001 | 4002 |
+| 클라이언트 설정 | 프록시 주소 지정 | 게이트웨이 변경 |
+| 적용 범위 | 프록시 설정한 앱만 | 네트워크 전체 |
+| CA 인증서 | 필요 | 필요 |
+| 권장 대상 | 개발·테스트 | 시연·광범위 차단 |
+
+---
+
+
 
 | 항목 | 수치 |
 |------|------|

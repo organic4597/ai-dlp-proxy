@@ -77,7 +77,12 @@ def _patch_control(key: str | None = None, value: object = None) -> None:
 
 # ── 색상 ─────────────────────────────────────────────────────────────────────
 SEV_S = {"critical": "bold red", "high": "magenta", "medium": "yellow", "low": "dim"}
-ACT_S = {"pass": "green", "alert": "yellow", "mask": "bold red", "block": "bold red reverse"}
+ACT_S  = {"pass": "green", "alert": "yellow", "mask": "bold red", "block": "bold red reverse"}
+ACT_LB = {"pass": "PASS", "alert": "ALERT", "mask": "MASKED", "block": "BLOCK"}
+
+def _trunc(s: str, n: int = 6) -> str:
+    """n자 초과 시 말줄임표(…) 처리."""
+    return s[:n] + "…" if len(s) > n else s
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -291,18 +296,24 @@ class DLPApp(App):
     #stats-bar { height: 1; background: $surface; padding: 0 1; }
     #main { height: 1fr; }
 
+    /* 툴바 */
+    .tab-toolbar { height: 3; background: $surface; align: right middle; padding: 0 1; }
+    .toolbar-title { width: 1fr; color: $text-muted; content-align: left middle; height: 3; }
+    .toolbar-btn { min-width: 8; height: 3; }
+
     /* 트래픽 */
     #hsplit { height: 1fr; }
-    #tlist { width: 46; min-width: 36; border-right: tall $surface-lighten-2; }
-    #ttable { height: 1fr; }
+    #tlist { width: 52; min-width: 42; border-right: tall $surface-lighten-2; }
+    #ttable { height: 1fr; overflow-x: hidden; }
+    #act-legend { height: 1; padding: 0 1; background: $surface; color: $text-muted; }
     #darea { width: 1fr; }
     #dlog { height: 1fr; }
 
     /* 탐지 */
     #fsplit { height: 1fr; }
-    #flist { width: 1fr; border-right: tall $surface-lighten-2; }
-    #ftable { height: 1fr; }
-    #fdetail-area { width: 60; min-width: 40; }
+    #flist { width: 54; min-width: 48; border-right: tall $surface-lighten-2; }
+    #ftable { height: 1fr; overflow-x: hidden; }
+    #fdetail-area { width: 1fr; }
     #fdetail { height: 1fr; }
 
     /* 로그 */
@@ -448,12 +459,25 @@ class DLPApp(App):
             with TabPane("트래픽", id="tab-traffic"):
                 with Horizontal(id="hsplit"):
                     with Vertical(id="tlist"):
+                        with Horizontal(classes="tab-toolbar"):
+                            yield Label("트래픽", classes="toolbar-title")
+                            yield Button("클리어", id="btn-clear-traffic", classes="toolbar-btn")
                         yield DataTable(id="ttable", cursor_type="row")
+                        yield Label(
+                            "[green]PASS[/] 정상통과  "
+                            "[yellow]ALERT[/] 탐지됨  "
+                            "[bold cyan]MASKED[/] PII마스킹  "
+                            "[bold red]BLOCK[/] 차단",
+                            id="act-legend",
+                        )
                     with Vertical(id="darea"):
                         yield RichLog(id="dlog", highlight=True, markup=True, wrap=True)
             with TabPane("탐지 목록", id="tab-findings"):
                 with Horizontal(id="fsplit"):
                     with Vertical(id="flist"):
+                        with Horizontal(classes="tab-toolbar"):
+                            yield Label("탐지목록", classes="toolbar-title")
+                            yield Button("클리어", id="btn-clear-findings", classes="toolbar-btn")
                         yield DataTable(id="ftable", cursor_type="row")
                     with Vertical(id="fdetail-area"):
                         yield RichLog(id="fdetail", highlight=True, markup=True, wrap=True)
@@ -587,16 +611,29 @@ class DLPApp(App):
                             yield Label("캡처 파일", classes="info-key")
                             yield Label(f"{_CAPTURE_OUT}", classes="info-val")
             with TabPane("엔진 로그", id="tab-log"):
-                yield RichLog(id="elog", highlight=True, markup=True, wrap=True)
+                with Vertical():
+                    with Horizontal(classes="tab-toolbar"):
+                        yield Label("엔진 로그", classes="toolbar-title")
+                        yield Button("클리어", id="btn-clear-log", classes="toolbar-btn")
+                    yield RichLog(id="elog", highlight=True, markup=True, wrap=True)
         yield Footer()
 
     # ── mount ─────────────────────────────────────────────────────────────────
 
     def on_mount(self) -> None:
-        self.query_one("#ttable", DataTable).add_columns(
-            "턴", "시각", "모델", "요청", "탐지", "액션")
-        self.query_one("#ftable", DataTable).add_columns(
-            "시각", "심각도", "규칙", "매치", "경로", "신뢰도", "모델")
+        tt = self.query_one("#ttable", DataTable)
+        tt.add_column("턴",  width=4)
+        tt.add_column("시각", width=8)
+        tt.add_column("모델", width=13)
+        tt.add_column("요",   width=3)
+        tt.add_column("탐",   width=3)
+        tt.add_column("액션", width=9)
+        ft = self.query_one("#ftable", DataTable)
+        ft.add_column("시각",   width=8)
+        ft.add_column("심각도", width=8)
+        ft.add_column("규칙",   width=16)
+        ft.add_column("신뢰도", width=5)
+        ft.add_column("모델",   width=9)
         # 제어 탭 — 패킷 큐 테이블
         qt = self.query_one("#ctrl-qtable", DataTable)
         qt.add_columns("시각", "모델", "대상", "탐지", "액션", "결정")
@@ -644,11 +681,12 @@ class DLPApp(App):
                     since_lbl.update(ps.started_at or "-")
                 except Exception:
                     pass
-            # StatsBar mitm 상태 반영
+            # StatsBar engine/mitm 상태 반영
             try:
                 bar = self.query_one(StatsBar)
                 if self._sup:
-                    bar.mitm_ok = self._sup.procs["mitm"].running
+                    bar.engine_ok = self._sup.procs["engine"].running
+                    bar.mitm_ok   = self._sup.procs["mitm"].running
             except Exception:
                 pass
 
@@ -847,6 +885,39 @@ class DLPApp(App):
     @on(Button.Pressed, "#btn-start-mitm")
     def _btn_start_mitm(self, _):     self._proc_toggle("mitm", True)
 
+    @on(Button.Pressed, "#btn-clear-log")
+    def _btn_clear_log(self, _):
+        self.query_one("#elog", RichLog).clear()
+
+    @on(Button.Pressed, "#btn-clear-traffic")
+    def _btn_clear_traffic(self, _):
+        # JSONL 히스토리 파일도 비워야 재시작 시 되살아나지 않음
+        try:
+            open(self._jsonl, "w").close()
+        except Exception:
+            pass
+        self._tk = TurnTracker()
+        self._finding_rows.clear()
+        self.query_one("#ttable", DataTable).clear()
+        self.query_one("#ftable", DataTable).clear()
+        try:
+            self.query_one("#dlog", RichLog).clear()
+        except Exception:
+            pass
+        try:
+            self.query_one("#fdetail", RichLog).clear()
+        except Exception:
+            pass
+
+    @on(Button.Pressed, "#btn-clear-findings")
+    def _btn_clear_findings(self, _):
+        self._finding_rows.clear()
+        self.query_one("#ftable", DataTable).clear()
+        try:
+            self.query_one("#fdetail", RichLog).clear()
+        except Exception:
+            pass
+
     @work
     async def _proc_restart(self, key: str):
         if not self._sup:
@@ -941,16 +1012,17 @@ class DLPApp(App):
         vals = (
             f"#{t.id}",
             _sts(t.ts),
-            (t.model or "?")[:18],
+            (t.model or "?")[:14],
             str(len(t.reqs)),
             f"[red]{t.fc}[/]" if t.fc else "0",
-            f"[{ACT_S.get(t.wa, '')}]{t.wa.upper()}[/]",
+            f"[{ACT_S.get(t.wa, '')}]{ACT_LB.get(t.wa, t.wa.upper())}[/]",
         )
         if rk in tb.rows:
             tb.remove_row(rk)
         tb.add_row(*vals, key=rk)
         if self._auto:
             tb.move_cursor(row=tb.row_count - 1)
+            self._show_turn_detail(t.id)
 
     def _aft(self, ev: dict, f: dict):
         tb = self.query_one("#ftable", DataTable)
@@ -962,10 +1034,8 @@ class DLPApp(App):
             _sts(ev.get("ts", "")),
             f"[{SEV_S.get(sev, '')}]{sev.upper()}[/]",
             f.get("rule", "?"),
-            (f.get("match_text") or "")[:30],
-            f.get("field_path", ""),
             f"{c:.1f}" if isinstance(c, (int, float)) else str(c),
-            (ev.get("model") or "?")[:15],
+            _trunc(ev.get("model") or "?"),
             key=rk,
         )
         if self._auto:
@@ -982,6 +1052,9 @@ class DLPApp(App):
             tid = int(rk[1:])
         except ValueError:
             return
+        self._show_turn_detail(tid)
+
+    def _show_turn_detail(self, tid: int):
         if tid < 1 or tid > len(self._tk.turns):
             return
         t = self._tk.turns[tid - 1]
@@ -1059,36 +1132,43 @@ class DLPApp(App):
     @work(exclusive=True)
     async def _subscribe(self):
         while True:
+            w = None
             try:
                 r, w = await asyncio.open_unix_connection(self._sock)
                 w.write(json.dumps({"action": "subscribe", "id": 0}).encode() + b"\n")
                 await w.drain()
                 ack = await asyncio.wait_for(r.readline(), timeout=5)
-                if ack and json.loads(ack).get("ok"):
-                    self.query_one(StatsBar).engine_ok = True
-                    self._lg("[green]엔진 구독 연결됨[/]")
+                if not (ack and json.loads(ack).get("ok")):
+                    continue
+                self._lg("[green]엔진 구독 연결됨[/]")
                 while True:
                     line = await r.readline()
                     if not line:
                         break
                     try:
                         ev = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    if ev.get("type") == "scan_result":
-                        self._one(ev)
-                        self._log_ev(ev)
-            except (ConnectionRefusedError, FileNotFoundError, OSError):
-                self.query_one(StatsBar).engine_ok = False
-            except asyncio.TimeoutError:
-                pass
+                        if ev.get("type") == "scan_result":
+                            self._one(ev)
+                            self._log_ev(ev)
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception:
+                        pass
             except asyncio.CancelledError:
                 return
-            except Exception as exc:
-                self._lg(f"[red]엔진 오류: {exc}[/]")
-            self.query_one(StatsBar).engine_ok = False
+            except Exception:
+                pass
+            finally:
+                if w is not None:
+                    try:
+                        w.close()
+                    except Exception:
+                        pass
             self._lg("[yellow]엔진 재연결 3초…[/]")
-            await asyncio.sleep(3)
+            try:
+                await asyncio.sleep(3)
+            except asyncio.CancelledError:
+                return
 
     def _log_ev(self, ev: dict):
         pa = ev.get("pipeline_action") or "pass"
@@ -1110,46 +1190,40 @@ class DLPApp(App):
 
     @work(exclusive=True)
     async def _poll(self):
-        w = None
+        await asyncio.sleep(1)  # 마운트 완료 대기
         while True:
             try:
-                # 연결이 없으면 새로 열기
-                if w is None or w.is_closing():
-                    r, w = await asyncio.open_unix_connection(self._sock)
-                w.write(json.dumps({"action": "stats", "id": -1}).encode() + b"\n")
-                await w.drain()
-                line = await asyncio.wait_for(r.readline(), timeout=3)
-                if not line:
-                    w = None
-                    raise ConnectionResetError
-                s = json.loads(line)
-                bar = self.query_one(StatsBar)
-                bar.total = s.get("total", 0)
-                bar.scanned = s.get("scanned", 0)
-                bar.findings = s.get("findings", 0)
-                bar.masked = s.get("masked", 0)
-                bar.engine_ok = True
+                # 매번 새 연결 사용 — 엔진 재시작 시도 확실히 감지
+                r, w = await asyncio.wait_for(
+                    asyncio.open_unix_connection(self._sock), timeout=2.0)
+                try:
+                    w.write(json.dumps({"action": "stats", "id": -1}).encode() + b"\n")
+                    await w.drain()
+                    line = await asyncio.wait_for(r.readline(), timeout=3)
+                    if not line:
+                        raise ConnectionResetError
+                    s = json.loads(line)
+                    bar = self.query_one(StatsBar)
+                    bar.total    = s.get("total", 0)
+                    bar.scanned  = s.get("scanned", 0)
+                    bar.findings = s.get("findings", 0)
+                    bar.masked   = s.get("masked", 0)
+                finally:
+                    try:
+                        w.close()
+                    except Exception:
+                        pass
             except (ConnectionRefusedError, ConnectionResetError,
                     FileNotFoundError, OSError, asyncio.TimeoutError):
-                self.query_one(StatsBar).engine_ok = False
-                if w:
-                    try:
-                        w.close()
-                    except Exception:
-                        pass
-                    w = None
+                pass
             except asyncio.CancelledError:
-                if w:
-                    w.close()
                 return
             except Exception:
-                if w:
-                    try:
-                        w.close()
-                    except Exception:
-                        pass
-                    w = None
-            await asyncio.sleep(3)
+                pass
+            try:
+                await asyncio.sleep(3)
+            except asyncio.CancelledError:
+                return
 
     # ── 스위치 ────────────────────────────────────────────────────────────────
 
