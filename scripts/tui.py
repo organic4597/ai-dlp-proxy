@@ -794,51 +794,60 @@ class DLPApp(App):
             status,
         )
 
+    # 메모리 내 disabled_rules 상태 (파일 read/write 경쟁 방지)
+    _disabled_rules: set = set()
+
     def _init_mask_rules(self):
+        self._disabled_rules = set(self._read_control().get("disabled_rules", []))
         mt = self.query_one("#mask-table", DataTable)
-        disabled = set(self._read_control().get("disabled_rules", []))
         for rule, sev, repl in self._MASK_RULES_DATA:
-            mt.add_row(*self._mask_rule_row(rule, sev, repl, rule not in disabled), key=rule)
+            mt.add_row(*self._mask_rule_row(rule, sev, repl, rule not in self._disabled_rules), key=rule)
 
     def _refresh_mask_table(self):
         """disabled_rules 변경 후 테이블 갱신.
         remove_row+add_row로 layout을 강제 갱신해 실제 터미널에서도 시각적으로 반영됨.
-        전체 루프를 순서대로 실행하면 최종 행 순서가 _MASK_RULES_DATA와 동일하게 복원됨.
+        _disabled_rules 메모리 상태 사용 (파일 재읽기 없음).
         """
         mt = self.query_one("#mask-table", DataTable)
         cursor_row = mt.cursor_coordinate.row  # 커서 위치 저장
-        disabled = set(self._read_control().get("disabled_rules", []))
-        for rule, sev, repl in self._MASK_RULES_DATA:
-            enabled = rule not in disabled
-            vals = self._mask_rule_row(rule, sev, repl, enabled)
-            if rule in mt.rows:
-                mt.remove_row(rule)
-            mt.add_row(*vals, key=rule)
-        # 커서 위치 복원 (로프 순환 후 행 순서가 _MASK_RULES_DATA와 동일하게 복원됨)
+        self._refreshing = True
+        mt.show_cursor = False
+        try:
+            for rule, sev, repl in self._MASK_RULES_DATA:
+                enabled = rule not in self._disabled_rules
+                vals = self._mask_rule_row(rule, sev, repl, enabled)
+                if rule in mt.rows:
+                    mt.remove_row(rule)
+                mt.add_row(*vals, key=rule)
+        finally:
+            mt.show_cursor = True
+            self._refreshing = False
+        # 커서 위치 복원
         if mt.row_count > 0:
             mt.move_cursor(row=min(cursor_row, mt.row_count - 1), animate=False)
 
-    _last_toggle_ts: float = 0.0  # 더블 토글 방지 (같은 행 재클릭 시 두 번 RowSelected 발생)
+    _last_toggle_ts: float = 0.0  # 더블 토글 방지
+    _refreshing: bool = False     # _refresh_mask_table 중 RowSelected 차단
 
     @on(DataTable.RowSelected, "#mask-table")
     def _toggle_mask_rule(self, e: DataTable.RowSelected):
         """클릭/Enter → disabled_rules 토글 (150ms 디바운스로 더블 토글 방지)."""
+        if self._refreshing:
+            return
         now = time.monotonic()
         if now - self._last_toggle_ts < 0.15:
             self._lg(f"[dim][mask] debounce skip: {e.row_key.value!r}[/]")
             return
         self._last_toggle_ts = now
         rule_key = str(e.row_key.value)
-        self._lg(f"[cyan][mask] toggle: {rule_key!r}[/]")
-        ctrl = self._read_control()
-        disabled: list = ctrl.get("disabled_rules", [])
-        if rule_key in disabled:
-            disabled.remove(rule_key)
+        if rule_key in self._disabled_rules:
+            self._disabled_rules.discard(rule_key)
             flag = True
         else:
-            disabled.append(rule_key)
+            self._disabled_rules.add(rule_key)
             flag = False
-        _patch_control("disabled_rules", disabled)
+        self._lg(f"[cyan][mask] toggle: {rule_key!r} → {'ON' if flag else 'OFF'} (disabled={sorted(self._disabled_rules)})[/]")
+        _patch_control("disabled_rules", list(self._disabled_rules))
         self._refresh_mask_table()
         self._lg(f"[{'green' if flag else 'dim'}]{rule_key} 마스킹 {'ON' if flag else 'OFF'}[/]")
 
