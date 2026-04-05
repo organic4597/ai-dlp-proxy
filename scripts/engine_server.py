@@ -107,7 +107,12 @@ def _handle_scan(request: dict) -> dict:
         return {"ok": True, "matched": False}
 
     # 2) 파이프라인 실행
-    result = run_pipeline(parsed.targets)
+    try:
+        _ctrl = json.loads(Path("/tmp/dlp-control.json").read_text())
+    except Exception:
+        _ctrl = {}
+    slm_enabled = bool(_ctrl.get("slm_enabled", False))
+    result = run_pipeline(parsed.targets, slm_enabled=slm_enabled)
 
     return {
         "ok": True,

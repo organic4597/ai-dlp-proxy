@@ -2,11 +2,14 @@
 DLP Pipeline — 스테이지를 순차 실행하는 러너.
 """
 from __future__ import annotations
+import logging
 import time
 
 from .base import Stage, Finding, Action, Severity, PipelineResult
 from .regex_stage import RegexStage
+from .slm_stage import SLMStage
 
+log = logging.getLogger(__name__)
 
 def _decide_action(findings: list[Finding]) -> Action:
     """findings에서 최종 액션 결정."""
@@ -20,35 +23,39 @@ def _decide_action(findings: list[Finding]) -> Action:
     return Action.ALERT
 
 
-# 기본 파이프라인 스테이지 목록
-_DEFAULT_STAGES: list[Stage] = [
-    RegexStage(),
-    # 향후: SLMStage(),
-]
+# 싱글톤 스테이지 인스턴스
+_regex_stage = RegexStage()
+_slm_stage   = SLMStage()   # 지연 로드 — 첫 scan() 호출 시 모델 로드
 
 
-def run_pipeline(targets: list, stages: list[Stage] | None = None) -> PipelineResult:
+def run_pipeline(
+    targets: list,
+    stages: list[Stage] | None = None,
+    slm_enabled: bool = False,
+) -> PipelineResult:
     """
     DLP 파이프라인 실행.
 
     Parameters
     ----------
-    targets : list[DLPTarget] — 추출된 텍스트 대상
-    stages  : 실행할 스테이지 목록 (None이면 기본 스테이지)
-
-    Returns
-    -------
-    PipelineResult
+    targets     : list[DLPTarget] — 추출된 텍스트 대상
+    stages      : 실행할 스테이지 목록 (None이면 자동 결정)
+    slm_enabled : True이면 RegexStage 뒤에 SLMStage 추가 실행
     """
     if stages is None:
-        stages = _DEFAULT_STAGES
+        stages = [_regex_stage]
+        if slm_enabled:
+            stages.append(_slm_stage)
 
     t0 = time.monotonic()
     all_findings: list[Finding] = []
 
     for stage in stages:
-        new = stage.scan(targets, all_findings)
-        all_findings.extend(new)
+        try:
+            new = stage.scan(targets, all_findings)
+            all_findings.extend(new)
+        except Exception as e:
+            log.error("[pipeline] %s 스테이지 오류: %s", stage.name, e)
 
     elapsed = round((time.monotonic() - t0) * 1000, 2)
     action = _decide_action(all_findings)
@@ -58,3 +65,4 @@ def run_pipeline(targets: list, stages: list[Stage] | None = None) -> PipelineRe
         findings=all_findings,
         elapsed_ms=elapsed,
     )
+

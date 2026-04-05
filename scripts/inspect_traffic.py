@@ -152,6 +152,7 @@ SEPARATOR = f"{C.DIM}{'═' * 90}{C.RESET}"
 
 # 규칙별 마스킹 대체 텍스트
 _MASK_TEMPLATES: dict[str, str] = {
+    # Regex Stage 규칙
     "kr_rrn":            "[주민등록번호]",
     "kr_phone":          "[전화번호]",
     "credit_card":       "[카드번호]",
@@ -165,6 +166,17 @@ _MASK_TEMPLATES: dict[str, str] = {
     "pem_private_key":   "[PRIVATE_KEY]",
     "jwt_token":         "[JWT]",
     "github_pat":        "[GH_TOKEN]",
+    # SLM Stage 규칙
+    "person_name":       "[이름]",
+    "address":           "[주소]",
+    "organization":      "[기관]",
+    "date_of_birth":     "[생년월일]",
+    "account_number":    "[계좌번호]",
+    "ip_address":        "[IP주소]",
+    "device_id":         "[기기ID]",
+    "medical_info":      "[의료정보]",
+    "biometric":         "[생체정보]",
+    "slm_pii":           "[개인정보]",
 }
 _MASK_DEFAULT = "[REDACTED]"
 

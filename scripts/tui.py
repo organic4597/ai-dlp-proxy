@@ -493,8 +493,8 @@ class DLPApp(App):
                         yield Label("정규식 기반 PII 탐지 (주민번호·카드번호 등 13개 규칙)", classes="opt-desc")
                         with Horizontal(classes="opt-row"):
                             yield Label("sLM Stage")
-                            yield Switch(id="ctrl-sw-slm", value=False, disabled=True)
-                        yield Label("소형 언어모델 오탐 필터링 — 미구현 (추후 활성화)", classes="opt-desc")
+                            yield Switch(id="ctrl-sw-slm", value=False)
+                        yield Label("소형 언어모델 보완 탐지 (이름·주소 등 문맥 PII) — Qwen2.5-1.5B", classes="opt-desc")
                     # ── 액션 정책 ──────────────────────────────────────────
                     with Vertical(classes="ctrl-card"):
                         yield Label("🚦 탐지 시 액션 정책", classes="ctrl-title")
@@ -583,8 +583,8 @@ class DLPApp(App):
                         yield Label("정규식 기반 개인정보 탐지 (주민번호·카드번호 등 13개 규칙)", classes="opt-desc")
                         with Horizontal(classes="opt-row"):
                             yield Label("sLM Stage")
-                            yield Switch(id="sw-slm", value=False, disabled=True)
-                        yield Label("소형 언어모델 기반 오탐 필터링 (미구현)", classes="opt-desc")
+                            yield Switch(id="sw-slm", value=False)
+                        yield Label("소형 언어모델 보완 탐지 (이름·주소 등 문맥 PII) — Qwen2.5-1.5B", classes="opt-desc")
                     # ── 표시 카드 ──
                     with Vertical(classes="card"):
                         yield Label("🖥️  표시", classes="card-title")
@@ -846,6 +846,16 @@ class DLPApp(App):
 
     @on(Switch.Changed, "#ctrl-sw-slm")
     def _ctrl_sw_slm(self, e: Switch.Changed):
+        _patch_control("slm_enabled", e.value)
+        self._lg(f"[{'green' if e.value else 'yellow'}]sLM Stage {'ON' if e.value else 'OFF'}[/]")
+
+    @on(Switch.Changed, "#sw-regex")
+    def _sw_regex(self, e: Switch.Changed):
+        _patch_control("regex_enabled", e.value)
+        self._lg(f"[{'green' if e.value else 'yellow'}]Regex Stage {'ON' if e.value else 'OFF'}[/]")
+
+    @on(Switch.Changed, "#sw-slm")
+    def _sw_slm(self, e: Switch.Changed):
         _patch_control("slm_enabled", e.value)
         self._lg(f"[{'green' if e.value else 'yellow'}]sLM Stage {'ON' if e.value else 'OFF'}[/]")
 
