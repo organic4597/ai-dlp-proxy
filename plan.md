@@ -1,4 +1,4 @@
-# AI Agent DLP Proxy — 프로젝트 계획서 (v2, 2026-04-04 최신화)
+# AI Agent DLP Proxy — 프로젝트 계획서 (v3, 2026-04-05 최신화)
 
 ## 프로젝트 개요
 LLM API 트래픽을 투명하게 가로채어 **개인정보(PII) 자동 탐지 → 마스킹/차단** 후 외부 AI 서비스로 전달하는 DLP(Data Loss Prevention) 인라인 프록시.  
@@ -144,25 +144,66 @@ HIGH/MEDIUM/LOW → ALERT
 
 | 탭 | 기능 |
 |----|------|
-| 트래픽 | 요청 목록 + HTTP/엔진 결과 상세보기 |
-| 탐지 | 탐지 findings 목록 + 필터링 |
+| 트래픽 | 요청 목록 + HTTP/엔진 결과 상세보기 + 클리어 버튼 |
+| 탐지 목록 | 탐지 findings 목록 + 우측 디테일 패널 + 클리어 버튼 |
 | 제어 | 파이프라인 토글, 정책 스위치, 마스킹 규칙 ON/OFF |
 | 프로세스 | mitmproxy/engine_server 상태 모니터링 + 시작/중지 |
 | 설정 | 포트, 대상 도메인 설정 |
-| 로그 | 실시간 이벤트 로그 |
+| 엔진 로그 | 실시간 이벤트 로그 + 클리어 버튼 |
 
 **StatsBar** (화면 상단 1줄):  
 `턴 N  요청 N  스캔 N  탐지 N  마스킹 N  │  Engine ●  mitm ●`
+
+**TUI 버그 수정 이력 (2026-04-05):**
+- `Engine ●` 빨간불 고착 → `_poll_procs`에서 `procs["engine"].running` 으로 mitm_ok와 동일한 방식으로 변경
+- `_subscribe` CancelledError sleep 미보호 → try/except 추가
+- 클리어 버튼: 트래픽 클리어 시 `traffic.jsonl` 파일도 함께 비움 (재시작 후 되살아나는 문제 수정)
+- 탭 툴바: `.tab-toolbar` 공통 CSS — 3탭 일관 디자인
+- 탐지목록 좌측 패널 고정 너비(54), 우측 디테일 `1fr`
+- mitmproxy `connection_strategy=lazy` 적용 — Bad Gateway 오류 수정
+- 트래픽 컬럼: 턴(4) 시각(8) 모델(13) 요(3) 탐(3) 액션(9)
+- 탐지 컬럼: 시각(8) 심각도(8) 규칙(16) 신뢰도(5) 모델(9)
+- `allow_hosts` 설정으로 Target 도메인만 TLS 복호화
 
 ---
 
 ## 남은 작업 (Roadmap)
 
-### Phase 4 — SLM 통합 (미구현)
-- Track B: `llama-cpp-python` + SLM (Qwen2.5-1.5B-Q4 또는 EXAONE-3.5-2.4B-Q4)
-- GBNF grammar로 JSON 출력 강제
-- `slm_enabled` 제어 파일 플래그로 ON/OFF
-- 예상 지연: CPU ~150~300ms (RPi 기준)
+### Phase 4 — SLM 통합 (진행 예정)
+
+#### 목표
+Regex Stage만으로 잡기 어려운 **문맥 의존적 PII** (예: 이름+부서가 조합된 간접 식별 정보, 자유형식 주소 등)를 소형 언어 모델로 보완 탐지.
+
+#### 모델 후보
+| 모델 | 크기 | 형식 | 비고 |
+|------|------|------|------|
+| Qwen2.5-1.5B-Instruct | ~1GB Q4 | GGUF | 다국어, 속도 빠름 |
+| EXAONE-3.5-2.4B-Instruct | ~1.5GB Q4 | GGUF | 한국어 특화 |
+
+#### 구현 계획
+1. **SLMStage** 클래스 작성 (`src/ai_dlp_proxy/engine/pipeline/slm_stage.py`)
+   - `llama-cpp-python` 으로 GGUF 모델 로드
+   - 입력: 텍스트 청크 + 기존 Regex Stage findings
+   - 출력: JSON `{"findings": [{"rule": ..., "start": ..., "end": ..., "text": ..., "confidence": ...}]}`
+   - GBNF grammar으로 JSON 출력 강제 (hallucination 방지)
+2. **Pipeline 연결** (`pipeline/__init__.py`)
+   - RegexStage → SLMStage (slm_enabled=True 시)
+   - SLM finding은 Regex가 이미 탐지한 위치 중복 제거
+3. **성능 고려**
+   - RPi CPU 추론: ~300~800ms 예상 → 비동기 스레드풀 in executor 처리
+   - 텍스트 길이 제한 (예: 2000자 초과 시 청킹)
+   - 캐시: 동일 텍스트 해시 기준 LRU 캐시
+4. **TUI 제어 탭 연동**
+   - 기존 `slm_enabled` 스위치 활성화
+   - 모델 경로 설정 UI
+5. **평가 기준**
+   - Regex가 못 잡는 케이스 샘플 20개 수집 → SLM으로 검증
+   - 오탐률 허용치: < 10%
+   - 지연 허용치: < 1000ms (RPi)
+
+#### 선행 작업
+- `llama-cpp-python` RPi ARM64 빌드/설치 확인
+- GGUF 모델 다운로드 위치 결정 (`/home1/ai-dlp-proxy/models/`)
 
 ### Phase 5 — 패키지화 및 배포 (미구현)
 - `pip install ai-dlp-proxy` 배포
@@ -174,17 +215,27 @@ HIGH/MEDIUM/LOW → ALERT
 ## 실행 방법
 
 ```bash
-cd /home1/ai_dlp_proxy
+cd /home1/ai-dlp-proxy
 source venv/bin/activate
 
-# 1. 엔진 서버 시작
-PYTHONPATH=src nohup python3 scripts/engine_server.py > /tmp/engine_server.log 2>&1 &
+# TUI 실행 (engine_server + mitmdump 자동 기동)
+python3 scripts/tui.py
 
-# 2. mitmproxy 시작
-mitmdump --listen-host 0.0.0.0 -p 4001 -s scripts/inspect_traffic.py &
+# 수동 기동 시:
+# 1. 엔진 서버
+PYTHONPATH=src python3 scripts/engine_server.py
+# 2. mitmproxy (명시적 프록시)
+mitmdump --listen-host 0.0.0.0 -p 4001 --set connection_strategy=lazy -s scripts/inspect_traffic.py
+# 2b. 투명 게이트웨이 모드
+mitmdump --mode transparent --listen-host 0.0.0.0 -p 4002 --set connection_strategy=lazy -s scripts/inspect_traffic.py
+```
 
-# 3. TUI 시작
-PYTHONPATH=src python3 scripts/tui.py
+### 테스트 클라이언트 프록시 설정
+```bash
+# 환경변수 방식
+export HTTPS_PROXY=http://192.168.0.16:4001
+export HTTP_PROXY=http://192.168.0.16:4001
+opencode  # 또는 curl, python 등
 ```
 
 ## 주요 파일 구조
