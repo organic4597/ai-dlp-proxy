@@ -30,6 +30,7 @@ from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.coordinate import Coordinate
 from textual.reactive import reactive
 from textual.widgets import (
     Button,
@@ -117,24 +118,26 @@ def _simulate_mask(text: str, findings: list[dict], field_path: str) -> str:
 class _ClickToggleTable(DataTable):
     """단일 클릭에도 RowSelected를 발생시키는 DataTable.
 
-    Textual 8.2.2에서 DataTable._on_click는 이미 선택된 행(highlight_click=True)일 때만
-    _post_selected_message()를 호출함. on_click (public handler)은 _on_click 이후에
-    항상 실행되므로 첫 번째 클릭에도 RowSelected를 발생시킬 수 있다.
-    같은 행 재클릭 시 _on_click도 RowSelected를 발생시켜 더블 토글이 되므로
-    App 핸들러에서 150ms 디바운스로 방지한다.
+    Textual 8.2.2 dispatch 순서: on_click(public, 서브클래스) → _on_click(private, DataTable).
+    즉 on_click이 먼저 실행되므로 DataTable이 cursor를 이동하기 전에
+    _post_selected_message()를 호출하면 이전 커서 위치의 row가 선택됨.
+    → 클릭된 meta["row"]로 cursor_coordinate를 직접 설정 후 호출.
+    같은 행 재클릭 시 _on_click도 RowSelected를 발생시켜 더블 토글 → 150ms 디바운스로 방지.
     """
 
     def on_click(self, event) -> None:
-        """_on_click(cursor 이동) 이후에 실행됨 — 항상 RowSelected 발생.
-        event.stop()으로 이벤트 버블링을 차단해 TabbedContent 탭 전환 방지.
-        """
-        event.stop()  # 버블링 차단 — 빈 공간 클릭 시 탭 이동 방지
+        """DataTable._on_click 이전에 실행됨 — cursor 이동 후 RowSelected 발생."""
+        event.stop()  # 버블링 차단 — 빈 공간 클릭 시 TabbedContent 탭 전환 방지
         meta = event.style.meta
         if "row" not in meta:
             return
         row_index = meta["row"]
         if row_index < 0 or row_index >= self.row_count:
             return
+        # cursor를 먼저 클릭된 행으로 이동해야 _post_selected_message가
+        # 올바른 row_key를 전달함 (DataTable._on_click보다 먼저 실행되므로)
+        col_index = meta.get("column", 0)
+        self.cursor_coordinate = Coordinate(row_index, col_index)
         self._post_selected_message()
 
 
