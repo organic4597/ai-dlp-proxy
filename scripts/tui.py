@@ -80,6 +80,61 @@ SEV_S = {"critical": "bold red", "high": "magenta", "medium": "yellow", "low": "
 ACT_S  = {"pass": "green", "alert": "yellow", "mask": "bold red", "block": "bold red reverse"}
 ACT_LB = {"pass": "PASS", "alert": "ALERT", "mask": "MASKED", "block": "BLOCK"}
 
+# ── 마스킹 치환 템플릿 (inspect_traffic.py 동일) ─────────────────────────────
+_MASK_TEMPLATES: dict[str, str] = {
+    "kr_rrn": "[주민등록번호]", "kr_phone": "[전화번호]",
+    "credit_card": "[카드번호]", "us_ssn": "[SSN]",
+    "email": "[이메일]", "kr_passport": "[여권번호]",
+    "kr_driver_license": "[운전면허]", "aws_access_key": "[AWS_KEY]",
+    "aws_secret_key": "[AWS_SECRET]", "api_key_assignment": "[API_KEY]",
+    "pem_private_key": "[PRIVATE_KEY]", "jwt_token": "[JWT]",
+    "github_pat": "[GH_TOKEN]", "person_name": "[이름]",
+    "address": "[주소]", "organization": "[기관]",
+    "date_of_birth": "[생년월일]", "account_number": "[계좌번호]",
+    "ip_address": "[IP주소]", "device_id": "[기기ID]",
+    "medical_info": "[의료정보]", "biometric": "[생체정보]",
+    "slm_pii": "[개인정보]",
+}
+
+def _simulate_mask(text: str, findings: list[dict], field_path: str) -> str:
+    """findings를 이용해 text에 마스킹 시뮬레이션 (오프셋 역순 치환)."""
+    relevant = [f for f in findings if f.get("field_path") == field_path]
+    if not relevant:
+        return text
+    for f in sorted(relevant, key=lambda x: x.get("match_start", 0), reverse=True):
+        repl = _MASK_TEMPLATES.get(f.get("rule", ""), "[REDACTED]")
+        start = f.get("match_start", 0)
+        end = f.get("match_end", 0)
+        if start < 0 or end <= start or end > len(text):
+            mt = f.get("match_text", "")
+            if mt:
+                text = text.replace(mt, repl, 1)
+        else:
+            text = text[:start] + repl + text[end:]
+    return text
+
+
+class _ClickToggleTable(DataTable):
+    """단일 클릭에도 RowSelected를 발생시키는 DataTable.
+
+    Textual 8.2.2에서 DataTable._on_click는 이미 선택된 행(highlight_click=True)일 때만
+    _post_selected_message()를 호출함. on_click (public handler)은 _on_click 이후에
+    항상 실행되므로 첫 번째 클릭에도 RowSelected를 발생시킬 수 있다.
+    같은 행 재클릭 시 _on_click도 RowSelected를 발생시켜 더블 토글이 되므로
+    App 핸들러에서 150ms 디바운스로 방지한다.
+    """
+
+    def on_click(self, event) -> None:
+        """_on_click(cursor 이동) 이후에 실행됨 — 항상 RowSelected 발생."""
+        meta = event.style.meta
+        if "row" not in meta:
+            return
+        row_index = meta["row"]
+        if row_index < 0 or row_index >= self.row_count:
+            return
+        self._post_selected_message()
+
+
 def _trunc(s: str, n: int = 6) -> str:
     """n자 초과 시 말줄임표(…) 처리."""
     return s[:n] + "…" if len(s) > n else s
@@ -308,7 +363,9 @@ class DLPApp(App):
     #ttable { height: 1fr; overflow-x: hidden; }
     #act-legend { height: 1; padding: 0 1; background: $surface; color: $text-muted; }
     #darea { width: 1fr; }
+    #detail-tabs { height: 1fr; }
     #dlog { height: 1fr; }
+    #dsent { height: 1fr; }
 
     /* 탐지 */
     #fsplit { height: 1fr; }
@@ -472,7 +529,11 @@ class DLPApp(App):
                             id="act-legend",
                         )
                     with Vertical(id="darea"):
-                        yield RichLog(id="dlog", highlight=True, markup=True, wrap=True)
+                        with TabbedContent(id="detail-tabs"):
+                            with TabPane("탐지 정보", id="tab-detail-info"):
+                                yield RichLog(id="dlog", highlight=True, markup=True, wrap=True)
+                            with TabPane("전송 내용", id="tab-detail-sent"):
+                                yield RichLog(id="dsent", highlight=True, markup=True, wrap=True)
             with TabPane("탐지 목록", id="tab-findings"):
                 with Horizontal(id="fsplit"):
                     with Vertical(id="flist"):
@@ -524,7 +585,7 @@ class DLPApp(App):
                     with Vertical(classes="ctrl-card"):
                         yield Label("🎭 마스킹 규칙", classes="ctrl-title")
                         yield Label("행 클릭 → 규칙 활성/비활성 토글 | 연두색 탐지된 PII를 치환 텍스트로 교체합니다.", classes="mask-badge")
-                        yield DataTable(id="mask-table", cursor_type="row")
+                        yield _ClickToggleTable(id="mask-table", cursor_type="row")
             with TabPane("프로세스", id="tab-procs"):
                 with VerticalScroll(id="proc-scroll"):
                     # engine 카드
@@ -741,14 +802,19 @@ class DLPApp(App):
         for rule, sev, repl in self._MASK_RULES_DATA:
             enabled = rule not in disabled
             vals = self._mask_rule_row(rule, sev, repl, enabled)
-            # update_cell 대신 행 제거 후 재추가 — ColumnKey.key 오류 회피
             if rule in mt.rows:
                 mt.remove_row(rule)
             mt.add_row(*vals, key=rule)
 
+    _last_toggle_ts: float = 0.0  # 더블 토글 방지 (같은 행 재클릭 시 두 번 RowSelected 발생)
+
     @on(DataTable.RowSelected, "#mask-table")
     def _toggle_mask_rule(self, e: DataTable.RowSelected):
-        """행 클릭 → disabled_rules 토글."""
+        """클릭/Enter → disabled_rules 토글 (150ms 디바운스로 더블 토글 방지)."""
+        now = time.monotonic()
+        if now - self._last_toggle_ts < 0.15:
+            return
+        self._last_toggle_ts = now
         rule_key = str(e.row_key.value)
         ctrl = self._read_control()
         disabled: list = ctrl.get("disabled_rules", [])
@@ -763,9 +829,22 @@ class DLPApp(App):
         self._lg(f"[{'green' if flag else 'dim'}]{rule_key} 마스킹 {'ON' if flag else 'OFF'}[/]")
 
     def _init_control_file(self):
-        """제어 파일 초기화 — 없으면 기본값으로 생성."""
+        """제어 파일 초기화 — 없으면 기본값으로 생성, 있으면 스위치 동기화."""
         if not _CONTROL_FILE.exists():
             _patch_control()
+        # 제어 파일 → 스위치 값 동기화
+        ctrl = self._read_control()
+        try:
+            self.query_one("#ctrl-sw-regex", Switch).value = bool(ctrl.get("regex_enabled", True))
+            self.query_one("#ctrl-sw-slm", Switch).value = bool(ctrl.get("slm_enabled", False))
+            self.query_one("#ctrl-sw-mask-on-detect", Switch).value = bool(ctrl.get("mask_on_detect", False))
+            self.query_one("#ctrl-sw-block-alert", Switch).value = bool(ctrl.get("block_on_alert", False))
+            self.query_one("#ctrl-sw-block-mask", Switch).value = bool(ctrl.get("block_on_mask", False))
+            # 설정 탭 스위치도 동기화
+            self.query_one("#sw-regex", Switch).value = bool(ctrl.get("regex_enabled", True))
+            self.query_one("#sw-slm", Switch).value = bool(ctrl.get("slm_enabled", False))
+        except Exception:
+            pass
 
     def _read_control(self) -> dict:
         try:
@@ -1069,6 +1148,7 @@ class DLPApp(App):
         if tid < 1 or tid > len(self._tk.turns):
             return
         t = self._tk.turns[tid - 1]
+        # ── 탐지 정보 탭 ─────────────────────────────────────────────────
         d = self.query_one("#dlog", RichLog)
         d.clear()
         d.write(f"[bold]═══ Turn #{t.id} ═══[/]")
@@ -1098,6 +1178,38 @@ class DLPApp(App):
                 if cb or ca:
                     d.write(f"      …{cb[-40:]}[bold red]<<<{f.get('match_text','')[:30]}>>>[/]{ca[:40]}…")
             d.write("")
+        # ── 전송 내용 탭 ─────────────────────────────────────────────────
+        ds = self.query_one("#dsent", RichLog)
+        ds.clear()
+        ds.write(f"[bold]═══ Turn #{t.id} — 전송된 프롬프트 ═══[/]")
+        ds.write(f"  모델: [green]{t.model}[/]  msgs: {t.mc}")
+        ds.write("")
+        for i, rq in enumerate(t.reqs):
+            targets = rq.get("targets", [])
+            if not targets:
+                ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 전송 내용 없음 (히스토리) ──[/]")
+                ds.write("")
+                continue
+            findings = rq.get("findings", [])
+            pa = rq.get("pipeline_action") or "pass"
+            ds.write(f"[bold]── 요청 #{rq.get('id','?')} ({i+1}/{len(t.reqs)}) [{ACT_S.get(pa, '')}]{pa.upper()}[/] ──[/]")
+            if findings:
+                ds.write(f"  [cyan]▶ 마스킹 {len(findings)}건 적용[/]")
+            for tgt in targets:
+                fp = tgt.get("field_path", "")
+                role = tgt.get("role", "?")
+                text = tgt.get("text", "")
+                # 탐지된 건이 있으면 마스킹 시뮬레이션 적용
+                if findings:
+                    text = _simulate_mask(text, findings, fp)
+                role_color = "cyan" if role == "system" else "green" if role == "assistant" else "yellow"
+                ds.write(f"  [{role_color}]{role}[/] [dim]({fp})[/]")
+                if len(text) > 2000:
+                    ds.write(f"    {text[:2000]}")
+                    ds.write(f"    [dim]… ({len(text):,}자 중 2000자만 표시)[/]")
+                else:
+                    ds.write(f"    {text}")
+                ds.write("")
 
     # ── 탐지 상세 ─────────────────────────────────────────────────────────────
 
@@ -1313,6 +1425,8 @@ def _rec2ev(rec: dict) -> dict | None:
         "elapsed_ms": eng.get("elapsed_ms", 0),
         "target_count": eng.get("target_count", 0),
         "total_text_len": eng.get("total_text_len", 0),
+        "targets": eng.get("targets", []),
+        "dlp_applied": rec.get("dlp_applied", "pass"),
     }
 
 
