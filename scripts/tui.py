@@ -125,7 +125,10 @@ class _ClickToggleTable(DataTable):
     """
 
     def on_click(self, event) -> None:
-        """_on_click(cursor 이동) 이후에 실행됨 — 항상 RowSelected 발생."""
+        """_on_click(cursor 이동) 이후에 실행됨 — 항상 RowSelected 발생.
+        event.stop()으로 이벤트 버블링을 차단해 TabbedContent 탭 전환 방지.
+        """
+        event.stop()  # 버블링 차단 — 빈 공간 클릭 시 탭 이동 방지
         meta = event.style.meta
         if "row" not in meta:
             return
@@ -701,7 +704,10 @@ class DLPApp(App):
         qt.add_columns("시각", "모델", "대상", "탐지", "액션", "결정")
         # 제어 탭 — 마스킹 규칙 테이블 (placeholder)
         mt = self.query_one("#mask-table", DataTable)
-        mt.add_columns("규칙", "심각도", "치환 텍스트", "상태")
+        mt.add_column("규칙",       key="rule",   width=22)
+        mt.add_column("심각도",     key="sev",    width=10)
+        mt.add_column("치환 텍스트", key="repl",   width=18)
+        mt.add_column("상태",       key="status", width=10)
         self._init_mask_rules()
         self._init_control_file()
         self._load_history()
@@ -796,15 +802,19 @@ class DLPApp(App):
             mt.add_row(*self._mask_rule_row(rule, sev, repl, rule not in disabled), key=rule)
 
     def _refresh_mask_table(self):
-        """disabled_rules 변경 후 테이블 전체 갱신."""
+        """disabled_rules 변경 후 테이블 셀만 업데이트 (행 순서/커서 유지)."""
         mt = self.query_one("#mask-table", DataTable)
         disabled = set(self._read_control().get("disabled_rules", []))
         for rule, sev, repl in self._MASK_RULES_DATA:
+            if rule not in mt.rows:
+                continue
             enabled = rule not in disabled
-            vals = self._mask_rule_row(rule, sev, repl, enabled)
-            if rule in mt.rows:
-                mt.remove_row(rule)
-            mt.add_row(*vals, key=rule)
+            name_col = rule if enabled else f"[dim]{rule}[/]"
+            repl_col = repl if enabled else f"[dim]{repl}[/]"
+            status   = "[green bold]\u2705 ON[/]" if enabled else "[dim]\u26ab OFF[/]"
+            mt.update_cell(rule, "rule",   name_col)
+            mt.update_cell(rule, "repl",   repl_col)
+            mt.update_cell(rule, "status", status)
 
     _last_toggle_ts: float = 0.0  # 더블 토글 방지 (같은 행 재클릭 시 두 번 RowSelected 발생)
 
