@@ -801,19 +801,22 @@ class DLPApp(App):
             mt.add_row(*self._mask_rule_row(rule, sev, repl, rule not in disabled), key=rule)
 
     def _refresh_mask_table(self):
-        """disabled_rules 변경 후 테이블 셀만 업데이트 (행 순서/커서 유지)."""
+        """disabled_rules 변경 후 테이블 갱신.
+        remove_row+add_row로 layout을 강제 갱신해 실제 터미널에서도 시각적으로 반영됨.
+        전체 루프를 순서대로 실행하면 최종 행 순서가 _MASK_RULES_DATA와 동일하게 복원됨.
+        """
         mt = self.query_one("#mask-table", DataTable)
+        cursor_row = mt.cursor_coordinate.row  # 커서 위치 저장
         disabled = set(self._read_control().get("disabled_rules", []))
         for rule, sev, repl in self._MASK_RULES_DATA:
-            if rule not in mt.rows:
-                continue
             enabled = rule not in disabled
-            name_col = rule if enabled else f"[dim]{rule}[/]"
-            repl_col = repl if enabled else f"[dim]{repl}[/]"
-            status   = "[green bold]\u2705 ON[/]" if enabled else "[dim]\u26ab OFF[/]"
-            mt.update_cell(rule, "rule",   name_col)
-            mt.update_cell(rule, "repl",   repl_col)
-            mt.update_cell(rule, "status", status)
+            vals = self._mask_rule_row(rule, sev, repl, enabled)
+            if rule in mt.rows:
+                mt.remove_row(rule)
+            mt.add_row(*vals, key=rule)
+        # 커서 위치 복원 (로프 순환 후 행 순서가 _MASK_RULES_DATA와 동일하게 복원됨)
+        if mt.row_count > 0:
+            mt.move_cursor(row=min(cursor_row, mt.row_count - 1), animate=False)
 
     _last_toggle_ts: float = 0.0  # 더블 토글 방지 (같은 행 재클릭 시 두 번 RowSelected 발생)
 
