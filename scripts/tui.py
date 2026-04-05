@@ -26,7 +26,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from textual import on, work
+from textual import events, on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
@@ -118,27 +118,23 @@ def _simulate_mask(text: str, findings: list[dict], field_path: str) -> str:
 class _ClickToggleTable(DataTable):
     """단일 클릭에도 RowSelected를 발생시키는 DataTable.
 
-    Textual 8.2.2 dispatch 순서: on_click(public, 서브클래스) → _on_click(private, DataTable).
-    즉 on_click이 먼저 실행되므로 DataTable이 cursor를 이동하기 전에
-    _post_selected_message()를 호출하면 이전 커서 위치의 row가 선택됨.
-    → 클릭된 meta["row"]로 cursor_coordinate를 직접 설정 후 호출.
-    같은 행 재클릭 시 _on_click도 RowSelected를 발생시켜 더블 토글 → 150ms 디바운스로 방지.
+    DataTable._on_click 대신 오버라이드. prevent_default()로 부모의
+    _on_click 실행을 차단하고, highlight_click 없이 항상 RowSelected 발생.
     """
 
-    def on_click(self, event) -> None:
-        """DataTable._on_click 이전에 실행됨 — cursor 이동 후 RowSelected 발생."""
-        event.stop()  # 버블링 차단 — 빈 공간 클릭 시 TabbedContent 탭 전환 방지
+    async def _on_click(self, event: events.Click) -> None:
+        event.prevent_default()  # DataTable._on_click 실행 차단
+        event.stop()             # 버블링 차단 (빈 공간 클릭 시 TabbedContent 탭 전환 방지)
         meta = event.style.meta
-        if "row" not in meta:
+        if "row" not in meta or "column" not in meta:
             return
         row_index = meta["row"]
         if row_index < 0 or row_index >= self.row_count:
             return
-        # cursor를 먼저 클릭된 행으로 이동해야 _post_selected_message가
-        # 올바른 row_key를 전달함 (DataTable._on_click보다 먼저 실행되므로)
-        col_index = meta.get("column", 0)
-        self.cursor_coordinate = Coordinate(row_index, col_index)
+        self._set_hover_cursor(True)
+        self.cursor_coordinate = Coordinate(row_index, meta["column"])
         self._post_selected_message()
+        self._scroll_cursor_into_view(animate=True)
 
 
 def _trunc(s: str, n: int = 6) -> str:
@@ -826,9 +822,11 @@ class DLPApp(App):
         """클릭/Enter → disabled_rules 토글 (150ms 디바운스로 더블 토글 방지)."""
         now = time.monotonic()
         if now - self._last_toggle_ts < 0.15:
+            self._lg(f"[dim][mask] debounce skip: {e.row_key.value!r}[/]")
             return
         self._last_toggle_ts = now
         rule_key = str(e.row_key.value)
+        self._lg(f"[cyan][mask] toggle: {rule_key!r}[/]")
         ctrl = self._read_control()
         disabled: list = ctrl.get("disabled_rules", [])
         if rule_key in disabled:
