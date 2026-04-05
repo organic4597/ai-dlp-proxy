@@ -1,0 +1,288 @@
+[
+  {
+    "id": "T01",
+    "description": "주민등록번호 + 전화번호 복합",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "고객 정보를 정리해줘.\n이름: 박지영\n주민등록번호: 880515-1104333\n연락처: 010-9876-5432\n이메일: jiyoung.park@company.co.kr"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["kr_rrn", "kr_phone"],
+      "detected_values": ["880515-1104333", "010-9876-5432"],
+      "action": "mask"
+    }
+  },
+  {
+    "id": "T02",
+    "description": "신용카드번호 (Luhn 유효)",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "이 결제 건을 확인해줘. 카드번호 4539-1488-0343-6467 으로 2026년 3월 15일 결제된 건이야."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["credit_card"],
+      "detected_values": ["4539-1488-0343-6467"],
+      "action": "mask"
+    }
+  },
+  {
+    "id": "T03",
+    "description": "주민등록번호 체크섬 실패 (오탐 방지)",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "주문번호는 920315-2087654 이고, 배송 추적번호는 880808-1122334 입니다."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": [],
+      "detected_values": [],
+      "action": "pass",
+      "note": "체크섬 불일치로 필터링 — 정상적인 오탐 방지"
+    }
+  },
+  {
+    "id": "T04",
+    "description": "카드번호 Luhn 실패 (오탐 방지)",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "택배 송장번호 4556-7788-9900-1122 로 조회해주세요."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": [],
+      "detected_values": [],
+      "action": "pass",
+      "note": "Luhn 실패로 필터링"
+    }
+  },
+  {
+    "id": "T05",
+    "description": "AWS Access Key",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "이 설정 좀 봐줘.\naws_access_key_id = AKIAIOSFODNN7EXAMPLE\naws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["aws_access_key"],
+      "detected_values": ["AKIAIOSFODNN7EXAMPLE"],
+      "action": "mask",
+      "note": "aws_secret_access_key는 api_key_assignment 패턴에 매칭 안 됨 (secret_key 만 매칭)"
+    }
+  },
+  {
+    "id": "T06",
+    "description": "GitHub PAT",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "깃헙 토큰이 안 되는데 확인해줘: ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["github_pat"],
+      "detected_values": ["ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"],
+      "action": "mask"
+    }
+  },
+  {
+    "id": "T07",
+    "description": "JWT 토큰",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "이 토큰 디코딩해줘: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhvbmcgR2lsZG9uZyIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["jwt_token"],
+      "detected_values": ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhvbmcgR2lsZG9uZyIsImlhdCI6MTUxNjIzOTAyMn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"],
+      "action": "alert",
+      "note": "JWT는 HIGH severity → ALERT (MASK는 CRITICAL만)"
+    }
+  },
+  {
+    "id": "T08",
+    "description": "PEM 개인키",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "이 키로 서명하면 될까?\n-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xfn/ywWyF8PbnGcY5unA\nKgrnoMLjBQUCDyYkf22s47BJEf3W0VqwmXHXOw7GRBEK\n-----END RSA PRIVATE KEY-----"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["pem_private_key"],
+      "detected_values": ["-----BEGIN RSA PRIVATE KEY-----"],
+      "action": "mask"
+    }
+  },
+  {
+    "id": "T09",
+    "description": "대화 축적 (캐시 테스트) — 턴 1",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "고객 김철수(950720-2218199)의 계약 내용을 요약해줘."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["kr_rrn", "credit_card"],
+      "detected_values": ["950720-2218199"],
+      "action": "mask",
+      "note": "RRN 13자리가 credit_card 패턴에도 매칭 + Luhn 통과. 캐시 미스 — 첨 스캔"
+    }
+  },
+  {
+    "id": "T10",
+    "description": "대화 축적 (캐시 테스트) — 턴 2 (이전 메시지 포함)",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "고객 김철수(950720-2218199)의 계약 내용을 요약해줘."
+        },
+        {
+          "role": "assistant",
+          "content": "김철수 고객의 계약 내용을 확인하겠습니다."
+        },
+        {
+          "role": "user",
+          "content": "추가로 전화번호 010-5555-7777 도 업데이트해줘. 카드는 5425-2334-3010-9903 으로 변경."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["kr_rrn", "kr_phone", "credit_card"],
+      "detected_values": ["950720-2218199", "010-5555-7777", "5425-2334-3010-9903"],
+      "action": "mask",
+      "note": "messages[0] 캐시 히트, messages[2] 캐시 미스"
+    }
+  },
+  {
+    "id": "T11",
+    "description": "US SSN",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "미국 고객 SSN은 123-45-6789 이고 한국 연락처는 010-3333-4444 입니다."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["us_ssn", "kr_phone"],
+      "detected_values": ["123-45-6789", "010-3333-4444"],
+      "action": "mask"
+    }
+  },
+  {
+    "id": "T12",
+    "description": "여권번호 + 운전면허",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "신분증 정보:\n여권번호: M12345678\n운전면허번호: 11-23-456789-01"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["kr_passport", "kr_driver_license"],
+      "detected_values": ["M12345678", "11-23-456789-01"],
+      "action": "alert",
+      "note": "여권/운전면허는 HIGH severity → ALERT"
+    }
+  },
+  {
+    "id": "T13",
+    "description": "복합 PII — 전체 고객 카드",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "다음 고객 정보를 CRM에 등록해줘.\n\n성명: 이수진\n주민등록번호: 000301-3600132\n휴대전화: 010-1111-2222\n카드번호: 4539-1488-0343-6467\n여권번호: M87654321\n\n비고: 2026년 4월 신규 가입 고객"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["kr_rrn", "kr_phone", "credit_card", "kr_passport"],
+      "detected_values": ["000301-3600132", "010-1111-2222", "4539-1488-0343-6467", "M87654321"],
+      "action": "mask"
+    }
+  },
+  {
+    "id": "T14",
+    "description": "PII 없음 — 정상 통과",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "파이썬에서 리스트 컴프리헨션 사용법을 알려줘. [x*2 for x in range(10)] 같은 예제도 포함해서."
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": [],
+      "detected_values": [],
+      "action": "pass"
+    }
+  },
+  {
+    "id": "T15",
+    "description": "API 키 할당문 (코드 내 하드코딩)",
+    "request": {
+      "model": "gpt-4o",
+      "messages": [
+        {
+          "role": "user",
+          "content": "이 코드 리뷰해줘:\n\nimport openai\napi_key = \"sk-proj-abcdefghijklmnopqrstuvwxyz123456\"\nclient = openai.OpenAI(api_key=api_key)"
+        }
+      ]
+    },
+    "expected": {
+      "detected_rules": ["api_key_assignment"],
+      "detected_values": ["api_key = \"sk-proj-abcdefghijklmnopqrstuvwxyz123456\""],
+      "action": "alert",
+      "note": "api_key_assignment는 HIGH severity → ALERT"
+    }
+  }
+]

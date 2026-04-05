@@ -1,0 +1,60 @@
+test_id,category,input_text,should_detect,expected_rule,expected_severity,notes
+# ── 주민등록번호 (kr_rrn) ─────────────────────────────────────────────────
+R01,kr_rrn,880515-1104333,true,kr_rrn,CRITICAL,체크섬 유효
+R02,kr_rrn,950720-2218199,true,kr_rrn,CRITICAL,체크섬 유효
+R03,kr_rrn,000301-3600132,true,kr_rrn,CRITICAL,2000년대생 성별코드 3
+R04,kr_rrn,751103-1389080,true,kr_rrn,CRITICAL,체크섬 유효
+R05,kr_rrn,010614-4542353,true,kr_rrn,CRITICAL,외국인 성별코드 4
+R06,kr_rrn,920315-2087654,false,,,"체크섬 실패 — 오탐 방지 정상 필터링"
+R07,kr_rrn,880808-1122334,false,,,"체크섬 실패 — 오탐 방지 정상 필터링"
+R08,kr_rrn,020102-1234411,false,,,"체크섬 불일치 (기대=9, 실제=1)"
+R09,kr_rrn,000000-0000000,false,,,"올-제로 패턴 제외"
+R10,kr_rrn,991301-1234567,false,,,"월 13 — 생년월일 유효성 실패"
+R11,kr_rrn,990132-1234567,false,,,"일 32 — 생년월일 유효성 실패"
+R12,kr_rrn,880515-5104333,false,,,"성별코드 5 — 유효하지 않음"
+# ── 전화번호 (kr_phone) ──────────────────────────────────────────────────
+P01,kr_phone,010-1234-5678,true,kr_phone,MEDIUM,표준 하이픈 형식
+P02,kr_phone,010.9876.5432,true,kr_phone,MEDIUM,점 구분 형식
+P03,kr_phone,01012345678,true,kr_phone,MEDIUM,연속 숫자
+P04,kr_phone,010-5555-7777,true,kr_phone,MEDIUM,표준 하이픈 형식
+P05,kr_phone,02-1234-5678,false,,,"유선전화 — 패턴 비매칭 (010/011/016/017/018/019만)"
+# ── 신용카드 (credit_card) ───────────────────────────────────────────────
+C01,credit_card,4539-1488-0343-6467,true,credit_card,CRITICAL,Visa 16자리 Luhn 유효
+C02,credit_card,5425-2334-3010-9903,true,credit_card,CRITICAL,Mastercard Luhn 유효
+C03,credit_card,6011-0009-9013-9424,true,credit_card,CRITICAL,Discover Luhn 유효
+C04,credit_card,4556-7788-9900-1122,false,,,"Luhn 실패 — 오탐 방지"
+C05,credit_card,4111-1111-1111-1111,false,,,"Luhn 유효하지만 unique digits ≤ 2 — 반복패턴 제외"
+C06,credit_card,0000-0000-0000-0000,false,,,"올-제로 패턴 제외"
+# ── US SSN ───────────────────────────────────────────────────────────────
+S01,us_ssn,123-45-6789,true,us_ssn,CRITICAL,표준 형식
+S02,us_ssn,987-65-4321,false,,,"9xx 범위 제외 — SSN 첫 그룹 9로 시작 불가"
+S03,us_ssn,000-00-0000,false,,,"올-제로 — 유효하지 않은 SSN"
+# ── 여권번호 (kr_passport) ───────────────────────────────────────────────
+PP01,kr_passport,M12345678,true,kr_passport,HIGH,표준 형식
+PP02,kr_passport,M87654321,true,kr_passport,HIGH,표준 형식
+# ── 운전면허 (kr_driver_license) ─────────────────────────────────────────
+DL01,kr_driver_license,11-23-456789-01,true,kr_driver_license,HIGH,표준 형식
+DL02,kr_driver_license,12-34-567890-12,true,kr_driver_license,HIGH,표준 형식
+# ── 이메일 (email) — 현재 disabled ──────────────────────────────────────
+E01,email,test@example.com,false,,,"disabled_rules에 포함 — 탐지 안 됨"
+E02,email,sujin_kang82@naver.com,false,,,"disabled_rules에 포함 — 탐지 안 됨"
+# ── AWS Access Key ───────────────────────────────────────────────────────
+AK01,aws_access_key,AKIAIOSFODNN7EXAMPLE,true,aws_access_key,CRITICAL,AKIA 접두사
+AK02,aws_access_key,ASIAIOSFODNN7EXAMPLE,true,aws_access_key,CRITICAL,ASIA 접두사 (임시 자격)
+# ── API 키 할당문 (api_key_assignment) ───────────────────────────────────
+AP01,api_key_assignment,"api_key = ""sk-proj-abcdef1234567890""",true,api_key_assignment,HIGH,코드 내 하드코딩
+AP02,api_key_assignment,"API_KEY=""ghijklmnopqrstuvwxyz""",true,api_key_assignment,HIGH,대문자 변수명
+# ── PEM 개인키 (pem_private_key) ─────────────────────────────────────────
+PK01,pem_private_key,-----BEGIN RSA PRIVATE KEY-----,false,,,"BEGIN~END 전체 블록 필요 — 단일 라인 미매칭"
+PK02,pem_private_key,-----BEGIN EC PRIVATE KEY-----,false,,,"BEGIN~END 전체 블록 필요 — 단일 라인 미매칭"
+# ── JWT 토큰 (jwt_token) ────────────────────────────────────────────────
+JW01,jwt_token,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U,true,jwt_token,HIGH,3파트 base64
+# ── GitHub PAT (github_pat) ──────────────────────────────────────────────
+GH01,github_pat,ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789,true,github_pat,CRITICAL,ghp_ 접두사
+GH02,github_pat,github_pat_11AAAAAA_abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRST,false,,,"github_pat_ 접두사 미지원 (ghp/gho/ghu/ghs/ghr만)"
+# ── 미탐지 (정상 텍스트) ────────────────────────────────────────────────
+N01,none,파이썬 리스트 사용법을 알려줘,false,,,"일반 코딩 질문"
+N02,none,서울의 날씨가 어때?,false,,,"일상 질문"
+N03,none,2026년 4월 15일까지 제출해주세요,false,,,"날짜 — PII 아님"
+N04,none,주문번호 ORD-2026-04-00123,false,,,"주문번호 — PII 아님"
+N05,none,"for i in range(100): print(i)",false,,,"코드 — PII 아님"

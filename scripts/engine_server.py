@@ -32,6 +32,7 @@ if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
 from ai_dlp_proxy.engine import extract, run_pipeline  # noqa: E402
+from ai_dlp_proxy.engine.pipeline import get_cache_stats  # noqa: E402
 
 # ── 로깅 설정 ────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -145,6 +146,15 @@ def _handle_scan(request: dict) -> dict:
             for f in result.findings
         ],
         "pipeline_summary": result.summary(),
+        # TUI 전송 내용 표시용 — target별 텍스트 (field_path, role, text)
+        "targets": [
+            {
+                "field_path": t.field_path,
+                "role": t.role,
+                "text": t.text,
+            }
+            for t in parsed.targets
+        ],
     }
 
 
@@ -186,7 +196,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                 _stats["masked"] += 1
                 resp = {"ok": True, "masked": _stats["masked"]}
             elif action == "stats":
-                resp = {"ok": True, **_stats}
+                resp = {"ok": True, **_stats, "cache": get_cache_stats()}
             elif action == "subscribe":
                 # 이벤트 스트림 구독 — 연결 유지하며 이벤트를 push
                 q: asyncio.Queue = asyncio.Queue(maxsize=500)
@@ -276,6 +286,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                     "finding_count": resp.get("finding_count", 0),
                     "findings": resp.get("findings", []),
                     "elapsed_ms": elapsed,
+                    "targets": resp.get("targets", []),
                 })
 
     except asyncio.IncompleteReadError:
