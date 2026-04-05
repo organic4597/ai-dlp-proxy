@@ -121,6 +121,7 @@ class ProcessSupervisor:
             str(Path(self._venv) / "mitmdump"),
             "--listen-host", "0.0.0.0",
             "-p", "4001",
+            "--set", "connection_strategy=lazy",  # pre-connect Bad Gateway 방지
             "-s", addon_path,
         ]
 
