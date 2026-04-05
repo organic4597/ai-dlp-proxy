@@ -38,7 +38,32 @@ tui.py (Textual TUI)
 
 ## 주요 기능
 
-### DLP 탐지 규칙 (12개)
+### DLP 탐지 파이프라인
+
+**2단계 탐지 아키텍처**: Regex Stage → SLM Stage
+
+```
+DLPTarget.text (순수 텍스트)
+    ├─ RegexStage  ← 패턴이 명확한 PII: 주민번호 · 카드번호 · API 키 등 13개 규칙
+    └─ SLMStage   ← 문맥의존 PII: 이름 · 주소 · 의료정보 등 9종 (선택적)
+```
+
+### 왜 SLM이 필요한가
+
+Regex는 **구조가 고정된 PII**에 탁월하지만 다음 PII는 탁지 불가능합니다.
+
+| Regex의 한계 | 예시 | SLM 통해 해결 |
+|---|---|---|
+| 문맥의존적 이름 | `담당자: 홍길동 부장` | `person_name` 탐지 |
+| 자유형식 주소 | `서울시 강남구 테헤란로 123` | `address` 탐지 |
+| 간접 식별 조합 | `대한병원 근무 홍길동` | 이름+기관 조합으로 식별 |
+| 도메인 특화 표현 | 의료 진단명, 생체 정보 | `medical_info`, `biometric` |
+
+**SLM 환경**: Qwen2.5-1.5B-Instruct Q4_K_M (GGUF, ~1GB)  
+**실행 위치**: RPi on-device — 데이터 외부 유출 제로  
+**활성화**: TUI 제어/설정 탭에서 `sLM Stage` 스위치
+
+### DLP 탐지 규칙 (Regex Stage, 12개)
 
 | 규칙 | 대상 | 등급 | 검증 |
 |------|------|------|------|
@@ -350,7 +375,7 @@ ai-dlp-proxy/
 - [x] 실시간 마스킹 파이프라인
 - [x] Textual TUI 6탭 대시보드
 - [x] 오탐 개선 (kr_rrn 체크섬 검증 강화)
-- [ ] SLM 컨텍스트 기반 탐지 (Qwen2.5 / EXAONE)
+- [x] SLM 보완 탐지 (Qwen2.5-1.5B-Instruct, on-device)
 - [ ] `pip install ai-dlp-proxy` 배포 패키지
 - [ ] CA 인증서 자동 설치
 - [ ] 사용자 정의 정책 (`settings.yaml`)

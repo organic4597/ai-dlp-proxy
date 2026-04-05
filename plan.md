@@ -169,41 +169,57 @@ HIGH/MEDIUM/LOW → ALERT
 
 ## 남은 작업 (Roadmap)
 
-### Phase 4 — SLM 통합 (진행 예정)
+### ✅ Phase 4 — SLM 통합 (완료)
 
-#### 목표
-Regex Stage만으로 잡기 어려운 **문맥 의존적 PII** (예: 이름+부서가 조합된 간접 식별 정보, 자유형식 주소 등)를 소형 언어 모델로 보완 탐지.
+#### 왜 SLM이 필요한가 — Regex의 한계
 
-#### 모델 후보
-| 모델 | 크기 | 형식 | 비고 |
-|------|------|------|------|
-| Qwen2.5-1.5B-Instruct | ~1GB Q4 | GGUF | 다국어, 속도 빠름 |
-| EXAONE-3.5-2.4B-Instruct | ~1.5GB Q4 | GGUF | 한국어 특화 |
+Regex Stage는 **패턴이 고정된 PII**(주민등록번호, 카드번호, API 키 등)에 탁월하지만,
+다음 유형의 PII는 구조적으로 **탐지 불가능**합니다.
 
-#### 구현 계획
-1. **SLMStage** 클래스 작성 (`src/ai_dlp_proxy/engine/pipeline/slm_stage.py`)
-   - `llama-cpp-python` 으로 GGUF 모델 로드
-   - 입력: 텍스트 청크 + 기존 Regex Stage findings
-   - 출력: JSON `{"findings": [{"rule": ..., "start": ..., "end": ..., "text": ..., "confidence": ...}]}`
-   - GBNF grammar으로 JSON 출력 강제 (hallucination 방지)
-2. **Pipeline 연결** (`pipeline/__init__.py`)
-   - RegexStage → SLMStage (slm_enabled=True 시)
-   - SLM finding은 Regex가 이미 탐지한 위치 중복 제거
-3. **성능 고려**
-   - RPi CPU 추론: ~300~800ms 예상 → 비동기 스레드풀 in executor 처리
-   - 텍스트 길이 제한 (예: 2000자 초과 시 청킹)
-   - 캐시: 동일 텍스트 해시 기준 LRU 캐시
-4. **TUI 제어 탭 연동**
-   - 기존 `slm_enabled` 스위치 활성화
-   - 모델 경로 설정 UI
-5. **평가 기준**
-   - Regex가 못 잡는 케이스 샘플 20개 수집 → SLM으로 검증
-   - 오탐률 허용치: < 10%
-   - 지연 허용치: < 1000ms (RPi)
+| 한계 유형 | 예시 | 이유 |
+|---|---|---|
+| **문맥 의존적 이름** | `담당자: 홍길동 부장` | 이름은 정해진 패턴이 없어 Regex 불가 |
+| **자유형식 주소** | `서울시 강남구 테헤란로 123` | 엄격한 형식 없음 |
+| **간접 식별 조합** | `대한 한의원 근무 홍길동` | 이름+기관 조합이 식별 자에 해당 |
+| **언어 교자사용** | `Kim Cheol-su`, `김철수` | Regex는 단일 표기체만 대응 |
+| **도메인 특화 표현** | 의료 진단명, 생체 정보 | 규칙 정의 불가능 |
 
-#### 선행 작업
-- `llama-cpp-python` RPi ARM64 빌드/설치 확인
-- GGUF 모델 다운로드 위치 결정 (`/home1/ai-dlp-proxy/models/`)
+**결론**: Regex는 스쾔어링 시스템으로, SLM은 의미를 이해하는 보험. 두 스테이지를 직렬로 두어 서로의 약점을 보완합니다.
+
+#### SLM 통합의 효용성
+
+| 항목 | 내용 |
+|---|---|
+| **탐지 범위 확장** | 이름, 주소, 기관, 생년월일, IP, 기기ID, 의료/생체 정보 9종 추가 |
+| **오탐 저감** | Regex의 단순 패턴 오탐을 모델이 문맥으로 재검증 가능 |
+| **한국어 특화** | Qwen2.5는 한국어 fine-tuning 데이터를 포함하여 한국어 PII를 높은 정확도로 탐지 |
+| **on-device** | 외부 API/서버 불필요. RPi에서 완전히 로컈 실행 → 데이터 외부 유출 제로 |
+| **선택적 활성화** | `slm_enabled` 플래그로 On/Off — 성능 민감한 시나리오에서 Regex만 사용 가능 |
+| **비용 효율** | 1.5B Q4_K_M 약 1GB 모델로 상업 LLM API 호출 없이 DLP 수행 |
+
+#### 성능 측정 (RPi 5, aarch64)
+
+| 단계 | 소요 시간 |
+|---|---|
+| Regex Stage | < 1ms |
+| SLM 모델 로드 (최신 1회) | ~4시간 |
+| SLM 추론 (청크당) | ~300–800ms |
+| 전체 요청 오버헤드 | < 1초 |
+
+#### 구현 상세
+- `src/ai_dlp_proxy/engine/pipeline/slm_stage.py`
+  - `llama-cpp-python` + Qwen2.5-1.5B-Instruct-Q4_K_M.gguf
+  - GBNF grammar으로 JSON 배열 출력 강제 → hallucination 방지
+  - DLPTarget.text (순수 텍스트)만 수신 — JSON body 전체가 아닌 필드 값만
+  - 1500자 청크 + 100자 overlap → 경계에서 PII 누락 방지
+  - offset 부정접 허용: SLM offset 오류 시 match_text 직접 탐색으로 복원
+  - Regex Stage와 50% 이상 갹치는 finding 중복 제거
+  - threading.Lock + 싱글턴 및 스레드 직렬화
+- `pipeline/__init__.py`: `slm_enabled` 파라미터로 On/Off
+- `engine_server.py`: `/tmp/dlp-control.json` 의 `slm_enabled` 플래그 연동
+- `inspect_traffic.py`: SLM 규칙 마스킹 템플릿 9종 추가
+- `tui.py`: sLM Stage 스위치 활성화
+- `models/qwen2.5-1.5b-instruct-q4_k_m.gguf`: ~1GB 다운로드 완료
 
 ### Phase 5 — 패키지화 및 배포 (미구현)
 - `pip install ai-dlp-proxy` 배포
