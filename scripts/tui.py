@@ -686,12 +686,12 @@ class DLPApp(App):
 
     def on_mount(self) -> None:
         tt = self.query_one("#ttable", DataTable)
-        tt.add_column("턴",  width=4)
-        tt.add_column("시각", width=8)
-        tt.add_column("모델", width=13)
-        tt.add_column("요",   width=3)
-        tt.add_column("탐",   width=3)
-        tt.add_column("액션", width=9)
+        tt.add_column("턴",   width=5)
+        tt.add_column("시각",  width=8)
+        tt.add_column("모델",  width=16)
+        tt.add_column("요청",  width=5)
+        tt.add_column("탐지",  width=5)
+        tt.add_column("액션",  width=9)
         ft = self.query_one("#ftable", DataTable)
         ft.add_column("시각",   width=8)
         ft.add_column("심각도", width=8)
