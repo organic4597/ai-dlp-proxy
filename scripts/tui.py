@@ -547,17 +547,11 @@ class DLPApp(App):
                         yield RichLog(id="fdetail", highlight=True, markup=True, wrap=True)
             with TabPane("제어", id="tab-control"):
                 with VerticalScroll(id="ctrl-scroll"):
-                    # ── 파이프라인 활성화 ──────────────────────────────────
+                    # ── 마스킹 규칙 ────────────────────────────────────────
                     with Vertical(classes="ctrl-card"):
-                        yield Label("🔬 파이프라인 활성화", classes="ctrl-title")
-                        with Horizontal(classes="opt-row"):
-                            yield Label("Regex Stage")
-                            yield Switch(id="ctrl-sw-regex", value=True)
-                        yield Label("정규식 기반 PII 탐지 (주민번호·카드번호 등 13개 규칙)", classes="opt-desc")
-                        with Horizontal(classes="opt-row"):
-                            yield Label("sLM Stage")
-                            yield Switch(id="ctrl-sw-slm", value=False)
-                        yield Label("소형 언어모델 보완 탐지 (이름·주소 등 문맥 PII) — Qwen2.5-1.5B", classes="opt-desc")
+                        yield Label("🎭 마스킹 규칙", classes="ctrl-title")
+                        yield Label("행 클릭 → 규칙 활성/비활성 토글 | 연두색 탐지된 PII를 치환 텍스트로 교체합니다.", classes="mask-badge")
+                        yield _ClickToggleTable(id="mask-table", cursor_type="row")
                     # ── 액션 정책 ──────────────────────────────────────────
                     with Vertical(classes="ctrl-card"):
                         yield Label("🚦 탐지 시 액션 정책", classes="ctrl-title")
@@ -583,11 +577,6 @@ class DLPApp(App):
                                 yield DataTable(id="ctrl-qtable", cursor_type="row")
                             with Vertical(id="ctrl-queue-right"):
                                 yield RichLog(id="ctrl-qdetail", highlight=True, markup=True, wrap=True)
-                    # ── 마스킹 규칙 ────────────────────────────────────────
-                    with Vertical(classes="ctrl-card"):
-                        yield Label("🎭 마스킹 규칙", classes="ctrl-title")
-                        yield Label("행 클릭 → 규칙 활성/비활성 토글 | 연두색 탐지된 PII를 치환 텍스트로 교체합니다.", classes="mask-badge")
-                        yield _ClickToggleTable(id="mask-table", cursor_type="row")
             with TabPane("프로세스", id="tab-procs"):
                 with VerticalScroll(id="proc-scroll"):
                     # engine 카드
@@ -858,8 +847,6 @@ class DLPApp(App):
         # 제어 파일 → 스위치 값 동기화
         ctrl = self._read_control()
         try:
-            self.query_one("#ctrl-sw-regex", Switch).value = bool(ctrl.get("regex_enabled", True))
-            self.query_one("#ctrl-sw-slm", Switch).value = bool(ctrl.get("slm_enabled", False))
             self.query_one("#ctrl-sw-mask-on-detect", Switch).value = bool(ctrl.get("mask_on_detect", False))
             self.query_one("#ctrl-sw-block-alert", Switch).value = bool(ctrl.get("block_on_alert", False))
             self.query_one("#ctrl-sw-block-mask", Switch).value = bool(ctrl.get("block_on_mask", False))
@@ -940,16 +927,6 @@ class DLPApp(App):
                         f"conf={f.get('confidence', 0):.1f}")
                 d.write(f"    {f.get('match_text', '')!r}")
                 d.write(f"    [dim]{f.get('field_path', '')}[/]")
-
-    @on(Switch.Changed, "#ctrl-sw-regex")
-    def _ctrl_sw_regex(self, e: Switch.Changed):
-        _patch_control("regex_enabled", e.value)
-        self._lg(f"[{'green' if e.value else 'yellow'}]Regex Stage {'ON' if e.value else 'OFF'}[/]")
-
-    @on(Switch.Changed, "#ctrl-sw-slm")
-    def _ctrl_sw_slm(self, e: Switch.Changed):
-        _patch_control("slm_enabled", e.value)
-        self._lg(f"[{'green' if e.value else 'yellow'}]sLM Stage {'ON' if e.value else 'OFF'}[/]")
 
     @on(Switch.Changed, "#sw-regex")
     def _sw_regex(self, e: Switch.Changed):
