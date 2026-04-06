@@ -2,7 +2,7 @@
 SLM Stage — llama-cpp-python 기반 소형 언어 모델 PII 보완 탐지.
 
 Regex Stage가 놓친 문맥 의존적 PII(예: 이름+소속 조합, 자유형식 주소 등)를
-SLM(Qwen2.5-1.5B-Instruct)으로 검증·보완합니다.
+SLM(Gemma 4 2B-IT)으로 검증·보완합니다.
 
 동작 방식
 ---------
@@ -18,8 +18,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+import platform
+import shutil
 import threading
 import time
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +33,7 @@ log = logging.getLogger(__name__)
 # ── 상수 ─────────────────────────────────────────────────────────────────────
 
 DEFAULT_MODEL_PATH = str(
-    Path(__file__).parents[4] / "models" / "qwen2.5-1.5b-instruct-q4_k_m.gguf"
+    Path(__file__).parents[4] / "models" / "gemma-4-2b-it-q4_k_m.gguf"
 )
 
 CHUNK_CHARS   = 1500   # 청크 최대 길이 (문자)
@@ -38,6 +41,40 @@ OVERLAP_CHARS = 100    # 청크 간 겹침 (offset 보정용)
 MAX_TOKENS    = 512    # SLM 출력 최대 토큰
 TEMPERATURE   = 0.0    # 결정적 출력
 CONFIDENCE_THRESHOLD = 0.5  # 이 값 미만 finding 무시
+
+
+class ComputeMode(Enum):
+    """런타임 컴퓨팅 환경."""
+    APPLE_SILICON = "apple_silicon"  # Metal GPU — ~300~600 ms/req
+    CUDA_GPU      = "cuda_gpu"       # NVIDIA CUDA — ~100~300 ms/req
+    CPU_ONLY      = "cpu_only"       # CPU 전용    — ~3~10 s/req (경고)
+
+
+def _detect_compute_mode() -> ComputeMode:
+    """플랫폼을 자동 감지하여 ComputeMode 반환."""
+    system = platform.system()
+    machine = platform.machine()
+    if system == "Darwin" and machine == "arm64":
+        return ComputeMode.APPLE_SILICON
+    if system == "Linux" and shutil.which("nvidia-smi") is not None:
+        return ComputeMode.CUDA_GPU
+    return ComputeMode.CPU_ONLY
+
+
+def _gpu_layers_for(mode: ComputeMode) -> int:
+    """ComputeMode에 맞는 n_gpu_layers 값 반환."""
+    return -1 if mode != ComputeMode.CPU_ONLY else 0
+
+
+_CPU_ONLY_WARNING_LINES = [
+    "[SLM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "[SLM] ⚠  경고: GPU 없는 CPU 전용 환경에서 SLM 실행",
+    "[SLM]    요청당 처리 시간이 3~10초 소요될 수 있습니다.",
+    "[SLM]    권장: Apple Silicon Mac 또는 NVIDIA GPU 환경",
+    "[SLM]    SLM 비활성화: 제어 파일에 \"slm_enabled\": false 설정",
+    "[SLM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+]
+
 
 # GBNF grammar — JSON 배열만 출력하도록 강제
 # grammar 파일로 분리하여 문자열 이스케이프 문제 회피
@@ -85,8 +122,11 @@ class SLMStage(Stage):
     ----------
     model_path : GGUF 모델 파일 경로. None이면 DEFAULT_MODEL_PATH 사용.
     n_ctx      : 컨텍스트 길이 (토큰)
-    n_threads  : CPU 스레드 수 (None이면 자동)
-    verbose    : llama.cpp 내부 로그 출력 여부
+    n_threads    : CPU 스레드 수 (None이면 자동)
+    n_gpu_layers : GPU 오프로드 레이어 수.
+                   -1 = 전 레이어 GPU (Apple Silicon Metal / CUDA 권장),
+                    0 = CPU 전용 (기본값, 명시적 설정 없을 시 플랫폼 자동 감지)
+    verbose      : llama.cpp 내부 로그 출력 여부
     """
 
     _lock = threading.Lock()  # 모델은 싱글톤, 멀티스레드 직렬화
@@ -96,14 +136,26 @@ class SLMStage(Stage):
         model_path: str | None = None,
         n_ctx: int = 2048,
         n_threads: int | None = None,
+        n_gpu_layers: int | None = None,
         verbose: bool = False,
     ):
         self._model_path = model_path or DEFAULT_MODEL_PATH
         self._n_ctx = n_ctx
         self._n_threads = n_threads or max(1, (os.cpu_count() or 4) // 2)
+        self._compute_mode = _detect_compute_mode()
+        self._n_gpu_layers = n_gpu_layers if n_gpu_layers is not None else _gpu_layers_for(self._compute_mode)
         self._verbose = verbose
         self._llm: Any = None  # Llama 인스턴스 (지연 로드)
         self._load_error: str | None = None
+
+        # 컴퓨팅 환경 로그 — CPU 전용이면 경고
+        if self._compute_mode == ComputeMode.CPU_ONLY:
+            for line in _CPU_ONLY_WARNING_LINES:
+                log.warning(line)
+        elif self._compute_mode == ComputeMode.APPLE_SILICON:
+            log.info("[SLM] Apple Silicon 감지 → Metal GPU 전 레이어 오프로드")
+        else:
+            log.info("[SLM] NVIDIA GPU 감지 → CUDA 전 레이어 오프로드")
 
     @property
     def name(self) -> str:
@@ -130,10 +182,11 @@ class SLMStage(Stage):
                 model_path=self._model_path,
                 n_ctx=self._n_ctx,
                 n_threads=self._n_threads,
+                n_gpu_layers=self._n_gpu_layers,
                 verbose=self._verbose,
             )
             elapsed = round((time.monotonic() - t0) * 1000)
-            log.info("[SLM] 모델 로드 완료 (%dms)", elapsed)
+            log.info("[SLM] 모델 로드 완료 (%dms, gpu_layers=%d)", elapsed, self._n_gpu_layers)
             return True
         except Exception as e:
             self._load_error = str(e)
