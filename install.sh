@@ -268,7 +268,7 @@ fi
 
 # shellcheck disable=SC1091
 source "$VENV_DIR/bin/activate"
-pip install --upgrade pip setuptools wheel -q
+pip install --upgrade "pip>=24" "setuptools>=69" wheel -q
 ok "가상환경 활성화: $VENV_DIR"
 
 # =============================================================================
@@ -307,10 +307,11 @@ info "프로젝트 의존성 설치 중..."
 
 # mitmproxy: PyPI 최신 버전 자동으로 탐지
 # --prefer-binary: 소스 빌드 없이 wheel 우선 (aarch64 등 플랫폼 호환성 보장)
+# h11: mitmproxy 11.x 가 h11<=0.14.0 요구 → 함께 고정
 install_mitmproxy() {
     local spec="$1"
     info "  mitmproxy ${spec} 시도..."
-    pip install --prefer-binary "$spec" -q 2>/dev/null && return 0
+    pip install --prefer-binary "$spec" "h11>=0.11,<=0.14.0" -q 2>/dev/null && return 0
     return 1
 }
 
