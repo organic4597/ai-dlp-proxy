@@ -1,0 +1,455 @@
+#!/usr/bin/env bash
+# =============================================================================
+#  AI DLP Proxy — Rocky Linux 원클릭 설치 스크립트
+#  지원: Rocky Linux 8 / 9, RHEL 8/9 호환
+#
+#  사용법:
+#    bash install.sh              # 기본 설치 (CPU 자동 감지)
+#    bash install.sh --gpu        # NVIDIA GPU 강제 활성화
+#    bash install.sh --no-model   # 모델 다운로드 건너뜀 (수동 배치 예정)
+#    bash install.sh --no-systemd # systemd 서비스 등록 건너뜀
+# =============================================================================
+set -euo pipefail
+
+# ── 색상 ──────────────────────────────────────────────────────────────────────
+RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'
+CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
+
+info()    { echo -e "${CYAN}[INFO]${RESET}  $*"; }
+ok()      { echo -e "${GREEN}[OK]${RESET}    $*"; }
+warn()    { echo -e "${YELLOW}[WARN]${RESET}  $*"; }
+error()   { echo -e "${RED}[ERROR]${RESET} $*" >&2; exit 1; }
+step()    { echo -e "\n${BOLD}━━━  $*  ━━━${RESET}"; }
+
+# ── 인수 파싱 ─────────────────────────────────────────────────────────────────
+OPT_GPU=false
+OPT_NO_MODEL=false
+OPT_NO_SYSTEMD=false
+for arg in "$@"; do
+    case "$arg" in
+        --gpu)        OPT_GPU=true ;;
+        --no-model)   OPT_NO_MODEL=true ;;
+        --no-systemd) OPT_NO_SYSTEMD=true ;;
+        --help|-h)
+            grep '^#  ' "$0" | sed 's/^#  //'
+            exit 0 ;;
+        *) warn "알 수 없는 옵션: $arg (무시)" ;;
+    esac
+done
+
+# ── 설치 경로 ─────────────────────────────────────────────────────────────────
+INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$INSTALL_DIR/venv"
+MODEL_DIR="$INSTALL_DIR/models"
+CONFIG_DIR="$HOME/.config/ai-dlp-proxy"
+MODEL_FILENAME="gemma-4-2b-it-q4_k_m.gguf"
+MODEL_PATH="$MODEL_DIR/$MODEL_FILENAME"
+# HuggingFace repo (bartowski 커뮤니티 GGUF)
+HF_REPO="bartowski/gemma-4-2b-it-GGUF"
+HF_FILE="$MODEL_FILENAME"
+
+# ── 서비스 실행 사용자 ────────────────────────────────────────────────────────
+RUN_USER="${SUDO_USER:-$USER}"
+RUN_HOME=$(getent passwd "$RUN_USER" | cut -d: -f6)
+
+# =============================================================================
+step "1/8  OS 호환성 확인"
+# =============================================================================
+
+if [[ ! -f /etc/os-release ]]; then
+    error "/etc/os-release 없음 — Rocky Linux / RHEL 계열이 아닌 환경입니다"
+fi
+
+source /etc/os-release
+OS_ID="${ID:-unknown}"
+OS_VER="${VERSION_ID%%.*}"   # "8.9" → "8"
+
+case "$OS_ID" in
+    rocky|rhel|almalinux|ol)
+        ok "OS: $PRETTY_NAME (지원)"
+        ;;
+    centos)
+        if [[ "$OS_VER" -lt 8 ]]; then
+            error "CentOS 7 이하는 미지원. Rocky Linux 8/9 권장"
+        fi
+        warn "CentOS Stream 감지 — 동작은 하지만 Rocky Linux 권장"
+        ;;
+    *)
+        warn "미검증 OS: $OS_ID. 계속 진행합니다 (오류 발생 시 Rocky Linux 사용)"
+        ;;
+esac
+
+if [[ "$OS_VER" -lt 8 ]]; then
+    error "Rocky Linux / RHEL 8+ 이상 필요 (현재: $VERSION_ID)"
+fi
+
+# =============================================================================
+step "2/8  시스템 패키지 설치 (dnf)"
+# =============================================================================
+
+if [[ "$EUID" -ne 0 ]]; then
+    warn "root 권한 없음 — sudo 없이 dnf를 실행합니다 (실패 시 sudo 권한 필요)"
+    DNF="sudo dnf"
+else
+    DNF="dnf"
+fi
+
+info "EPEL 및 개발 도구 활성화..."
+$DNF install -y epel-release 2>/dev/null || true
+$DNF config-manager --set-enabled crb 2>/dev/null \
+    || $DNF config-manager --set-enabled powertools 2>/dev/null \
+    || true   # Rocky 8: powertools, Rocky 9: crb
+
+info "필수 패키지 설치..."
+$DNF install -y \
+    python3.11 python3.11-devel python3.11-pip \
+    gcc gcc-c++ cmake3 make \
+    openssl openssl-devel \
+    git wget curl \
+    bzip2-devel libffi-devel zlib-devel \
+    ca-certificates \
+    2>/dev/null || {
+        # python3.11이 없으면 3.12 시도
+        $DNF install -y python3.12 python3.12-devel python3.12-pip || true
+    }
+
+ok "시스템 패키지 설치 완료"
+
+# ── Python 실행 파일 결정 ─────────────────────────────────────────────────────
+PYTHON=""
+for candidate in python3.12 python3.11 python3; do
+    if command -v "$candidate" &>/dev/null; then
+        ver=$("$candidate" -c "import sys; print(sys.version_info[:2])" 2>/dev/null)
+        # (3, 11) 이상인지 확인
+        if "$candidate" -c "import sys; sys.exit(0 if sys.version_info >= (3,11) else 1)" 2>/dev/null; then
+            PYTHON="$candidate"
+            break
+        fi
+    fi
+done
+
+[[ -z "$PYTHON" ]] && error "Python 3.11+ 을 찾지 못했습니다. 수동 설치 후 재실행하세요"
+ok "Python: $($PYTHON --version)"
+
+# =============================================================================
+step "3/8  GPU 환경 감지"
+# =============================================================================
+
+COMPUTE_MODE="cpu"
+
+if [[ "$OPT_GPU" == true ]]; then
+    COMPUTE_MODE="cuda"
+    info "--gpu 플래그 → CUDA 강제 활성"
+elif command -v nvidia-smi &>/dev/null; then
+    GPU_INFO=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1)
+    if [[ -n "$GPU_INFO" ]]; then
+        COMPUTE_MODE="cuda"
+        ok "NVIDIA GPU 감지: $GPU_INFO"
+    fi
+fi
+
+if [[ "$COMPUTE_MODE" == "cpu" ]]; then
+    echo ""
+    echo -e "${YELLOW}┌─────────────────────────────────────────────────────────────┐${RESET}"
+    echo -e "${YELLOW}│  ⚠  경고: GPU가 감지되지 않았습니다 (CPU 전용 모드)         │${RESET}"
+    echo -e "${YELLOW}│                                                             │${RESET}"
+    echo -e "${YELLOW}│  SLM(Gemma 4 2B) 추론 시 요청당 3~10초 소요 예상           │${RESET}"
+    echo -e "${YELLOW}│  NVIDIA GPU 환경이라면:  bash install.sh --gpu              │${RESET}"
+    echo -e "${YELLOW}│  SLM 없이 Regex만 사용:  TUI → 제어탭 → SLM Stage OFF      │${RESET}"
+    echo -e "${YELLOW}└─────────────────────────────────────────────────────────────┘${RESET}"
+    echo ""
+    read -rp "계속 진행하시겠습니까? [Y/n] " confirm
+    confirm="${confirm:-Y}"
+    [[ "${confirm,,}" != "y" ]] && { info "설치 취소"; exit 0; }
+fi
+
+# =============================================================================
+step "4/8  Python 가상환경 구성"
+# =============================================================================
+
+if [[ -d "$VENV_DIR" ]]; then
+    warn "기존 venv 발견 ($VENV_DIR) — 재사용합니다"
+    warn "깨끗하게 재설치하려면:  rm -rf venv && bash install.sh"
+else
+    info "가상환경 생성: $VENV_DIR"
+    "$PYTHON" -m venv "$VENV_DIR"
+fi
+
+# shellcheck disable=SC1091
+source "$VENV_DIR/bin/activate"
+pip install --upgrade pip setuptools wheel -q
+ok "가상환경 활성화: $VENV_DIR"
+
+# =============================================================================
+step "5/8  Python 패키지 설치"
+# =============================================================================
+
+# ── llama-cpp-python: GPU 여부에 따라 빌드 플래그 다름 ──────────────────────
+info "llama-cpp-python 설치 중 (시간이 걸릴 수 있습니다)..."
+
+if [[ "$COMPUTE_MODE" == "cuda" ]]; then
+    info "  모드: CUDA GPU 빌드"
+    CMAKE_ARGS="-DGGML_CUDA=on" \
+    FORCE_CMAKE=1 \
+        pip install llama-cpp-python --no-binary llama-cpp-python -q \
+        || {
+            warn "CUDA 빌드 실패 → CPU 빌드로 폴백"
+            pip install llama-cpp-python -q
+        }
+else
+    info "  모드: CPU 빌드"
+    pip install llama-cpp-python -q
+fi
+
+# ── 나머지 패키지 ────────────────────────────────────────────────────────────
+info "프로젝트 의존성 설치 중..."
+pip install \
+    "mitmproxy>=12.0" \
+    "rich>=13.0" \
+    "pyyaml>=6.0" \
+    "textual>=8.2.2" \
+    "huggingface_hub>=0.22" \
+    -q
+
+# ── 프로젝트 자체 설치 (editable) ────────────────────────────────────────────
+pip install -e "$INSTALL_DIR" -q
+
+ok "Python 패키지 설치 완료"
+
+# =============================================================================
+step "6/8  Gemma 4 2B-IT 모델 다운로드"
+# =============================================================================
+
+mkdir -p "$MODEL_DIR"
+
+if [[ "$OPT_NO_MODEL" == true ]]; then
+    warn "--no-model 플래그 — 모델 다운로드 건너뜀"
+    warn "수동으로 다음 경로에 배치하세요: $MODEL_PATH"
+elif [[ -f "$MODEL_PATH" ]]; then
+    ok "모델 파일 이미 존재: $MODEL_PATH"
+else
+    info "HuggingFace에서 모델 다운로드 중..."
+    info "  저장소: $HF_REPO"
+    info "  파일:   $HF_FILE"
+    info "  경로:   $MODEL_PATH"
+    echo -e "\n${YELLOW}  모델 크기 약 1.6GB — 네트워크 속도에 따라 수 분 소요${RESET}\n"
+
+    # huggingface_hub CLI 사용
+    python - <<PYEOF
+import sys
+try:
+    from huggingface_hub import hf_hub_download
+    path = hf_hub_download(
+        repo_id="$HF_REPO",
+        filename="$HF_FILE",
+        local_dir="$MODEL_DIR",
+        local_dir_use_symlinks=False,
+    )
+    print(f"[OK] 다운로드 완료: {path}")
+except Exception as e:
+    print(f"[ERROR] 다운로드 실패: {e}", file=sys.stderr)
+    print("[INFO]  HuggingFace 로그인 필요 시: huggingface-cli login", file=sys.stderr)
+    sys.exit(1)
+PYEOF
+    ok "모델 다운로드 완료: $MODEL_PATH"
+fi
+
+# =============================================================================
+step "7/8  설정 디렉터리 및 mitmproxy CA 인증서"
+# =============================================================================
+
+mkdir -p "$CONFIG_DIR"
+
+# 기본 제어 파일 생성 (없을 때만)
+CTRL_FILE="$CONFIG_DIR/dlp-control.json"
+if [[ ! -f "$CTRL_FILE" ]]; then
+    cat > "$CTRL_FILE" <<'JSON'
+{
+    "disabled_rules":          [],
+    "block_on_critical":       false,
+    "slm_enabled":             true,
+    "asset_enabled":           false,
+    "context_penalty_enabled": true,
+    "confidence_threshold":    0.5,
+    "allowlist":               []
+}
+JSON
+    ok "기본 제어 파일 생성: $CTRL_FILE"
+fi
+
+# mitmproxy CA 인증서 생성 (없을 때만)
+MITM_CA="$CONFIG_DIR/mitmproxy-ca-cert.pem"
+if [[ ! -f "$MITM_CA" ]]; then
+    info "mitmproxy CA 인증서 생성 중..."
+    # mitmdump를 0.5초만 실행해서 CA 생성만 트리거
+    MITMPROXY_CONFDIR="$CONFIG_DIR" \
+        "$VENV_DIR/bin/mitmdump" --listen-port 18999 &
+    MITM_PID=$!
+    sleep 2
+    kill "$MITM_PID" 2>/dev/null || true
+    wait "$MITM_PID" 2>/dev/null || true
+
+    # mitmproxy 기본 저장 위치에서 복사
+    MITM_DEFAULT="$HOME/.mitmproxy/mitmproxy-ca-cert.pem"
+    if [[ -f "$MITM_DEFAULT" ]]; then
+        cp "$MITM_DEFAULT" "$MITM_CA"
+        ok "CA 인증서 복사: $MITM_CA"
+    else
+        warn "CA 인증서 자동 생성 실패 — 최초 mitmdump 실행 시 자동 생성됩니다"
+    fi
+fi
+
+# logs 디렉터리
+mkdir -p "$INSTALL_DIR/logs"
+ok "설정 디렉터리 준비 완료: $CONFIG_DIR"
+
+# =============================================================================
+step "8/8  systemd 서비스 등록"
+# =============================================================================
+
+if [[ "$OPT_NO_SYSTEMD" == true ]]; then
+    warn "--no-systemd 플래그 — 서비스 등록 건너뜀"
+else
+    if [[ "$EUID" -ne 0 ]]; then
+        warn "root 권한 없음 — systemd 서비스를 사용자 단위(--user)로 등록합니다"
+        SYSTEMD_DIR="$HOME/.config/systemd/user"
+        SYSTEMCTL="systemctl --user"
+    else
+        SYSTEMD_DIR="/etc/systemd/system"
+        SYSTEMCTL="systemctl"
+    fi
+
+    mkdir -p "$SYSTEMD_DIR"
+
+    # ── DLP 엔진 서비스 ──────────────────────────────────────────────────────
+    cat > "$SYSTEMD_DIR/ai-dlp-engine.service" <<EOF
+[Unit]
+Description=AI DLP Proxy — Engine Server
+After=network.target
+Documentation=https://github.com/organic4597/ai-dlp-proxy
+
+[Service]
+Type=simple
+User=$RUN_USER
+WorkingDirectory=$INSTALL_DIR
+ExecStart=$VENV_DIR/bin/python $INSTALL_DIR/scripts/engine_server.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:$INSTALL_DIR/logs/engine.log
+StandardError=append:$INSTALL_DIR/logs/engine.log
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # ── mitmproxy 서비스 ─────────────────────────────────────────────────────
+    cat > "$SYSTEMD_DIR/ai-dlp-mitm.service" <<EOF
+[Unit]
+Description=AI DLP Proxy — mitmproxy HTTPS Interceptor
+After=ai-dlp-engine.service
+Requires=ai-dlp-engine.service
+Documentation=https://github.com/organic4597/ai-dlp-proxy
+
+[Service]
+Type=simple
+User=$RUN_USER
+WorkingDirectory=$INSTALL_DIR
+ExecStart=$VENV_DIR/bin/mitmdump \\
+    --listen-host 0.0.0.0 \\
+    --listen-port 4001 \\
+    --ssl-insecure \\
+    -s $INSTALL_DIR/scripts/inspect_traffic.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:$INSTALL_DIR/logs/mitm.log
+StandardError=append:$INSTALL_DIR/logs/mitm.log
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # ── TUI 서비스 (선택) ────────────────────────────────────────────────────
+    cat > "$SYSTEMD_DIR/ai-dlp-tui.service" <<EOF
+[Unit]
+Description=AI DLP Proxy — TUI Dashboard
+After=ai-dlp-engine.service
+Documentation=https://github.com/organic4597/ai-dlp-proxy
+
+[Service]
+Type=simple
+User=$RUN_USER
+WorkingDirectory=$INSTALL_DIR
+ExecStart=$VENV_DIR/bin/python $INSTALL_DIR/scripts/tui.py
+Restart=on-failure
+RestartSec=3
+StandardInput=tty
+TTYPath=/dev/tty1
+StandardOutput=tty
+StandardError=append:$INSTALL_DIR/logs/tui.log
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # systemd 리로드 및 서비스 활성화
+    if [[ "$EUID" -eq 0 ]]; then
+        systemctl daemon-reload
+        systemctl enable ai-dlp-engine.service ai-dlp-mitm.service
+        ok "systemd 서비스 등록 및 활성화 (root)"
+    else
+        systemctl --user daemon-reload
+        systemctl --user enable ai-dlp-engine.service ai-dlp-mitm.service 2>/dev/null || true
+        ok "systemd 사용자 서비스 등록 완료"
+    fi
+fi
+
+# =============================================================================
+#  설치 완료 — 사용법 안내
+# =============================================================================
+
+echo ""
+echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════════════════════╗${RESET}"
+echo -e "${GREEN}${BOLD}║              AI DLP Proxy 설치 완료!                           ║${RESET}"
+echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════════════════════╝${RESET}"
+echo ""
+echo -e "${BOLD}── 서비스 시작 ─────────────────────────────────────────────────────${RESET}"
+if [[ "$EUID" -eq 0 ]]; then
+    echo "  sudo systemctl start ai-dlp-engine ai-dlp-mitm"
+    echo "  sudo systemctl status ai-dlp-engine ai-dlp-mitm"
+else
+    echo "  systemctl --user start ai-dlp-engine ai-dlp-mitm"
+    echo "  systemctl --user status ai-dlp-engine ai-dlp-mitm"
+fi
+echo ""
+echo -e "${BOLD}── TUI 대시보드 (터미널에서 직접 실행) ───────────────────────────────${RESET}"
+echo "  cd $INSTALL_DIR"
+echo "  source venv/bin/activate"
+echo "  python scripts/tui.py"
+echo ""
+echo -e "${BOLD}── 클라이언트 프록시 설정 ──────────────────────────────────────────${RESET}"
+SERVER_IP=$(hostname -I | awk '{print $1}')
+echo "  HTTP/HTTPS 프록시:  ${SERVER_IP}:4001"
+echo "  CA 인증서 경로:     $CONFIG_DIR/mitmproxy-ca-cert.pem"
+echo "  (클라이언트 PC에서 CA 인증서를 신뢰하도록 설치 필요)"
+echo ""
+echo -e "${BOLD}── 모델 경로 ───────────────────────────────────────────────────────${RESET}"
+if [[ -f "$MODEL_PATH" ]]; then
+    echo -e "  ${GREEN}✓${RESET}  $MODEL_PATH"
+else
+    echo -e "  ${YELLOW}✗${RESET}  $MODEL_PATH  (없음 — SLM 비활성 상태로 실행됨)"
+fi
+echo ""
+echo -e "${BOLD}── 컴퓨팅 모드 ─────────────────────────────────────────────────────${RESET}"
+if [[ "$COMPUTE_MODE" == "cuda" ]]; then
+    echo -e "  ${GREEN}NVIDIA GPU (CUDA)${RESET} — 예상 레이턴시 ~200ms/req"
+else
+    echo -e "  ${YELLOW}CPU 전용${RESET} — 예상 레이턴시 ~5초/req (SLM 활성 시)"
+    echo "  GPU 추가 후 재설치: bash install.sh --gpu"
+fi
+echo ""
+echo -e "${BOLD}── 로그 ────────────────────────────────────────────────────────────${RESET}"
+echo "  $INSTALL_DIR/logs/engine.log"
+echo "  $INSTALL_DIR/logs/mitm.log"
+echo ""

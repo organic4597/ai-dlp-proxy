@@ -115,24 +115,76 @@ Textual 기반 6탭 인터랙티브 모니터링
 
 ### 요구사항
 
-- Python 3.12+
-- Raspberry Pi (또는 Linux 머신)
+- Python 3.11+
+- Rocky Linux 8/9, RHEL 8/9, Raspberry Pi (또는 Linux 머신)
 - Windows/Mac PC에서 프록시 설정 가능한 환경
 
-### 설치
+---
+
+### Rocky Linux — 원클릭 설치
+
+```bash
+git clone https://github.com/organic4597/ai-dlp-proxy.git
+cd ai-dlp-proxy
+bash install.sh
+```
+
+설치 스크립트가 다음을 자동으로 처리합니다:
+
+| 단계 | 내용 |
+|---|---|
+| OS 확인 | Rocky 8/9, RHEL 8/9, AlmaLinux 지원 여부 검사 |
+| 시스템 패키지 | `dnf`로 Python 3.11+, gcc, cmake, openssl-devel 설치 |
+| GPU 감지 | NVIDIA GPU 감지 시 CUDA 빌드 자동 활성, 미감지 시 경고 후 CPU 모드 |
+| 가상환경 | `venv/` 생성 및 의존성 설치 |
+| 모델 다운로드 | Gemma 4 2B-IT Q4_K_M (~1.6GB) HuggingFace 자동 다운로드 |
+| 설정 파일 | `~/.config/ai-dlp-proxy/dlp-control.json` 기본 설정 생성 |
+| CA 인증서 | mitmproxy CA 인증서 자동 생성 |
+| systemd | `ai-dlp-engine`, `ai-dlp-mitm` 서비스 자동 등록 |
+
+**설치 옵션:**
+
+```bash
+bash install.sh --gpu        # NVIDIA GPU 강제 활성화
+bash install.sh --no-model   # 모델 다운로드 건너뜀 (수동 배치 예정)
+bash install.sh --no-systemd # systemd 서비스 등록 건너뜀
+```
+
+**설치 후 서비스 시작:**
+
+```bash
+sudo systemctl start ai-dlp-engine ai-dlp-mitm
+sudo systemctl status ai-dlp-engine ai-dlp-mitm
+
+# TUI 대시보드
+source venv/bin/activate
+python scripts/tui.py
+```
+
+**방화벽 설정 (필요 시):**
+
+```bash
+sudo firewall-cmd --permanent --add-port=4001/tcp
+sudo firewall-cmd --reload
+```
+
+---
+
+### 수동 설치 (기타 Linux / Raspberry Pi)
 
 ```bash
 git clone https://github.com/organic4597/ai-dlp-proxy.git
 cd ai-dlp-proxy
 python3 -m venv venv
 source venv/bin/activate
-pip install mitmproxy textual
+pip install mitmproxy textual pyyaml rich llama-cpp-python
+pip install -e .
 ```
 
 ### CA 인증서 설치 (Windows PC)
 
 ```bash
-# RPi에서 mitmproxy 최초 실행으로 인증서 생성
+# 서버에서 mitmproxy 최초 실행으로 인증서 생성
 mitmdump -p 4001
 
 # 생성된 인증서를 Windows로 복사 후 설치
@@ -140,11 +192,11 @@ mitmdump -p 4001
 # → Windows: 신뢰할 수 있는 루트 인증 기관에 설치
 ```
 
-### 실행
+### 실행 (수동)
 
 ```bash
 # 1. DLP 엔진 서버
-PYTHONPATH=src nohup python3 scripts/engine_server.py > /tmp/engine_server.log 2>&1 &
+PYTHONPATH=src nohup python3 scripts/engine_server.py > logs/engine.log 2>&1 &
 
 # 2. mitmproxy 프록시
 mitmdump --listen-host 0.0.0.0 -p 4001 -s scripts/inspect_traffic.py &
@@ -153,7 +205,18 @@ mitmdump --listen-host 0.0.0.0 -p 4001 -s scripts/inspect_traffic.py &
 PYTHONPATH=src python3 scripts/tui.py
 ```
 
-Windows PC에서 시스템 프록시를 `RPi_IP:4001`로 설정하면 LLM 트래픽이 자동으로 DLP 프록시를 경유합니다.
+Windows PC에서 시스템 프록시를 `서버IP:4001`로 설정하면 LLM 트래픽이 자동으로 DLP 프록시를 경유합니다.
+
+---
+
+### 컴퓨팅 환경별 예상 성능
+
+| 환경 | SLM 레이턴시 | 비고 |
+|---|---|---|
+| CPU 전용 (x86) | 3~10초/req | SLM 비활성 권장 |
+| NVIDIA RTX 3090 | ~120ms/req | CUDA 빌드 필요 |
+| Apple Silicon M2 | ~450ms/req | Metal 자동 활성 |
+| Apple Silicon M4 Pro | ~170ms/req | Metal 자동 활성 |
 
 ---
 
