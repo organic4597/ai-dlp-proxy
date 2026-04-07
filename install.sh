@@ -72,9 +72,13 @@ MODEL_DIR="$INSTALL_DIR/models"
 CONFIG_DIR="$HOME/.config/ai-dlp-proxy"
 MODEL_FILENAME="gemma-4-2b-it-q4_k_m.gguf"
 MODEL_PATH="$MODEL_DIR/$MODEL_FILENAME"
-# HuggingFace repo (bartowski 커뮤니티 GGUF)
+# HuggingFace repo — bartowski GGUF 커뮤니티 (대소문자 fallback 포함)
+# bartowski 규칙: Q4_K_M (대문자) 사용
 HF_REPO="bartowski/gemma-4-2b-it-GGUF"
-HF_FILE="$MODEL_FILENAME"
+HF_FILES=("gemma-4-2b-it-Q4_K_M.gguf" "gemma-4-2b-it-q4_k_m.gguf")
+# Gemma 4는 Google gated repo → HF 토큰 필요
+# 대체 repo (토큰 불필요 미러)
+HF_REPO_ALT="unsloth/gemma-4-2b-it-GGUF"
 
 # ── 서비스 실행 사용자 ────────────────────────────────────────────────────────
 RUN_USER="${SUDO_USER:-$USER}"
@@ -352,28 +356,73 @@ elif [[ -f "$MODEL_PATH" ]]; then
 else
     info "HuggingFace에서 모델 다운로드 중..."
     info "  저장소: $HF_REPO"
-    info "  파일:   $HF_FILE"
     info "  경로:   $MODEL_PATH"
-    echo -e "\n${YELLOW}  모델 크기 약 1.6GB — 네트워크 속도에 따라 수 분 소요${RESET}\n"
+    echo -e "\n${YELLOW}  모델 크기 약 1.6GB — 네트워크 속도에 따라 수 분 소요${RESET}"
+    echo -e "${YELLOW}  Gemma 4는 Google gated repo입니다. HuggingFace 토큰이 필요합니다.${RESET}\n"
 
-    # huggingface_hub CLI 사용
-    python - <<PYEOF
-import sys
+    # HF 토큰: 환경변수 → 프롬프트 순서로 획득
+    HF_TOKEN="${HUGGING_FACE_HUB_TOKEN:-${HF_TOKEN:-}}"
+    if [[ -z "$HF_TOKEN" ]]; then
+        echo    "  HuggingFace 토큰 없이는 Gemma gated repo에 접근할 수 없습니다."
+        echo    "  토큰 발급: https://huggingface.co/settings/tokens"
+        echo    "  (토큰 없이 건너뛰려면 Enter)"
+        read -rsp "  HF 토큰 입력: " HF_TOKEN
+        echo ""
+    fi
+
+    if [[ -z "$HF_TOKEN" ]]; then
+        warn "토큰 없음 — 모델 다운로드를 건너뜁니다"
+        warn "나중에 수동 다운로드:"
+        warn "  huggingface-cli login"
+        warn "  huggingface-cli download $HF_REPO ${HF_FILES[0]} --local-dir $MODEL_DIR"
+        warn "  mv $MODEL_DIR/${HF_FILES[0]} $MODEL_PATH 2>/dev/null || true"
+    else
+        # huggingface_hub CLI 사용 — 파일명 대소문자 fallback + 대체 repo
+        python - <<PYEOF
+import sys, os
+os.environ["HUGGING_FACE_HUB_TOKEN"] = "$HF_TOKEN"
 try:
     from huggingface_hub import hf_hub_download
-    path = hf_hub_download(
-        repo_id="$HF_REPO",
-        filename="$HF_FILE",
-        local_dir="$MODEL_DIR",
-        local_dir_use_symlinks=False,
-    )
-    print(f"[OK] 다운로드 완료: {path}")
-except Exception as e:
-    print(f"[ERROR] 다운로드 실패: {e}", file=sys.stderr)
-    print("[INFO]  HuggingFace 로그인 필요 시: huggingface-cli login", file=sys.stderr)
+except ImportError:
+    print("[ERROR] huggingface_hub 미설치", file=sys.stderr)
     sys.exit(1)
+
+repos  = ["$HF_REPO", "$HF_REPO_ALT"]
+files  = ["${HF_FILES[0]}", "${HF_FILES[1]}"]
+dest   = "$MODEL_PATH"
+destdir= "$MODEL_DIR"
+
+for repo in repos:
+    for fname in files:
+        try:
+            print(f"[INFO]  시도: {repo} / {fname}")
+            path = hf_hub_download(
+                repo_id=repo,
+                filename=fname,
+                local_dir=destdir,
+                token="$HF_TOKEN",
+            )
+            # 파일명이 다르면 표준 경로로 복사
+            import shutil
+            if str(path) != dest:
+                shutil.copy2(path, dest)
+            print(f"[OK]    다운로드 완료: {dest}")
+            sys.exit(0)
+        except Exception as e:
+            print(f"[WARN]  실패 ({repo}/{fname}): {e}", file=sys.stderr)
+
+print("[ERROR] 모든 저장소/파일명 시도 실패", file=sys.stderr)
+print("[INFO]  수동 다운로드:", file=sys.stderr)
+print(f"  huggingface-cli download {repos[0]} {files[0]} --local-dir {destdir} --token <TOKEN>", file=sys.stderr)
+sys.exit(1)
 PYEOF
-    ok "모델 다운로드 완료: $MODEL_PATH"
+        if [[ $? -eq 0 ]]; then
+            ok "모델 다운로드 완료: $MODEL_PATH"
+        else
+            warn "모델 다운로드 실패 — 나머지 설치는 계속 진행합니다"
+            warn "SLM 없이도 Regex Stage는 정상 동작합니다 (TUI → SLM Stage OFF)"
+        fi
+    fi
 fi
 
 # =============================================================================
