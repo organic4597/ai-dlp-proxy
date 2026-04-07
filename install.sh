@@ -4,10 +4,14 @@
 #  지원: Rocky Linux 8 / 9, RHEL 8/9 호환
 #
 #  사용법:
-#    bash install.sh              # 기본 설치 (CPU 자동 감지)
+#    bash install.sh              # 기본 설치 (환경 자동 감지)
 #    bash install.sh --gpu        # NVIDIA GPU 강제 활성화
 #    bash install.sh --no-model   # 모델 다운로드 건너뜀 (수동 배치 예정)
 #    bash install.sh --no-systemd # systemd 서비스 등록 건너뜀
+#
+#  VMware / VirtualBox 가상 머신 환경 자동 감지:
+#    - GPU passthrough 불가 → CPU 전용 모드 자동 설정 (확인 프롬프트 없음)
+#    - Apple Silicon MacBook + VMware Fusion → aarch64 Rocky Linux 지원
 # =============================================================================
 set -euo pipefail
 
@@ -37,6 +41,30 @@ for arg in "$@"; do
     esac
 done
 
+# ── 아키텍처 및 VM 환경 감지 (인수 파싱 직후 바로 확인) ─────────────────────
+ARCH=$(uname -m)   # x86_64 | aarch64 | arm64
+
+# systemd-detect-virt: none / vmware / kvm / virtualbox / docker ...
+VIRT_TYPE=$(systemd-detect-virt 2>/dev/null || echo "none")
+IS_VM=false
+VM_VENDOR=""
+case "$VIRT_TYPE" in
+    vmware|kvm|virtualbox|hyperv|xen|parallels|qemu)
+        IS_VM=true
+        VM_VENDOR="$VIRT_TYPE"
+        ;;
+esac
+# DMI 폴백 (systemd-detect-virt 없는 최소 설치 환경)
+if [[ "$IS_VM" == false ]] && [[ -r /sys/class/dmi/id/sys_vendor ]]; then
+    DMI_VENDOR=$(cat /sys/class/dmi/id/sys_vendor 2>/dev/null || echo "")
+    case "${DMI_VENDOR,,}" in
+        *vmware*) IS_VM=true; VM_VENDOR="vmware" ;;
+        *virtualbox*|*innotek*) IS_VM=true; VM_VENDOR="virtualbox" ;;
+        *parallels*) IS_VM=true; VM_VENDOR="parallels" ;;
+        *microsoft*) IS_VM=true; VM_VENDOR="hyperv" ;;
+    esac
+fi
+
 # ── 설치 경로 ─────────────────────────────────────────────────────────────────
 INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$INSTALL_DIR/venv"
@@ -53,7 +81,7 @@ RUN_USER="${SUDO_USER:-$USER}"
 RUN_HOME=$(getent passwd "$RUN_USER" | cut -d: -f6)
 
 # =============================================================================
-step "1/8  OS 호환성 확인"
+step "1/8  환경 확인 (OS / 아키텍처 / VM)"
 # =============================================================================
 
 if [[ ! -f /etc/os-release ]]; then
@@ -83,6 +111,22 @@ if [[ "$OS_VER" -lt 8 ]]; then
     error "Rocky Linux / RHEL 8+ 이상 필요 (현재: $VERSION_ID)"
 fi
 
+# 아키텍처 출력
+case "$ARCH" in
+    x86_64)  ok "아키텍처: x86_64" ;;
+    aarch64) ok "아키텍처: aarch64 (ARM64) — Apple Silicon VMware Fusion 또는 ARM 서버" ;;
+    *)       warn "미검증 아키텍처: $ARCH" ;;
+esac
+
+# VM 환경 출력
+if [[ "$IS_VM" == true ]]; then
+    ok "가상 머신 감지: ${VM_VENDOR} (GPU passthrough 불가 → CPU 전용 자동 설정)"
+    [[ "$VM_VENDOR" == "vmware" && "$ARCH" == "aarch64" ]] && \
+        info "  Apple Silicon MacBook + VMware Fusion 환경으로 판단됩니다"
+else
+    ok "베어메탈(물리 호스트) 환경"
+fi
+
 # =============================================================================
 step "2/8  시스템 패키지 설치 (dnf)"
 # =============================================================================
@@ -100,18 +144,51 @@ $DNF config-manager --set-enabled crb 2>/dev/null \
     || $DNF config-manager --set-enabled powertools 2>/dev/null \
     || true   # Rocky 8: powertools, Rocky 9: crb
 
+# VMware Tools 설치 (VMware VM일 때만)
+if [[ "$IS_VM" == true && "$VM_VENDOR" == "vmware" ]]; then
+    info "VMware 환경 → open-vm-tools 설치..."
+    $DNF install -y open-vm-tools 2>/dev/null || true
+fi
+
+# cmake 패키지명: Rocky 8 x86_64는 cmake3, aarch64/Rocky 9는 cmake
+CMAKE_PKG="cmake"
+if [[ "$OS_VER" == "8" && "$ARCH" == "x86_64" ]]; then
+    CMAKE_PKG="cmake3"
+fi
+
 info "필수 패키지 설치..."
-$DNF install -y \
-    python3.11 python3.11-devel python3.11-pip \
-    gcc gcc-c++ cmake3 make \
-    openssl openssl-devel \
-    git wget curl \
-    bzip2-devel libffi-devel zlib-devel \
-    ca-certificates \
-    2>/dev/null || {
-        # python3.11이 없으면 3.12 시도
-        $DNF install -y python3.12 python3.12-devel python3.12-pip || true
-    }
+# Rocky 8에서 Python 3.11은 AppStream 모듈로 활성화 필요 (Rocky 9는 불필요)
+if [[ "$OS_VER" == "8" ]]; then
+    $DNF module enable -y python311 2>/dev/null || true
+fi
+
+# Rocky 9.x: python3.11-pip은 별도 패키지 없음 → python3.11만 설치 후 ensurepip 사용
+# Rocky 8.x: python3.11-pip 패키지 존재
+if [[ "$OS_VER" == "9" ]]; then
+    $DNF install -y \
+        python3.11 python3.11-devel \
+        gcc gcc-c++ "$CMAKE_PKG" make \
+        openssl openssl-devel \
+        git wget curl \
+        bzip2-devel libffi-devel zlib-devel \
+        ca-certificates \
+        2>/dev/null || {
+            $DNF install -y python3.12 python3.12-devel 2>/dev/null || \
+            $DNF install -y python3 python3-devel || true
+        }
+else
+    $DNF install -y \
+        python3.11 python3.11-devel python3.11-pip \
+        gcc gcc-c++ "$CMAKE_PKG" make \
+        openssl openssl-devel \
+        git wget curl \
+        bzip2-devel libffi-devel zlib-devel \
+        ca-certificates \
+        2>/dev/null || {
+            $DNF install -y python3.12 python3.12-devel python3.12-pip 2>/dev/null || \
+            $DNF install -y python3 python3-devel python3-pip || true
+        }
+fi
 
 ok "시스템 패키지 설치 완료"
 
@@ -140,6 +217,10 @@ COMPUTE_MODE="cpu"
 if [[ "$OPT_GPU" == true ]]; then
     COMPUTE_MODE="cuda"
     info "--gpu 플래그 → CUDA 강제 활성"
+elif [[ "$IS_VM" == true ]]; then
+    # 가상 머신: GPU passthrough 일반적으로 불가 → 자동 CPU 모드 (프롬프트 없음)
+    COMPUTE_MODE="cpu"
+    info "VM 환경 → GPU passthrough 미지원 → CPU 전용 자동 설정"
 elif command -v nvidia-smi &>/dev/null; then
     GPU_INFO=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1)
     if [[ -n "$GPU_INFO" ]]; then
@@ -151,16 +232,24 @@ fi
 if [[ "$COMPUTE_MODE" == "cpu" ]]; then
     echo ""
     echo -e "${YELLOW}┌─────────────────────────────────────────────────────────────┐${RESET}"
-    echo -e "${YELLOW}│  ⚠  경고: GPU가 감지되지 않았습니다 (CPU 전용 모드)         │${RESET}"
+    echo -e "${YELLOW}│  ⚠  경고: CPU 전용 모드                                     │${RESET}"
     echo -e "${YELLOW}│                                                             │${RESET}"
+    if [[ "$IS_VM" == true ]]; then
+    echo -e "${YELLOW}│  원인: 가상 머신(${VM_VENDOR}) — GPU passthrough 불가        │${RESET}"
+    else
+    echo -e "${YELLOW}│  원인: NVIDIA GPU 미감지                                    │${RESET}"
+    echo -e "${YELLOW}│  NVIDIA GPU 환경이라면:  bash install.sh --gpu               │${RESET}"
+    fi
     echo -e "${YELLOW}│  SLM(Gemma 4 2B) 추론 시 요청당 3~10초 소요 예상           │${RESET}"
-    echo -e "${YELLOW}│  NVIDIA GPU 환경이라면:  bash install.sh --gpu              │${RESET}"
     echo -e "${YELLOW}│  SLM 없이 Regex만 사용:  TUI → 제어탭 → SLM Stage OFF      │${RESET}"
     echo -e "${YELLOW}└─────────────────────────────────────────────────────────────┘${RESET}"
     echo ""
-    read -rp "계속 진행하시겠습니까? [Y/n] " confirm
-    confirm="${confirm:-Y}"
-    [[ "${confirm,,}" != "y" ]] && { info "설치 취소"; exit 0; }
+    # VM 환경은 확인 불필요 (이미 알고 있는 제약), 베어메탈만 확인 프롬프트
+    if [[ "$IS_VM" == false ]]; then
+        read -rp "계속 진행하시겠습니까? [Y/n] " confirm
+        confirm="${confirm:-Y}"
+        [[ "${confirm,,}" != "y" ]] && { info "설치 취소"; exit 0; }
+    fi
 fi
 
 # =============================================================================
@@ -172,6 +261,8 @@ if [[ -d "$VENV_DIR" ]]; then
     warn "깨끗하게 재설치하려면:  rm -rf venv && bash install.sh"
 else
     info "가상환경 생성: $VENV_DIR"
+    # Rocky 9: pip이 번들에 없는 경우 ensurepip으로 부트스트랩
+    "$PYTHON" -m ensurepip --upgrade 2>/dev/null || true
     "$PYTHON" -m venv "$VENV_DIR"
 fi
 
@@ -196,15 +287,45 @@ if [[ "$COMPUTE_MODE" == "cuda" ]]; then
             warn "CUDA 빌드 실패 → CPU 빌드로 폴백"
             pip install llama-cpp-python -q
         }
+elif [[ "$ARCH" == "aarch64" ]]; then
+    info "  모드: CPU 빌드 (aarch64/ARM64)"
+    # aarch64에서 llamafile 모듈이 빌드 오류를 낼 수 있어 비활성화
+    CMAKE_ARGS="-DGGML_LLAMAFILE=OFF" \
+    FORCE_CMAKE=1 \
+        pip install llama-cpp-python --no-binary llama-cpp-python -q \
+        || {
+            warn "aarch64 네이티브 빌드 실패 → 바이너리 wheel 폴백"
+            pip install llama-cpp-python -q
+        }
 else
-    info "  모드: CPU 빌드"
+    info "  모드: CPU 빌드 (x86_64)"
     pip install llama-cpp-python -q
 fi
 
 # ── 나머지 패키지 ────────────────────────────────────────────────────────────
 info "프로젝트 의존성 설치 중..."
-pip install \
-    "mitmproxy>=12.0" \
+
+# mitmproxy: PyPI 최신 버전 자동으로 탐지
+# --prefer-binary: 소스 빌드 없이 wheel 우선 (aarch64 등 플랫폼 호환성 보장)
+install_mitmproxy() {
+    local spec="$1"
+    info "  mitmproxy ${spec} 시도..."
+    pip install --prefer-binary "$spec" -q 2>/dev/null && return 0
+    return 1
+}
+
+# 12 → 11 → 10 순서로 fallback
+if   install_mitmproxy "mitmproxy>=12.0"; then
+    ok "  mitmproxy >=12.0 설치 완료"
+elif install_mitmproxy "mitmproxy>=11.0,<12.0"; then
+    ok "  mitmproxy >=11.0 설치 완료"
+elif install_mitmproxy "mitmproxy>=10.0,<11.0"; then
+    ok "  mitmproxy >=10.0 설치 완료"
+else
+    error "mitmproxy 설치 실패. 네트워크 상태를 확인하세요:\n  curl -I https://pypi.org"
+fi
+
+pip install --prefer-binary \
     "rich>=13.0" \
     "pyyaml>=6.0" \
     "textual>=8.2.2" \
@@ -444,6 +565,11 @@ echo ""
 echo -e "${BOLD}── 컴퓨팅 모드 ─────────────────────────────────────────────────────${RESET}"
 if [[ "$COMPUTE_MODE" == "cuda" ]]; then
     echo -e "  ${GREEN}NVIDIA GPU (CUDA)${RESET} — 예상 레이턴시 ~200ms/req"
+elif [[ "$IS_VM" == true ]]; then
+    echo -e "  ${YELLOW}CPU 전용 (${VM_VENDOR} VM)${RESET} — 예상 레이턴시 ~5초/req (SLM 활성 시)"
+    [[ "$VM_VENDOR" == "vmware" && "$ARCH" == "aarch64" ]] && \
+        echo "  환경: Apple Silicon MacBook + VMware Fusion"
+    echo "  SLM 비활성 권장: TUI → 제어탭 → SLM Stage OFF (Regex만으로도 충분)"
 else
     echo -e "  ${YELLOW}CPU 전용${RESET} — 예상 레이턴시 ~5초/req (SLM 활성 시)"
     echo "  GPU 추가 후 재설치: bash install.sh --gpu"
