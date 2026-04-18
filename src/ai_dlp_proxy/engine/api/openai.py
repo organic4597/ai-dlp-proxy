@@ -4,19 +4,16 @@ OpenAI Chat Completions 포맷 파서.
 (모두 /v1/chat/completions 또는 /chat/completions 엔드포인트 사용)
 
 검사 대상 role:
-  user        — 사용자 입력 (직접 민감정보 유출 위험)
-  tool        — 함수 실행 결과 (파일 경로·DB 레코드 등 노출 위험)
+  user        — 사용자 입력
+  tool_result — 함수 실행 결과 (role=="tool" 메시지 content)
+  tool_call   — LLM이 호출한 함수 인자 (assistant.tool_calls[].function.arguments)
 제외 role:
-  system      — 시스템 프롬프트 템플릿 (LLM Provider가 관리)
-  assistant   — LLM이 생성한 응답 (아웃바운드, 검사 불필요)
-  tool_call   — assistant가 만든 함수 호출 인자 (LLM 생성)
-  tool_def    — 도구 정의 description (개발자 작성 고정값)
+  system      — 개발자 고정 시스템 프롬프트
+  assistant   — LLM 응답 텍스트 (대화 history에서 매 턴 재탐지 방지)
+  tool_def    — 도구 정의 description
 """
 from __future__ import annotations
 from .base import DLPTarget, ParsedRequest
-
-# 검사할 role 집합
-_SCAN_ROLES = {"user", "tool"}
 
 
 def parse(provider: str, url: str, body: dict) -> ParsedRequest:
@@ -24,37 +21,87 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
     stream = bool(body.get("stream", False))
     targets: list[DLPTarget] = []
 
+    messages = body.get("messages", [])
+
+    # ── 히스토리 경계 판별 ────────────────────────────────────────────────────
+    # 마지막 assistant 메시지 이후 = 새 메시지 (history=False)
+    # 그 이전 = 이전 턴의 히스토리 (history=True: 마스킹은 하되 탐지 카운트 제외)
+    last_assistant_idx = -1
+    for i, msg in enumerate(messages):
+        if msg.get("role") == "assistant":
+            last_assistant_idx = i
+
     # ── messages ─────────────────────────────────────────────────────────────
-    for i, msg in enumerate(body.get("messages", [])):
+    for i, msg in enumerate(messages):
         role = msg.get("role", "unknown")
-
-        # system / assistant / tool_call 정의 등은 검사 제외
-        if role not in _SCAN_ROLES:
-            continue
-
         content = msg.get("content", "")
-        # tool role은 함수 실행 결과 → tool_result로 레이블
-        scan_role = "tool_result" if role == "tool" else role
+        is_hist = i <= last_assistant_idx
 
-        if isinstance(content, str):
-            if content.strip():
+        # system/assistant 본문은 스캔 제외. tool은 아래 별도 처리.
+        if role not in ("assistant", "system", "tool"):
+            if isinstance(content, str):
+                if content.strip():
+                    targets.append(DLPTarget(
+                        field_path=f"messages[{i}].content",
+                        role=role,
+                        text=content,
+                        history=is_hist,
+                    ))
+            elif isinstance(content, list):
+                for j, block in enumerate(content):
+                    btype = block.get("type", "")
+                    if btype == "text":
+                        text = block.get("text", "")
+                        if text.strip():
+                            targets.append(DLPTarget(
+                                field_path=f"messages[{i}].content[{j}].text",
+                                role=role,
+                                text=text,
+                                history=is_hist,
+                            ))
+
+        # tool_calls: 함수 인자 (JSON 문자열)
+        for k, tc in enumerate(msg.get("tool_calls", [])):
+            fn = tc.get("function", {})
+            args = fn.get("arguments", "")
+            if isinstance(args, str) and args.strip():
+                targets.append(DLPTarget(
+                    field_path=f"messages[{i}].tool_calls[{k}].function.arguments",
+                    role="tool_call",
+                    text=args,
+                    history=is_hist,
+                ))
+
+        # tool 역할 메시지의 content (함수 실행 결과) → role="tool_result"로 정규화
+        if role == "tool":
+            result = msg.get("content", "")
+            if isinstance(result, str) and result.strip():
                 targets.append(DLPTarget(
                     field_path=f"messages[{i}].content",
-                    role=scan_role,
-                    text=content,
+                    role="tool_result",
+                    text=result,
+                    history=is_hist,
                 ))
-        elif isinstance(content, list):
-            # 멀티모달 content 블록 배열
-            for j, block in enumerate(content):
-                if block.get("type") == "text":
-                    text = block.get("text", "")
-                    if text.strip():
-                        targets.append(DLPTarget(
-                            field_path=f"messages[{i}].content[{j}].text",
-                            role=scan_role,
-                            text=text,
-                        ))
-                # image_url / binary 블록은 DLP 미대상
+
+    # ── tool 정의 description ─────────────────────────────────────────────────
+    for i, tool in enumerate(body.get("tools", [])):
+        fn = tool.get("function", {})
+        desc = fn.get("description", "")
+        if desc.strip():
+            targets.append(DLPTarget(
+                field_path=f"tools[{i}].function.description",
+                role="tool_def",
+                text=desc,
+            ))
+
+    # ── user 식별자 필드 ──────────────────────────────────────────────────────
+    user_field = body.get("user", "")
+    if isinstance(user_field, str) and user_field.strip():
+        targets.append(DLPTarget(
+            field_path="user",
+            role="metadata",
+            text=user_field,
+        ))
 
     return ParsedRequest(
         provider=provider,

@@ -31,12 +31,20 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
     # systemInstruction — 제외 (LLM Provider 관리 고정값)
     # tools functionDeclarations — 제외 (개발자 작성 고정값)
 
-    # ── contents: user role 및 functionResponse만 처리 ────────────────────────
-    for i, content in enumerate(body.get("contents", [])):
+    contents = body.get("contents", [])
+
+    # ── 히스토리 경계 판별 ──────────────────────────────────────────────────
+    last_model_idx = -1
+    for i, content in enumerate(contents):
+        if content.get("role") == "model":
+            last_model_idx = i
+
+    # ── contents: user role 및 functionResponse 처리 (히스토리 마킹) ──────────
+    for i, content in enumerate(contents):
         role = content.get("role", "user")
-        # Gemini: user / model(=assistant) — model role 제외
         if role == "model":
             continue
+        is_hist = i <= last_model_idx
 
         for j, part in enumerate(content.get("parts", [])):
             # 일반 텍스트 (user 입력)
@@ -46,6 +54,7 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
                     field_path=f"contents[{i}].parts[{j}].text",
                     role="user",
                     text=text,
+                    history=is_hist,
                 ))
 
             # functionResponse — 함수 실행 결과 (tool_result에 해당)
@@ -57,6 +66,7 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
                         field_path=f"contents[{i}].parts[{j}].functionResponse.response",
                         role="tool_result",
                         text=json.dumps(resp, ensure_ascii=False),
+                        history=is_hist,
                     ))
             # functionCall (model이 만든 호출 인자) — role=="model" 단계에서 이미 skip됨
 

@@ -1,0 +1,353 @@
+case_id,category,input_text,expected_rule,min_confidence,expected_action,notes
+RTP-RRN-001,kr_rrn,"customer onboarding
+resident_registration_number: ""880515-1104333""",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-002,kr_rrn,"member_rrn=950720-2218199
+identification completed=true",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-003,kr_rrn,"본인확인 신청서
+주민등록번호 000301-3600132",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-004,kr_rrn,"customer onboarding
+resident_registration_number: ""751103-1389080""",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-005,kr_rrn,"member_rrn=880515-1104333
+identification completed=true",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-006,kr_rrn,"본인확인 신청서
+주민등록번호 950720-2218199",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-007,kr_rrn,"customer onboarding
+resident_registration_number: ""000301-3600132""",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-008,kr_rrn,"member_rrn=751103-1389080
+identification completed=true",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-009,kr_rrn,"본인확인 신청서
+주민등록번호 880515-1104333",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-010,kr_rrn,"customer onboarding
+resident_registration_number: ""950720-2218199""",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-011,kr_rrn,"member_rrn=000301-3600132
+identification completed=true",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-RRN-012,kr_rrn,"본인확인 신청서
+주민등록번호 751103-1389080",kr_rrn,0.8,mask,현실형 JSON/YAML/설문 문맥
+RTP-CARD-001,credit_card,"payment request
+card_number: ""4539-1488-0343-6467""",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-002,credit_card,"billing.card=5425-2334-3010-9903
+payment_status=pending",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-003,credit_card,"신용카드 결제 정보
+승인 대상 카드 6011-0009-9013-9424",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-004,credit_card,"payment request
+card_number: ""4556737586899855""",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-005,credit_card,"billing.card=4539-1488-0343-6467
+payment_status=pending",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-006,credit_card,"신용카드 결제 정보
+승인 대상 카드 5425-2334-3010-9903",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-007,credit_card,"payment request
+card_number: ""6011-0009-9013-9424""",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-008,credit_card,"billing.card=4556737586899855
+payment_status=pending",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-009,credit_card,"신용카드 결제 정보
+승인 대상 카드 4539-1488-0343-6467",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-010,credit_card,"payment request
+card_number: ""5425-2334-3010-9903""",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-011,credit_card,"billing.card=6011-0009-9013-9424
+payment_status=pending",credit_card,0.6,mask,결제/청구 문맥
+RTP-CARD-012,credit_card,"신용카드 결제 정보
+승인 대상 카드 4556737586899855",credit_card,0.6,mask,결제/청구 문맥
+RTP-PHONE-001,kr_phone,"contact profile
+phone: ""010-1234-5678""",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-002,kr_phone,"SMS_TO=01098765432
+mobile verified=true",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-003,kr_phone,"긴급 연락처
+핸드폰 번호 011-223-7788",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-004,kr_phone,"contact profile
+phone: ""019.9999.1234""",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-005,kr_phone,"SMS_TO=010-1234-5678
+mobile verified=true",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-006,kr_phone,"긴급 연락처
+핸드폰 번호 01098765432",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-007,kr_phone,"contact profile
+phone: ""011-223-7788""",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-008,kr_phone,"SMS_TO=019.9999.1234
+mobile verified=true",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-009,kr_phone,"긴급 연락처
+핸드폰 번호 010-1234-5678",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-010,kr_phone,"contact profile
+phone: ""01098765432""",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-011,kr_phone,"SMS_TO=011-223-7788
+mobile verified=true",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-PHONE-012,kr_phone,"긴급 연락처
+핸드폰 번호 019.9999.1234",kr_phone,1.0,alert,연락처/문자 발송 문맥
+RTP-EMAIL-001,email,"recipient_email=notify+security@example.com
+send_enabled=true",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-002,email,"notification:
+  email: ""alerts@corp.internal""",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-003,email,mail inbox routing target billing-team@service.io,email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-004,email,"recipient_email=owner@support.dev
+send_enabled=true",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-005,email,"notification:
+  email: ""notify+security@example.com""",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-006,email,mail inbox routing target alerts@corp.internal,email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-007,email,"recipient_email=billing-team@service.io
+send_enabled=true",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-008,email,"notification:
+  email: ""owner@support.dev""",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-009,email,mail inbox routing target notify+security@example.com,email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-010,email,"recipient_email=alerts@corp.internal
+send_enabled=true",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-011,email,"notification:
+  email: ""billing-team@service.io""",email,1.0,alert,알림/수신자 문맥
+RTP-EMAIL-012,email,mail inbox routing target owner@support.dev,email,1.0,alert,알림/수신자 문맥
+RTP-PASS-001,kr_passport,"traveler profile
+passport_number: ""M12345678""",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-002,kr_passport,"passportNo=AB1234567
+visa_check=required",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-003,kr_passport,"출입국 신청서
+여권 번호 MA9876543",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-004,kr_passport,"traveler profile
+passport_number: ""P12345678""",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-005,kr_passport,"passportNo=M12345678
+visa_check=required",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-006,kr_passport,"출입국 신청서
+여권 번호 AB1234567",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-007,kr_passport,"traveler profile
+passport_number: ""MA9876543""",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-008,kr_passport,"passportNo=P12345678
+visa_check=required",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-009,kr_passport,"출입국 신청서
+여권 번호 M12345678",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-010,kr_passport,"traveler profile
+passport_number: ""AB1234567""",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-011,kr_passport,"passportNo=MA9876543
+visa_check=required",kr_passport,1.0,alert,여권/비자 문맥
+RTP-PASS-012,kr_passport,"출입국 신청서
+여권 번호 P12345678",kr_passport,1.0,alert,여권/비자 문맥
+RTP-LIC-001,kr_driver_license,"driver_profile
+license_number: ""11-23-456789-01""",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-002,kr_driver_license,"driving_license=12-34-567890-12
+police_check=true",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-003,kr_driver_license,"운전면허 발급 정보
+면허 번호 26-12-345678-90",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-004,kr_driver_license,"driver_profile
+license_number: ""28-98-765432-10""",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-005,kr_driver_license,"driving_license=11-23-456789-01
+police_check=true",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-006,kr_driver_license,"운전면허 발급 정보
+면허 번호 12-34-567890-12",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-007,kr_driver_license,"driver_profile
+license_number: ""26-12-345678-90""",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-008,kr_driver_license,"driving_license=28-98-765432-10
+police_check=true",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-009,kr_driver_license,"운전면허 발급 정보
+면허 번호 11-23-456789-01",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-010,kr_driver_license,"driver_profile
+license_number: ""12-34-567890-12""",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-011,kr_driver_license,"driving_license=26-12-345678-90
+police_check=true",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-LIC-012,kr_driver_license,"운전면허 발급 정보
+면허 번호 28-98-765432-10",kr_driver_license,1.0,alert,면허/발급 문맥
+RTP-AWS-001,aws_access_key,"cloud deploy credential
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-002,aws_access_key,"infra account bootstrap
+AWS_ACCESS_KEY_ID: ""ASIAIOSFODNN7EXAMPLE""",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-003,aws_access_key,"배포용 클라우드 계정 키
+export AWS_ACCESS_KEY_ID=ABIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-004,aws_access_key,"cloud deploy credential
+AWS_ACCESS_KEY_ID=ACCAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-005,aws_access_key,"infra account bootstrap
+AWS_ACCESS_KEY_ID: ""AKIAIOSFODNN7EXAMPLE""",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-006,aws_access_key,"배포용 클라우드 계정 키
+export AWS_ACCESS_KEY_ID=ASIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-007,aws_access_key,"cloud deploy credential
+AWS_ACCESS_KEY_ID=ABIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-008,aws_access_key,"infra account bootstrap
+AWS_ACCESS_KEY_ID: ""ACCAIOSFODNN7EXAMPLE""",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-009,aws_access_key,"배포용 클라우드 계정 키
+export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-010,aws_access_key,"cloud deploy credential
+AWS_ACCESS_KEY_ID=ASIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-011,aws_access_key,"infra account bootstrap
+AWS_ACCESS_KEY_ID: ""ABIAIOSFODNN7EXAMPLE""",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-AWS-012,aws_access_key,"배포용 클라우드 계정 키
+export AWS_ACCESS_KEY_ID=ACCAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,Docker/.env/배포 문맥
+RTP-API-001,api_key_assignment,"external integration credential
+API_KEY=sk-proj-abcdef1234567890ABCDEFGHIJ",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-002,api_key_assignment,"issued service key
+secret_key: ""tok_1234567890ABCDEFghijklmnop""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-003,api_key_assignment,"연동용 서비스키
+""access_token"": ""svcKEY_000011112222333344445555""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-004,api_key_assignment,"external integration credential
+auth_token=private_token_abcdefghijklmnop1234",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-005,api_key_assignment,"issued service key
+API_KEY: ""sk-proj-abcdef1234567890ABCDEFGHIJ""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-006,api_key_assignment,"연동용 서비스키
+""secret_key"": ""tok_1234567890ABCDEFghijklmnop""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-007,api_key_assignment,"external integration credential
+access_token=svcKEY_000011112222333344445555",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-008,api_key_assignment,"issued service key
+auth_token: ""private_token_abcdefghijklmnop1234""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-009,api_key_assignment,"연동용 서비스키
+""API_KEY"": ""sk-proj-abcdef1234567890ABCDEFGHIJ""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-010,api_key_assignment,"external integration credential
+secret_key=tok_1234567890ABCDEFghijklmnop",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-011,api_key_assignment,"issued service key
+access_token: ""svcKEY_000011112222333344445555""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-API-012,api_key_assignment,"연동용 서비스키
+""auth_token"": ""private_token_abcdefghijklmnop1234""",api_key_assignment,1.0,alert,.env/Compose/YAML 실전 문맥
+RTP-PWD-001,password_assignment,".env
+DB_PASSWORD=ProdLogin!2026",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-002,password_assignment,"services:
+  api:
+    environment:
+      MYSQL_PASSWORD: ""Migrate#Pass88""",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-003,password_assignment,"apiVersion: v1
+kind: Secret
+stringData:
+  SPRING_DATASOURCE_PASSWORD: Vault!Gate77",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-004,password_assignment,".env
+LOGIN_PASSWORD=Admin?Panel55",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-005,password_assignment,"services:
+  api:
+    environment:
+      PW: ""Svc*Auth44""",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-006,password_assignment,"apiVersion: v1
+kind: Secret
+stringData:
+  APP_PASSPHRASE: Batch%Job33",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-007,password_assignment,".env
+DB_PASSWORD=ProdLogin!2026",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-008,password_assignment,"services:
+  api:
+    environment:
+      MYSQL_PASSWORD: ""Migrate#Pass88""",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-009,password_assignment,"apiVersion: v1
+kind: Secret
+stringData:
+  SPRING_DATASOURCE_PASSWORD: Vault!Gate77",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-010,password_assignment,".env
+LOGIN_PASSWORD=Admin?Panel55",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-011,password_assignment,"services:
+  api:
+    environment:
+      PW: ""Svc*Auth44""",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-012,password_assignment,"apiVersion: v1
+kind: Secret
+stringData:
+  APP_PASSPHRASE: Batch%Job33",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-013,password_assignment,".env
+DB_PASSWORD=ProdLogin!2026",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-014,password_assignment,"services:
+  api:
+    environment:
+      MYSQL_PASSWORD: ""Migrate#Pass88""",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-015,password_assignment,"apiVersion: v1
+kind: Secret
+stringData:
+  SPRING_DATASOURCE_PASSWORD: Vault!Gate77",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-016,password_assignment,".env
+LOGIN_PASSWORD=Admin?Panel55",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-017,password_assignment,"services:
+  api:
+    environment:
+      PW: ""Svc*Auth44""",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PWD-018,password_assignment,"apiVersion: v1
+kind: Secret
+stringData:
+  APP_PASSPHRASE: Batch%Job33",password_assignment,0.49,pass,dotenv/Docker Compose/Kubernetes Secret 후보 추출
+RTP-PEM-001,pem_private_key,"certificate renew private key
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-002,pem_private_key,"apiVersion: v1
+kind: Secret
+stringData:
+  tls.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+    -----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-003,pem_private_key,"ssl private key block
+-----BEGIN RSA PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-004,pem_private_key,"certificate renew private key
+-----BEGIN RSA PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-005,pem_private_key,"apiVersion: v1
+kind: Secret
+stringData:
+  tls.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd
+    -----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-006,pem_private_key,"ssl private key block
+-----BEGIN RSA PRIVATE KEY-----
+MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-007,pem_private_key,"certificate renew private key
+-----BEGIN RSA PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-008,pem_private_key,"apiVersion: v1
+kind: Secret
+stringData:
+  tls.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+    -----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-009,pem_private_key,"ssl private key block
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-010,pem_private_key,"certificate renew private key
+-----BEGIN RSA PRIVATE KEY-----
+MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-011,pem_private_key,"apiVersion: v1
+kind: Secret
+stringData:
+  tls.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+    -----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-PEM-012,pem_private_key,"ssl private key block
+-----BEGIN RSA PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,Kubernetes Secret/TLS 문맥
+RTP-JWT-001,jwt_token,Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U,jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-002,jwt_token,"login session
+auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-003,jwt_token,"headers:
+  Authorization: ""Bearer eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER""",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-004,jwt_token,Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF,jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-005,jwt_token,"login session
+auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-006,jwt_token,"headers:
+  Authorization: ""Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde""",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-007,jwt_token,Authorization: Bearer eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER,jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-008,jwt_token,"login session
+auth_token=eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-009,jwt_token,"headers:
+  Authorization: ""Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U""",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-010,jwt_token,Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde,jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-011,jwt_token,"login session
+auth_token=eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-JWT-012,jwt_token,"headers:
+  Authorization: ""Bearer eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF""",jwt_token,1.0,alert,Bearer/Auth 헤더 문맥
+RTP-GH-001,github_pat,"github repo push token
+GITHUB_PAT=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-002,github_pat,"commit push automation
+GH_TOKEN: ""gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh""",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-003,github_pat,"깃허브 리포 배포 토큰
+export GITHUB_PAT=ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-004,github_pat,"github repo push token
+GITHUB_PAT=ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-005,github_pat,"commit push automation
+GH_TOKEN: ""ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789""",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-006,github_pat,"깃허브 리포 배포 토큰
+export GITHUB_PAT=gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-007,github_pat,"github repo push token
+GITHUB_PAT=ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-008,github_pat,"commit push automation
+GH_TOKEN: ""ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890""",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-009,github_pat,"깃허브 리포 배포 토큰
+export GITHUB_PAT=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-010,github_pat,"github repo push token
+GITHUB_PAT=gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-011,github_pat,"commit push automation
+GH_TOKEN: ""ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab""",github_pat,1.0,mask,GitHub Actions/CLI 문맥
+RTP-GH-012,github_pat,"깃허브 리포 배포 토큰
+export GITHUB_PAT=ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890",github_pat,1.0,mask,GitHub Actions/CLI 문맥

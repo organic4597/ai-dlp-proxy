@@ -1152,13 +1152,58 @@ cc→0.6
   │ F3 conf=0.7 suppressed=False → action 반영    │
   └────────────────────────────────────────────────┘
 ```
-## 11. 참고 문헌 및 관련 연구
 
-본 아키텍처(Regex + 머신러닝/LLM 하이브리드 탐지 및 의미 기반 문맥 인지)는 최근 학계 및 산업계의 Data Loss Prevention(DLP) 연구 방향과 일치합니다. 다음은 본 설계와 유사한 접근 방식을 다루는 주요 연구 사례입니다:
 
-- An Evaluation Study of Hybrid Methods for Multilingual PII Detection (arXiv, 2025)
-기존 정규표현식(Regex)과 문맥 인지 대형 언어 모델(LLM)을 결합하여 다국어 환경에서 PII 탐지의 오탐을 줄이고 정확도를 높이는 하이브리드 프레임워크(RECAP) 연구.
-- A hybrid rule-based NLP and machine learning approach for PII detection and anonymization in financial documents (Scientific Reports, 2025)
-금융 문서에서 룰 기반(Regex) NLP와 머신러닝(NER)을 결합하여 문맥과 포맷의 다양성을 처리하고 오탐을 완화하는 아키텍처 제안.
-- US20250005175A1 - Hybrid sensitive data scrubbing using patterns and large language models (US Patent, Crowdstrike, 2025)
-정규표현식 패턴 매칭과 대규모 언어 모델(LLM)의 출력을 결합하여 민감한 데이터(PII 등)를 스크러빙하는 산업계(Crowdstrike)의 하이브리드 파이프라인 적용 사례.
+4. 한계점 및 개선 기회
+⚠️ 한계 1: 정량적 성능 평가 부재
+문제: 계획서에는 V1~V18 단위 테스트만 있고, **벤치마크 데이터셋 기반 정량 평가(Precision/Recall/F1)**가 없습니다.
+
+RECAP은 nervaluate 라이브러리로 13개 언어 F1을 보고
+Scientific Reports 논문은 혼동 행렬, ROC, PR 곡선을 제시
+Presidio는 presidio-research에서 자체 벤치마크 도구 제공
+권장:
+
+V19: 한국어 PII 벤치마크 데이터셋(최소 500문장, 코드 혼재 30%) 구축
+     → Phase 1 적용 전후 Precision/Recall/F1 비교 리포트 생성
+     → 목표: Precision +20%p 이상 (현재 추정 ~60% → 80% 이상)
+⚠️ 한계 2: PII 키워드 세트의 정적 특성
+_PII_CONTEXT_WORDS는 수동 관리 딕셔너리입니다. 새 도메인(의료, 법률 등) 추가 시 키워드를 직접 수정해야 합니다.
+
+RECAP은 LLM이 자체적으로 문맥을 판단 (키워드 목록 불필요)
+Google Cloud DLP은 ML 기반 context analyzer 사용
+권장: 현재 설계는 12개 룰에 대해 충분하지만, 향후 룰 확장 시 TF-IDF 기반 자동 키워드 추출 또는 few-shot SLM 기반 문맥 판정 전환을 고려할 수 있습니다.
+
+⚠️ 한계 3: SLM(Gemma 4 2B-IT) 한국어 PII 탐지 성능 불확실
+검색 결과, Gemma 2B-IT의 한국어 PII 탐지 전용 벤치마크는 2025년 기준 미공개입니다. 다국어 일반 성능은 확인되나, 한국어 주민등록번호/전화번호 등의 문맥 탐지 정확도는 검증되지 않았습니다.
+
+권장: Phase 3 진입 전 한국어 PII 탐지 mini-benchmark(100문장) 수행. Gemma 4 2B vs Qwen2.5-1.5B vs Phi-3-mini 비교 후 최종 모델 선정.
+
+⚠️ 한계 4: 임베딩 유사도 임계값 고정 시작
+기본 embedding_threshold: 0.80은 보수적 시작으로 적절하나, 자산별 최적 임계값을 찾는 자동 캘리브레이션 메커니즘이 없습니다.
+
+Presidio의 presidio-research는 데이터셋 기반 자동 threshold 튜닝 도구 제공
+권장: TUI에서 "테스트 문장 입력 → 유사도 점수 실시간 확인" 기능 추가로 사용자가 직관적으로 임계값을 조정할 수 있게 하는 것이 좋습니다.
+
+⚠️ 한계 5: NMS가 단순 구간 겹침만 검사
+현재 NMS는 start < end AND end > start(IoU > 0)면 무조건 우선순위 낮은 쪽을 suppress합니다. 이는 부분 겹침에서 두 탐지가 모두 유효한 경우(nested entity)를 처리하지 못합니다.
+
+NER 분야에서는 nested NER 처리를 위해 IoU 임계값(0.5 등)을 두거나, span-level merging을 사용
+권장: 현재 12개 룰 + 자산 수준에서는 단순 겹침 처리가 충분하지만, 룰 수 증가 시 IoU 임계값 도입을 검토하세요.
+
+5. 산업 대비 포지셔닝
+             정밀도
+              ↑
+              │
+  Presidio ●  │  ● Google Cloud DLP
+  (오픈소스)  │    (클라우드 SaaS)
+              │
+              │      ● RECAP (연구)
+              │
+  ai-dlp-proxy│● (예상 위치)
+  (로컬 프록시)│
+              │
+              │  ● CrowdStrike (엔터프라이즈)
+              │
+  순수 Regex ●│
+              └──────────────────────→ 레이턴시 (낮을수록 좋음)
+ai-dlp-proxy는 로컬 실행 + 낮은 레이턴시 + 중간~높은 정밀도 영역에 위치합니다. 순수 Regex 대비 정밀도를 크게 끌어올리면서도, 클라우드 DLP 대비 데이터 외부 전송이 없는 것이 핵심 가치입니다.

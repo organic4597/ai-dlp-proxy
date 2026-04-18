@@ -33,6 +33,7 @@ if str(_SRC_DIR) not in sys.path:
 
 from ai_dlp_proxy.engine import extract, run_pipeline  # noqa: E402
 from ai_dlp_proxy.engine.pipeline import get_cache_stats  # noqa: E402
+from ai_dlp_proxy.engine.pipeline.control import load_control  # noqa: E402
 
 # ── 로깅 설정 ────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -113,7 +114,25 @@ def _handle_scan(request: dict) -> dict:
     except Exception:
         _ctrl = {}
     slm_enabled = bool(_ctrl.get("slm_enabled", False))
-    result = run_pipeline(parsed.targets, slm_enabled=slm_enabled)
+    control = load_control()
+
+    # role 필터: skip_roles에 포함된 role은 스캔 대상에서 제외
+    # 기본값: system(시스템 프롬프트), tool_def(함수 정의) 제외
+    scan_targets = [
+        t for t in parsed.targets
+        if t.role not in control.skip_roles
+    ]
+    skipped_target_count = len(parsed.targets) - len(scan_targets)
+
+    result = run_pipeline(scan_targets, slm_enabled=slm_enabled)
+    effective_findings = result.effective_findings(control.confidence_threshold)
+
+    # history 플래그 기준: 이전 턴 히스토리 finding 분리
+    new_findings = [f for f in result.findings if not f.history]
+    new_effective = [f for f in effective_findings if not f.history]
+    raw_finding_count = len(new_findings)
+    effective_finding_count = len(new_effective)
+    suppressed_finding_count = max(0, raw_finding_count - effective_finding_count)
 
     return {
         "ok": True,
@@ -123,11 +142,17 @@ def _handle_scan(request: dict) -> dict:
         "stream": parsed.stream,
         "msg_count": msg_count,
         "target_count": len(parsed.targets),
+        "scan_target_count": len(scan_targets),
+        "skipped_target_count": skipped_target_count,
+        "skip_roles": sorted(control.skip_roles),
         "total_text_len": parsed.total_text_len,
         # 파이프라인 결과
         "pipeline_action": result.action.value,
         "pipeline_elapsed_ms": result.elapsed_ms,
-        "finding_count": len(result.findings),
+        "finding_count": raw_finding_count,
+        "raw_finding_count": raw_finding_count,
+        "effective_finding_count": effective_finding_count,
+        "suppressed_finding_count": suppressed_finding_count,
         "findings": [
             {
                 "stage": f.stage,
@@ -141,19 +166,22 @@ def _handle_scan(request: dict) -> dict:
                 "context_before": f.context_before,
                 "context_after": f.context_after,
                 "confidence": f.confidence,
+                "suppressed": f.suppressed,
+                "history": f.history,
                 "description": f.metadata.get("description", ""),
+                "metadata": f.metadata,
             }
             for f in result.findings
         ],
         "pipeline_summary": result.summary(),
-        # TUI 전송 내용 표시용 — target별 텍스트 (field_path, role, text)
+        # TUI 전송 내용 표시용 — scan_targets만 (skip된 role 제외)
         "targets": [
             {
                 "field_path": t.field_path,
                 "role": t.role,
                 "text": t.text,
             }
-            for t in parsed.targets
+            for t in scan_targets
         ],
     }
 
@@ -170,19 +198,19 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
             if not line:
                 break
 
-            _stats["total"] += 1
-
             try:
                 request = json.loads(line)
             except json.JSONDecodeError as e:
                 _stats["errors"] += 1
                 resp = {"ok": False, "error": f"JSON parse: {e}"}
-                writer.write(json.dumps(resp).encode() + b"\n")
+                writer.write(json.dumps(resp, ensure_ascii=False).encode() + b"\n")
                 await writer.drain()
                 continue
 
             req_id = request.get("id", "?")
             action = request.get("action", "scan")
+            if action == "scan":
+                _stats["total"] += 1
             t0 = time.monotonic()
 
             if action == "scan":
@@ -195,6 +223,15 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
             elif action == "masked_inc":
                 _stats["masked"] += 1
                 resp = {"ok": True, "masked": _stats["masked"]}
+            elif action == "applied_result":
+                applied = str(request.get("dlp_applied", "pass") or "pass")
+                resp = {"ok": True, "dlp_applied": applied}
+                if _subscribers:
+                    _broadcast_event({
+                        "type": "scan_applied",
+                        "id": req_id,
+                        "dlp_applied": applied,
+                    })
             elif action == "stats":
                 resp = {"ok": True, **_stats, "cache": get_cache_stats()}
             elif action == "subscribe":
@@ -233,7 +270,8 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                 _stats["scanned"] += 1
                 prov = resp.get("provider", "?")
                 model = resp.get("model", "?")
-                fc = resp.get("finding_count", 0)
+                fc = resp.get("raw_finding_count", resp.get("finding_count", 0))
+                efc = resp.get("effective_finding_count", fc)
                 pa = resp.get("pipeline_action", "pass")
                 _stats["findings"] += fc
 
@@ -246,7 +284,8 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                         f"  #{req_id} {C.CYAN}{prov}{C.RESET} "
                         f"model={C.GREEN}{model}{C.RESET} "
                         f"{action_c}[{pa.upper()}]{C.RESET} "
-                        f"findings={C.RED}{fc}{C.RESET} "
+                        f"findings={C.RED}{fc}{C.RESET}"
+                        f" effective={C.YELLOW}{efc}{C.RESET} "
                         f"{C.DIM}{elapsed}ms{C.RESET}"
                     )
                     for f in resp.get("findings", []):
@@ -256,7 +295,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                         }.get(f["severity"], C.RESET)
                         log.info(
                             f"    {sev_c}[{f['severity'].upper()}]{C.RESET} "
-                            f"{f['rule']} conf={f['confidence']:.1f}: {f['match_text'][:60]!r} "
+                            f"{f['rule']} conf={f['confidence']:.1f}: {f['match_text'][:60]!s} "
                             f"@ {C.DIM}{f['field_path']}{C.RESET}"
                         )
                 else:
@@ -284,9 +323,13 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                     "total_text_len": resp.get("total_text_len", 0),
                     "pipeline_action": resp.get("pipeline_action"),
                     "finding_count": resp.get("finding_count", 0),
+                    "raw_finding_count": resp.get("raw_finding_count", resp.get("finding_count", 0)),
+                    "effective_finding_count": resp.get("effective_finding_count", 0),
+                    "suppressed_finding_count": resp.get("suppressed_finding_count", 0),
                     "findings": resp.get("findings", []),
                     "elapsed_ms": elapsed,
                     "targets": resp.get("targets", []),
+                    "dlp_applied": "pass",
                 })
 
     except asyncio.IncompleteReadError:

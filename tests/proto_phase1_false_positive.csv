@@ -1,0 +1,189 @@
+case_id,category,input_text,expected_rule,max_confidence,expected_action,notes
+FP-PASS-001,kr_passport,M12345678,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-002,kr_passport,const sample = AB1234567; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-003,kr_passport,MA9876543,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-004,kr_passport,const sample = K76543210; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-005,kr_passport,P12345678,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-006,kr_passport,const sample = M12345678; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-007,kr_passport,AB1234567,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-008,kr_passport,const sample = MA9876543; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-009,kr_passport,K76543210,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-010,kr_passport,const sample = P12345678; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-011,kr_passport,M12345678,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-012,kr_passport,const sample = AB1234567; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-013,kr_passport,MA9876543,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-014,kr_passport,const sample = K76543210; return sample;,kr_passport,0.12,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-PASS-015,kr_passport,P12345678,kr_passport,0.4,pass,문맥 없음 또는 코드 문맥에서 threshold 미만
+FP-LIC-001,kr_driver_license,const code = '11-23-456789-01'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-002,kr_driver_license,12-34-567890-12,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-003,kr_driver_license,const code = '13-45-678901-23'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-004,kr_driver_license,26-12-345678-90,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-005,kr_driver_license,const code = '28-98-765432-10'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-006,kr_driver_license,11-23-456789-01,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-007,kr_driver_license,const code = '12-34-567890-12'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-008,kr_driver_license,13-45-678901-23,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-009,kr_driver_license,const code = '26-12-345678-90'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-010,kr_driver_license,28-98-765432-10,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-011,kr_driver_license,const code = '11-23-456789-01'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-012,kr_driver_license,12-34-567890-12,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-013,kr_driver_license,const code = '13-45-678901-23'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-014,kr_driver_license,26-12-345678-90,kr_driver_license,0.4,pass,코드 상수 또는 문맥 없는 관리코드
+FP-LIC-015,kr_driver_license,const code = '28-98-765432-10'; return code;,kr_driver_license,0.12,pass,코드 상수 또는 문맥 없는 관리코드
+FP-PHONE-001,kr_phone,const port = '01012345678'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-002,kr_phone,socket_port=010-1234-5678,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-003,kr_phone,const port = '01122334455'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-004,kr_phone,socket_port=018.5555.7777,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-005,kr_phone,const port = '019-9999-1234'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-006,kr_phone,socket_port=01012345678,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-007,kr_phone,const port = '010-1234-5678'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-008,kr_phone,socket_port=01122334455,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-009,kr_phone,const port = '018.5555.7777'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-010,kr_phone,socket_port=019-9999-1234,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-011,kr_phone,const port = '01012345678'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-012,kr_phone,socket_port=010-1234-5678,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-013,kr_phone,const port = '01122334455'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-PHONE-014,kr_phone,socket_port=018.5555.7777,kr_phone,0.4,pass,코드/식별자 숫자열
+FP-PHONE-015,kr_phone,const port = '019-9999-1234'; return port;,kr_phone,0.12,pass,코드/식별자 숫자열
+FP-EMAIL-001,email,const user = 'test@example.com'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-002,email,demo@internal.org,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-003,email,const user = 'sample@service.io'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-004,email,user@local.dev,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-005,email,const user = 'person@dummy.net'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-006,email,test@example.com,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-007,email,const user = 'demo@internal.org'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-008,email,sample@service.io,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-009,email,const user = 'user@local.dev'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-010,email,person@dummy.net,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-011,email,const user = 'test@example.com'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-012,email,demo@internal.org,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-013,email,const user = 'sample@service.io'; return user;,email,0.12,pass,예제 이메일 상수
+FP-EMAIL-014,email,user@local.dev,email,0.4,pass,예제 이메일 상수
+FP-EMAIL-015,email,const user = 'person@dummy.net'; return user;,email,0.12,pass,예제 이메일 상수
+FP-AWS-001,aws_access_key,"import boto3
+const awsKey = 'AKIAIOSFODNN7EXAMPLE';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-002,aws_access_key,ASIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-003,aws_access_key,"import boto3
+const awsKey = 'ABIAIOSFODNN7EXAMPLE';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-004,aws_access_key,ACCAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-005,aws_access_key,"import boto3
+const awsKey = 'AKIA1234567890ABCD12';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-006,aws_access_key,AKIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-007,aws_access_key,"import boto3
+const awsKey = 'ASIAIOSFODNN7EXAMPLE';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-008,aws_access_key,ABIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-009,aws_access_key,"import boto3
+const awsKey = 'ACCAIOSFODNN7EXAMPLE';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-010,aws_access_key,AKIA1234567890ABCD12,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-011,aws_access_key,"import boto3
+const awsKey = 'AKIAIOSFODNN7EXAMPLE';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-012,aws_access_key,ASIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-013,aws_access_key,"import boto3
+const awsKey = 'ABIAIOSFODNN7EXAMPLE';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-014,aws_access_key,ACCAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-AWS-015,aws_access_key,"import boto3
+const awsKey = 'AKIA1234567890ABCD12';",aws_access_key,0.12,pass,코드 예제 또는 문맥 없는 키 모양 문자열
+FP-API-001,api_key_assignment,"import hashlib
+api_key = generated_token_value_1234567890",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-002,api_key_assignment,"import hashlib
+secret_key = placeholder_secret_ABCDEF123456",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-003,api_key_assignment,"import hashlib
+access_token = tmp_auth_token_9876543210",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-004,api_key_assignment,"import hashlib
+auth_token = dev_private_key_1234567890ab",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-005,api_key_assignment,"import hashlib
+private_key = runtime_access_token_4455667788",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-006,api_key_assignment,"import hashlib
+api_key = generated_token_value_1234567890",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-007,api_key_assignment,"import hashlib
+secret_key = placeholder_secret_ABCDEF123456",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-008,api_key_assignment,"import hashlib
+access_token = tmp_auth_token_9876543210",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-009,api_key_assignment,"import hashlib
+auth_token = dev_private_key_1234567890ab",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-010,api_key_assignment,"import hashlib
+private_key = runtime_access_token_4455667788",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-011,api_key_assignment,"import hashlib
+api_key = generated_token_value_1234567890",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-012,api_key_assignment,"import hashlib
+secret_key = placeholder_secret_ABCDEF123456",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-013,api_key_assignment,"import hashlib
+access_token = tmp_auth_token_9876543210",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-014,api_key_assignment,"import hashlib
+auth_token = dev_private_key_1234567890ab",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-API-015,api_key_assignment,"import hashlib
+private_key = runtime_access_token_4455667788",api_key_assignment,0.12,pass,설정 코드 할당문 오탐 억제
+FP-PWD-001,password_assignment,const db_password = process.env.DB_PASSWORD; return db_password;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-002,password_assignment,password=${VAULT_SECRET_DB_PASS},password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-003,password_assignment,const passwd = PASSWORD_HINT_TEXT; return passwd;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-004,password_assignment,pwd=old_password_hash_value,password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-005,password_assignment,const reset_password_url = settings.default_password; return reset_password_url;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-006,password_assignment,db_password=process.env.DB_PASSWORD,password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-007,password_assignment,const password = ${VAULT_SECRET_DB_PASS}; return password;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-008,password_assignment,passwd=PASSWORD_HINT_TEXT,password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-009,password_assignment,const pwd = old_password_hash_value; return pwd;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-010,password_assignment,reset_password_url=settings.default_password,password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-011,password_assignment,const db_password = process.env.DB_PASSWORD; return db_password;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-012,password_assignment,password=${VAULT_SECRET_DB_PASS},password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-013,password_assignment,const passwd = PASSWORD_HINT_TEXT; return passwd;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-014,password_assignment,pwd=old_password_hash_value,password_assignment,0.4,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PWD-015,password_assignment,const reset_password_url = settings.default_password; return reset_password_url;,password_assignment,0.3,pass,참조값/힌트/해시 필드 오탐 억제
+FP-PEM-001,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-002,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-003,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-004,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-005,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQCexamplepayloadforpemprivatekey0123456789ABCDEFGHIJKLMNOP\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-006,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-007,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-008,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-009,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-010,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQCexamplepayloadforpemprivatekey0123456789ABCDEFGHIJKLMNOP\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-011,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-012,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-013,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-014,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-PEM-015,pem_private_key,"def get_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQCexamplepayloadforpemprivatekey0123456789ABCDEFGHIJKLMNOP\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,코드 내 PEM 예제
+FP-JWT-001,jwt_token,const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-002,jwt_token,const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-003,jwt_token,const token = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-004,jwt_token,const token = 'eyJhbGciOiJIUzM4NCJ9.eyJ1c2VyIjoiYWRtaW4ifQ.ZYXWVUTSRQPONMLKJIHGFEDCBA9876543210qwer'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-005,jwt_token,const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-006,jwt_token,const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-007,jwt_token,const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-008,jwt_token,const token = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-009,jwt_token,const token = 'eyJhbGciOiJIUzM4NCJ9.eyJ1c2VyIjoiYWRtaW4ifQ.ZYXWVUTSRQPONMLKJIHGFEDCBA9876543210qwer'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-010,jwt_token,const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-011,jwt_token,const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-012,jwt_token,const token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-013,jwt_token,const token = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-014,jwt_token,const token = 'eyJhbGciOiJIUzM4NCJ9.eyJ1c2VyIjoiYWRtaW4ifQ.ZYXWVUTSRQPONMLKJIHGFEDCBA9876543210qwer'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-JWT-015,jwt_token,const token = 'eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF'; return token;,jwt_token,0.12,pass,코드 예제 JWT
+FP-GH-001,github_pat,const demo = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-002,github_pat,const demo = 'gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-003,github_pat,const demo = 'ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-004,github_pat,const demo = 'ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-005,github_pat,const demo = 'ghr_MmNnBbVvCcXxZzLlKkJjHhGgFfDdSsAa001122'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-006,github_pat,const demo = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-007,github_pat,const demo = 'gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-008,github_pat,const demo = 'ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-009,github_pat,const demo = 'ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-010,github_pat,const demo = 'ghr_MmNnBbVvCcXxZzLlKkJjHhGgFfDdSsAa001122'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-011,github_pat,const demo = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-012,github_pat,const demo = 'gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-013,github_pat,const demo = 'ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-014,github_pat,const demo = 'ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰
+FP-GH-015,github_pat,const demo = 'ghr_MmNnBbVvCcXxZzLlKkJjHhGgFfDdSsAa001122'; return demo;,github_pat,0.12,pass,코드 예제 GitHub 토큰

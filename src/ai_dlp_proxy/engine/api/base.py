@@ -15,6 +15,7 @@ class DLPTarget:
     field_path: str   # "messages[2].content", "system", "tools[0].function.description"
     role: str         # "system" | "user" | "assistant" | "tool_call" | "tool_result" | "tool_def" | "metadata"
     text: str         # 실제 검사·마스킹 대상 텍스트
+    history: bool = False  # True이면 이전 턴 히스토리 (마스킹은 하되 탐지 카운트 제외)
 
     def __repr__(self) -> str:
         preview = self.text[:80].replace("\n", "↵")

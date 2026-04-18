@@ -1,0 +1,217 @@
+case_id,category,input_text,expected_rule,max_confidence,expected_action,notes
+RFP-RRN-001,kr_rrn,"const fixtureResidentNo = ""880515-1104333""; return fixtureResidentNo;",kr_rrn,0.12,pass,샘플 데이터/문서 문맥
+RFP-RRN-002,kr_rrn,schema.example.rrn=950720-2218199,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-003,kr_rrn,README sample resident number 000301-3600132,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-004,kr_rrn,"const fixtureResidentNo = ""751103-1389080""; return fixtureResidentNo;",kr_rrn,0.12,pass,샘플 데이터/문서 문맥
+RFP-RRN-005,kr_rrn,schema.example.rrn=880515-1104333,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-006,kr_rrn,README sample resident number 950720-2218199,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-007,kr_rrn,"const fixtureResidentNo = ""000301-3600132""; return fixtureResidentNo;",kr_rrn,0.12,pass,샘플 데이터/문서 문맥
+RFP-RRN-008,kr_rrn,schema.example.rrn=751103-1389080,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-009,kr_rrn,README sample resident number 880515-1104333,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-010,kr_rrn,"const fixtureResidentNo = ""950720-2218199""; return fixtureResidentNo;",kr_rrn,0.12,pass,샘플 데이터/문서 문맥
+RFP-RRN-011,kr_rrn,schema.example.rrn=000301-3600132,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-RRN-012,kr_rrn,README sample resident number 751103-1389080,kr_rrn,0.4,pass,샘플 데이터/문서 문맥
+RFP-CARD-001,credit_card,"const demoCard = ""4539-1488-0343-6467""; return demoCard;",credit_card,0.12,pass,문서/데모 카드번호
+RFP-CARD-002,credit_card,docs.example.card=5425-2334-3010-9903,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-003,credit_card,sample card number 6011-0009-9013-9424,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-004,credit_card,"const demoCard = ""4556737586899855""; return demoCard;",credit_card,0.12,pass,문서/데모 카드번호
+RFP-CARD-005,credit_card,docs.example.card=4539-1488-0343-6467,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-006,credit_card,sample card number 5425-2334-3010-9903,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-007,credit_card,"const demoCard = ""6011-0009-9013-9424""; return demoCard;",credit_card,0.12,pass,문서/데모 카드번호
+RFP-CARD-008,credit_card,docs.example.card=4556737586899855,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-009,credit_card,sample card number 4539-1488-0343-6467,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-010,credit_card,"const demoCard = ""5425-2334-3010-9903""; return demoCard;",credit_card,0.12,pass,문서/데모 카드번호
+RFP-CARD-011,credit_card,docs.example.card=6011-0009-9013-9424,credit_card,0.4,pass,문서/데모 카드번호
+RFP-CARD-012,credit_card,sample card number 4556737586899855,credit_card,0.4,pass,문서/데모 카드번호
+RFP-PHONE-001,kr_phone,"const samplePhone = ""010-1234-5678""; return samplePhone;",kr_phone,0.12,pass,문서/테스트 fixture 번호
+RFP-PHONE-002,kr_phone,docs.phone.example=01098765432,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-003,kr_phone,placeholder contact number 011-223-7788,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-004,kr_phone,"const samplePhone = ""019.9999.1234""; return samplePhone;",kr_phone,0.12,pass,문서/테스트 fixture 번호
+RFP-PHONE-005,kr_phone,docs.phone.example=010-1234-5678,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-006,kr_phone,placeholder contact number 01098765432,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-007,kr_phone,"const samplePhone = ""011-223-7788""; return samplePhone;",kr_phone,0.12,pass,문서/테스트 fixture 번호
+RFP-PHONE-008,kr_phone,docs.phone.example=019.9999.1234,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-009,kr_phone,placeholder contact number 010-1234-5678,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-010,kr_phone,"const samplePhone = ""01098765432""; return samplePhone;",kr_phone,0.12,pass,문서/테스트 fixture 번호
+RFP-PHONE-011,kr_phone,docs.phone.example=011-223-7788,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-PHONE-012,kr_phone,placeholder contact number 019.9999.1234,kr_phone,0.4,pass,문서/테스트 fixture 번호
+RFP-EMAIL-001,email,"const sampleEmail = ""notify@example.com""; return sampleEmail;",email,0.12,pass,예제 수신자 이메일
+RFP-EMAIL-002,email,docs.recipient.example=demo@corp.internal,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-003,email,placeholder recipient billing@service.io,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-004,email,"const sampleEmail = ""owner@support.dev""; return sampleEmail;",email,0.12,pass,예제 수신자 이메일
+RFP-EMAIL-005,email,docs.recipient.example=notify@example.com,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-006,email,placeholder recipient demo@corp.internal,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-007,email,"const sampleEmail = ""billing@service.io""; return sampleEmail;",email,0.12,pass,예제 수신자 이메일
+RFP-EMAIL-008,email,docs.recipient.example=owner@support.dev,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-009,email,placeholder recipient notify@example.com,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-010,email,"const sampleEmail = ""demo@corp.internal""; return sampleEmail;",email,0.12,pass,예제 수신자 이메일
+RFP-EMAIL-011,email,docs.recipient.example=billing@service.io,email,0.4,pass,예제 수신자 이메일
+RFP-EMAIL-012,email,placeholder recipient owner@support.dev,email,0.4,pass,예제 수신자 이메일
+RFP-PASS-001,kr_passport,"const passportExample = ""M12345678""; return passportExample;",kr_passport,0.12,pass,예제 여권번호
+RFP-PASS-002,kr_passport,sample.passport.no=AB1234567,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-003,kr_passport,README passport example MA9876543,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-004,kr_passport,"const passportExample = ""P12345678""; return passportExample;",kr_passport,0.12,pass,예제 여권번호
+RFP-PASS-005,kr_passport,sample.passport.no=M12345678,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-006,kr_passport,README passport example AB1234567,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-007,kr_passport,"const passportExample = ""MA9876543""; return passportExample;",kr_passport,0.12,pass,예제 여권번호
+RFP-PASS-008,kr_passport,sample.passport.no=P12345678,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-009,kr_passport,README passport example M12345678,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-010,kr_passport,"const passportExample = ""AB1234567""; return passportExample;",kr_passport,0.12,pass,예제 여권번호
+RFP-PASS-011,kr_passport,sample.passport.no=MA9876543,kr_passport,0.4,pass,예제 여권번호
+RFP-PASS-012,kr_passport,README passport example P12345678,kr_passport,0.4,pass,예제 여권번호
+RFP-LIC-001,kr_driver_license,"const licenseExample = ""11-23-456789-01""; return licenseExample;",kr_driver_license,0.12,pass,예제 면허번호
+RFP-LIC-002,kr_driver_license,sample.license.no=12-34-567890-12,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-003,kr_driver_license,README driver license example 26-12-345678-90,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-004,kr_driver_license,"const licenseExample = ""28-98-765432-10""; return licenseExample;",kr_driver_license,0.12,pass,예제 면허번호
+RFP-LIC-005,kr_driver_license,sample.license.no=11-23-456789-01,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-006,kr_driver_license,README driver license example 12-34-567890-12,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-007,kr_driver_license,"const licenseExample = ""26-12-345678-90""; return licenseExample;",kr_driver_license,0.12,pass,예제 면허번호
+RFP-LIC-008,kr_driver_license,sample.license.no=28-98-765432-10,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-009,kr_driver_license,README driver license example 11-23-456789-01,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-010,kr_driver_license,"const licenseExample = ""12-34-567890-12""; return licenseExample;",kr_driver_license,0.12,pass,예제 면허번호
+RFP-LIC-011,kr_driver_license,sample.license.no=26-12-345678-90,kr_driver_license,0.4,pass,예제 면허번호
+RFP-LIC-012,kr_driver_license,README driver license example 28-98-765432-10,kr_driver_license,0.4,pass,예제 면허번호
+RFP-AWS-001,aws_access_key,"const demoAwsKey = ""AKIAIOSFODNN7EXAMPLE""; return demoAwsKey;",aws_access_key,0.12,pass,예제 AWS 키 문자열
+RFP-AWS-002,aws_access_key,docs.example.aws_key=ASIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-003,aws_access_key,sample aws key ABIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-004,aws_access_key,"const demoAwsKey = ""ACCAIOSFODNN7EXAMPLE""; return demoAwsKey;",aws_access_key,0.12,pass,예제 AWS 키 문자열
+RFP-AWS-005,aws_access_key,docs.example.aws_key=AKIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-006,aws_access_key,sample aws key ASIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-007,aws_access_key,"const demoAwsKey = ""ABIAIOSFODNN7EXAMPLE""; return demoAwsKey;",aws_access_key,0.12,pass,예제 AWS 키 문자열
+RFP-AWS-008,aws_access_key,docs.example.aws_key=ACCAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-009,aws_access_key,sample aws key AKIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-010,aws_access_key,"const demoAwsKey = ""ASIAIOSFODNN7EXAMPLE""; return demoAwsKey;",aws_access_key,0.12,pass,예제 AWS 키 문자열
+RFP-AWS-011,aws_access_key,docs.example.aws_key=ABIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-AWS-012,aws_access_key,sample aws key ACCAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키 문자열
+RFP-API-001,api_key_assignment,"import os
+API_KEY=process.env.SERVICE_API_KEY",api_key_assignment,0.12,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-002,api_key_assignment,"service config
+secret_key: process.env.SECRET_KEY_REF",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-003,api_key_assignment,"reference only
+""access_token"": ""runtime_access_token_ref_445566""",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-004,api_key_assignment,"import os
+auth_token=generated_private_key_ref_778899",api_key_assignment,0.12,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-005,api_key_assignment,"service config
+API_KEY: process.env.SERVICE_API_KEY",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-006,api_key_assignment,"reference only
+""secret_key"": ""process.env.SECRET_KEY_REF""",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-007,api_key_assignment,"import os
+access_token=runtime_access_token_ref_445566",api_key_assignment,0.12,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-008,api_key_assignment,"service config
+auth_token: generated_private_key_ref_778899",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-009,api_key_assignment,"reference only
+""API_KEY"": ""process.env.SERVICE_API_KEY""",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-010,api_key_assignment,"import os
+secret_key=process.env.SECRET_KEY_REF",api_key_assignment,0.12,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-011,api_key_assignment,"service config
+access_token: runtime_access_token_ref_445566",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-API-012,api_key_assignment,"reference only
+""auth_token"": ""generated_private_key_ref_778899""",api_key_assignment,0.4,pass,실제 비밀값이 아닌 참조/런타임 값
+RFP-PWD-001,password_assignment,".env
+DB_PASSWORD=${DB_PASSWORD}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-002,password_assignment,"services:
+  api:
+    environment:
+      MYSQL_PASSWORD: ""process.env.DB_PASSWORD""",password_assignment,0.3,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-003,password_assignment,"env:
+  SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-004,password_assignment,".env
+LOGIN_PASSWORD=$DB_PASSWORD",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-005,password_assignment,"services:
+  api:
+    environment:
+      PW: ""{{ .Values.dbPassword }}""",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-006,password_assignment,"env:
+  APP_PASSPHRASE: ${MYSQL_PASSWORD:-changeme}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-007,password_assignment,".env
+DB_PASSWORD=${DB_PASSWORD}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-008,password_assignment,"services:
+  api:
+    environment:
+      MYSQL_PASSWORD: ""process.env.DB_PASSWORD""",password_assignment,0.3,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-009,password_assignment,"env:
+  SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-010,password_assignment,".env
+LOGIN_PASSWORD=$DB_PASSWORD",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-011,password_assignment,"services:
+  api:
+    environment:
+      PW: ""{{ .Values.dbPassword }}""",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-012,password_assignment,"env:
+  APP_PASSPHRASE: ${MYSQL_PASSWORD:-changeme}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-013,password_assignment,".env
+DB_PASSWORD=${DB_PASSWORD}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-014,password_assignment,"services:
+  api:
+    environment:
+      MYSQL_PASSWORD: ""process.env.DB_PASSWORD""",password_assignment,0.3,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-015,password_assignment,"env:
+  SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-016,password_assignment,".env
+LOGIN_PASSWORD=$DB_PASSWORD",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-017,password_assignment,"services:
+  api:
+    environment:
+      PW: ""{{ .Values.dbPassword }}""",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PWD-018,password_assignment,"env:
+  APP_PASSPHRASE: ${MYSQL_PASSWORD:-changeme}",password_assignment,0.4,pass,GitHub Actions/Docker/.env 비밀 참조값
+RFP-PEM-001,pem_private_key,"def load_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,문서/코드 예제 PEM
+RFP-PEM-002,pem_private_key,"example tls key
+-----BEGIN RSA PRIVATE KEY-----
+MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-003,pem_private_key,"README snippet -> -----BEGIN RSA PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-004,pem_private_key,"def load_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,문서/코드 예제 PEM
+RFP-PEM-005,pem_private_key,"example tls key
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-006,pem_private_key,"README snippet -> -----BEGIN RSA PRIVATE KEY-----
+MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-007,pem_private_key,"def load_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,문서/코드 예제 PEM
+RFP-PEM-008,pem_private_key,"example tls key
+-----BEGIN RSA PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-009,pem_private_key,"README snippet -> -----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-010,pem_private_key,"def load_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.12,pass,문서/코드 예제 PEM
+RFP-PEM-011,pem_private_key,"example tls key
+-----BEGIN RSA PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-PEM-012,pem_private_key,"README snippet -> -----BEGIN RSA PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+RFP-JWT-001,jwt_token,const jwtExample = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U'; return jwtExample;,jwt_token,0.12,pass,문서/샘플 JWT
+RFP-JWT-002,jwt_token,docs.example.jwt=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-003,jwt_token,sample bearer token eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-004,jwt_token,const jwtExample = 'eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF'; return jwtExample;,jwt_token,0.12,pass,문서/샘플 JWT
+RFP-JWT-005,jwt_token,docs.example.jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-006,jwt_token,sample bearer token eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-007,jwt_token,const jwtExample = 'eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER'; return jwtExample;,jwt_token,0.12,pass,문서/샘플 JWT
+RFP-JWT-008,jwt_token,docs.example.jwt=eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-009,jwt_token,sample bearer token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-010,jwt_token,const jwtExample = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde'; return jwtExample;,jwt_token,0.12,pass,문서/샘플 JWT
+RFP-JWT-011,jwt_token,docs.example.jwt=eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-JWT-012,jwt_token,sample bearer token eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF,jwt_token,0.4,pass,문서/샘플 JWT
+RFP-GH-001,github_pat,const githubPatExample = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'; return githubPatExample;,github_pat,0.12,pass,문서/예제 GitHub PAT
+RFP-GH-002,github_pat,docs.example.gh_pat=gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-003,github_pat,sample personal token ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-004,github_pat,const githubPatExample = 'ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890'; return githubPatExample;,github_pat,0.12,pass,문서/예제 GitHub PAT
+RFP-GH-005,github_pat,docs.example.gh_pat=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-006,github_pat,sample personal token gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-007,github_pat,const githubPatExample = 'ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab'; return githubPatExample;,github_pat,0.12,pass,문서/예제 GitHub PAT
+RFP-GH-008,github_pat,docs.example.gh_pat=ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-009,github_pat,sample personal token ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-010,github_pat,const githubPatExample = 'gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh'; return githubPatExample;,github_pat,0.12,pass,문서/예제 GitHub PAT
+RFP-GH-011,github_pat,docs.example.gh_pat=ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab,github_pat,0.4,pass,문서/예제 GitHub PAT
+RFP-GH-012,github_pat,sample personal token ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890,github_pat,0.4,pass,문서/예제 GitHub PAT

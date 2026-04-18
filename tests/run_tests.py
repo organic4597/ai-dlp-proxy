@@ -7,6 +7,8 @@ test_requests.json — OpenAI 형식 요청 단위 파이프라인 검증
 """
 import csv
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -23,6 +25,28 @@ G = "\033[32m"  # green
 R = "\033[31m"  # red
 Y = "\033[33m"  # yellow
 W = "\033[0m"   # reset
+
+
+def _setup_control_file() -> None:
+    """테스트용 제어 파일 초기화.
+
+    E01/E02: email이 disabled_rules에 포함되어야 탐지 안 됨.
+    T01: 이메일 주소가 포함된 복합 메시지에서 email 룰 비활성.
+    파일이 root 소유인 경우 sudo tee로 덮어씀.
+    """
+    ctrl = {
+        "disabled_rules": ["email"],
+        "confidence_threshold": 0.5,
+        "context_penalty_enabled": True,
+        "allowlist": [],
+    }
+    content = json.dumps(ctrl, ensure_ascii=False).encode("utf-8")
+    path = "/tmp/dlp-control.json"
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(ctrl, f, ensure_ascii=False)
+    except PermissionError:
+        subprocess.run(["sudo", "tee", path], input=content, check=True, capture_output=True)
 
 
 def run_csv_tests() -> tuple[int, int]:
@@ -126,6 +150,8 @@ def main():
     print(f"\n{'='*70}")
     print(f"  DLP 파이프라인 테스트")
     print(f"{'='*70}")
+
+    _setup_control_file()
 
     print(f"\n{Y}▶ CSV 단위 테스트 (test_cases.csv){W}")
     csv_pass, csv_fail = run_csv_tests()

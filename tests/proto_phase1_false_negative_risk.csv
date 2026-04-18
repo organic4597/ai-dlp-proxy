@@ -1,0 +1,75 @@
+case_id,category,input_text,expected_rule,min_confidence,expected_action,notes
+FNR-RRN-001,kr_rrn,"""rrn"":""880515-1104333""",kr_rrn,0.8,mask,JSON/속성/무구분자 주민번호
+FNR-RRN-002,kr_rrn,"residentNo = ""9507202218199""",kr_rrn,0.8,mask,JSON/속성/무구분자 주민번호
+FNR-RRN-003,kr_rrn,"주민등록번호:""000301-3600132""",kr_rrn,0.8,mask,JSON/속성/무구분자 주민번호
+FNR-RRN-004,kr_rrn,applicant_rrn=7511031389080,kr_rrn,0.8,mask,JSON/속성/무구분자 주민번호
+FNR-CARD-001,credit_card,"""card_number"":""4539-1488-0343-6467""",credit_card,0.6,mask,JSON/공백 구분 카드번호
+FNR-CARD-002,credit_card,"payment_card = ""5425233430109903""",credit_card,0.6,mask,JSON/공백 구분 카드번호
+FNR-CARD-003,credit_card,billing.card: 6011 0009 9013 9424,credit_card,0.6,mask,JSON/공백 구분 카드번호
+FNR-CARD-004,credit_card,checkout_pan=4556737586899855,credit_card,0.6,mask,JSON/공백 구분 카드번호
+FNR-PHONE-001,kr_phone,"""phone"":""010-1234-5678""",kr_phone,1.0,alert,JSON/YAML/평문 연락처
+FNR-PHONE-002,kr_phone,"primary_phone=""01098765432""",kr_phone,1.0,alert,JSON/YAML/평문 연락처
+FNR-PHONE-003,kr_phone,contact.mobile: 011-223-7788,kr_phone,1.0,alert,JSON/YAML/평문 연락처
+FNR-PHONE-004,kr_phone,SMS_TO=019.9999.1234,kr_phone,1.0,alert,JSON/YAML/평문 연락처
+FNR-EMAIL-001,email,"""recipient_email"":""notify+ops@example.com""",email,1.0,alert,plus-tag/subdomain 이메일
+FNR-EMAIL-002,email,owner_email=alerts@corp.internal,email,1.0,alert,plus-tag/subdomain 이메일
+FNR-EMAIL-003,email,mail to billing-team@service.io,email,1.0,alert,plus-tag/subdomain 이메일
+FNR-EMAIL-004,email,recipient: contact@support.dev,email,1.0,alert,plus-tag/subdomain 이메일
+FNR-PASS-001,kr_passport,"""passport_number"":""M12345678""",kr_passport,1.0,alert,JSON/YAML/한글 라벨 여권
+FNR-PASS-002,kr_passport,passportNo=AB1234567,kr_passport,1.0,alert,JSON/YAML/한글 라벨 여권
+FNR-PASS-003,kr_passport,"travel_doc = ""MA9876543""",kr_passport,1.0,alert,JSON/YAML/한글 라벨 여권
+FNR-PASS-004,kr_passport,여권번호: P12345678,kr_passport,1.0,alert,JSON/YAML/한글 라벨 여권
+FNR-LIC-001,kr_driver_license,"""driver_license"":""11-23-456789-01""",kr_driver_license,1.0,alert,속성/문서 라벨 면허번호
+FNR-LIC-002,kr_driver_license,license_no=12-34-567890-12,kr_driver_license,1.0,alert,속성/문서 라벨 면허번호
+FNR-LIC-003,kr_driver_license,면허번호: 26-12-345678-90,kr_driver_license,1.0,alert,속성/문서 라벨 면허번호
+FNR-LIC-004,kr_driver_license,"license: ""28-98-765432-10""",kr_driver_license,1.0,alert,속성/문서 라벨 면허번호
+FNR-AWS-001,aws_access_key,"cloud deploy credential
+AWS_ACCESS_KEY_ID=""AKIAIOSFODNN7EXAMPLE""",aws_access_key,1.0,mask,배포/클라우드 문맥의 AWS 키
+FNR-AWS-002,aws_access_key,"infra account bootstrap
+AWS_ACCESS_KEY_ID=ASIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,배포/클라우드 문맥의 AWS 키
+FNR-AWS-003,aws_access_key,"클라우드 계정 키
+ABIAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,배포/클라우드 문맥의 AWS 키
+FNR-AWS-004,aws_access_key,"deploy account key
+ACCAIOSFODNN7EXAMPLE",aws_access_key,1.0,mask,배포/클라우드 문맥의 AWS 키
+FNR-API-001,api_key_assignment,"external integration
+""API_KEY"":""sk-proj-abcdef1234567890ABCDEFGHIJ""",api_key_assignment,1.0,alert,JSON/속성 형태 API 키
+FNR-API-002,api_key_assignment,"issued service key
+secret_key = tok_1234567890ABCDEFghijklmnop",api_key_assignment,1.0,alert,JSON/속성 형태 API 키
+FNR-API-003,api_key_assignment,"연동용 서비스키
+auth_token:""svcKEY_000011112222333344445555""",api_key_assignment,1.0,alert,JSON/속성 형태 API 키
+FNR-API-004,api_key_assignment,"external issued credential
+private_key=private_token_abcdefghijklmnop1234",api_key_assignment,1.0,alert,JSON/속성 형태 API 키
+FNR-PWD-001,password_assignment,"pw: ""Alpha!234""",password_assignment,0.49,pass,라벨 포함 패스워드 candidate 추출
+FNR-PWD-002,password_assignment,"""password"":""Beta#5678""",password_assignment,0.49,pass,라벨 포함 패스워드 candidate 추출
+FNR-PWD-003,password_assignment,'db_password' : 'Gamma$9012',password_assignment,0.49,pass,라벨 포함 패스워드 candidate 추출
+FNR-PWD-004,password_assignment,passphrase=Delta^3456,password_assignment,0.49,pass,라벨 포함 패스워드 candidate 추출
+FNR-PEM-001,pem_private_key,"certificate renew
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,들여쓰기/멀티라인 PEM 블록
+FNR-PEM-002,pem_private_key,"stringData:
+  tls.key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+    -----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,들여쓰기/멀티라인 PEM 블록
+FNR-PEM-003,pem_private_key,"ssl private key
+-----BEGIN RSA PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,들여쓰기/멀티라인 PEM 블록
+FNR-PEM-004,pem_private_key,"private key block
+-----BEGIN RSA PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+-----END RSA PRIVATE KEY-----",pem_private_key,1.0,mask,들여쓰기/멀티라인 PEM 블록
+FNR-JWT-001,jwt_token,Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U,jwt_token,1.0,alert,Bearer 헤더/속성 JWT
+FNR-JWT-002,jwt_token,auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde,jwt_token,1.0,alert,Bearer 헤더/속성 JWT
+FNR-JWT-003,jwt_token,"login session
+bearer eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER",jwt_token,1.0,alert,Bearer 헤더/속성 JWT
+FNR-JWT-004,jwt_token,headers: Authorization=Bearer eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF,jwt_token,1.0,alert,Bearer 헤더/속성 JWT
+FNR-GH-001,github_pat,"github repo push token
+GITHUB_PAT=ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789",github_pat,1.0,mask,env/export/GitHub token
+FNR-GH-002,github_pat,"commit push automation
+GH_TOKEN=""gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh""",github_pat,1.0,mask,env/export/GitHub token
+FNR-GH-003,github_pat,"repo secret
+export GITHUB_PAT=ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab",github_pat,1.0,mask,env/export/GitHub token
+FNR-GH-004,github_pat,"깃허브 푸시 토큰
+ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890",github_pat,1.0,mask,env/export/GitHub token

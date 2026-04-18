@@ -1,0 +1,626 @@
+{
+  "meta": {
+    "created": "2026-04-15",
+    "model": "gemma-4-2b-it-q4_k_m.gguf (CPU, llama-cpp-python v0.3.20)",
+    "regex_rules": 12,
+    "description": "ai-dlp-proxy 탐지 엣지케이스 정리. 미탐(FN) 10건 / 오탐(FP) 10건 / Regex 한계 / SLM 한계"
+  },
+
+  "false_negatives": {
+    "description": "감지되어야 하는데 감지가 안 된 케이스 (미탐 / False Negative)",
+    "note": "Regex + SLM 파이프라인 기준. 어느 단계에서도 탐지 실패.",
+    "cases": [
+      {
+        "id": "FN-01",
+        "category": "주민등록번호",
+        "description": "앞자리 내부에 공백이 삽입된 주민번호",
+        "input": "주민 번호는 90 12 15 - 1 23 45 67 이에요.",
+        "expected_output": {
+          "detected": true,
+          "rule": "kr_rrn",
+          "match_text": "90 12 15 - 1 23 45 67"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: 앞자리(6자리) 내부 공백은 패턴이 허용하지 않음 (`[-\\s]?`는 앞-뒷자리 사이에만 적용). SLM: person_name으로 탐지했으나 패턴 변형에서 혼동."
+      },
+      {
+        "id": "FN-02",
+        "category": "주민등록번호",
+        "description": "한글 문장 속에 분산 서술된 주민번호 구성요소",
+        "input": "저는 1990년 12월 15일생이고 뒷번호는 1234567로 등록되어 있어요.",
+        "expected_output": {
+          "detected": true,
+          "rule": "kr_rrn",
+          "match_text": "901215-1234567 (재조합)"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: 앞자리(YYMMDD)와 뒷자리가 분리된 문자열로 패턴 불일치. 연속된 13자리가 아니므로 매칭 불가. SLM 단독 테스트에서는 탐지 성공 (date_of_birth), 하지만 파이프라인 전체 기준으로는 regex 1차 통과 후 문맥 주입이 필요."
+      },
+      {
+        "id": "FN-03",
+        "category": "신용카드번호",
+        "description": "카드번호를 한글 발음으로 서술 (숫자 없음)",
+        "input": "제 카드 앞 네 자리는 사오삼이이고 나머지는 천오백 두 자리씩 이어요.",
+        "expected_output": {
+          "detected": true,
+          "rule": "credit_card",
+          "match_text": "사오삼이... (재조합 필요)"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: 숫자 패턴 불일치. SLM(실측): 1379ms 응답으로 미탐, 추론 사실상 미실행. 한글-숫자 변환 추론이 필요한 케이스로 현재 모델 크기(2B)로는 불가."
+      },
+      {
+        "id": "FN-04",
+        "category": "전화번호",
+        "description": "전화번호를 한글 발음으로 서술",
+        "input": "제 전화는 공일공에 일이삼사에 오육칠팔 입니다.",
+        "expected_output": {
+          "detected": true,
+          "rule": "kr_phone",
+          "match_text": "010-1234-5678 (재조합)"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: 숫자 패턴 없어 불일치. SLM(실측): 33888ms 추론 후 미탐. 한글 발음 숫자 변환이 필요한 케이스."
+      },
+      {
+        "id": "FN-05",
+        "category": "API 키",
+        "description": "API 키 값만 단독 노출 (할당문/컨텍스트 없음)",
+        "input": "sk-proj-aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdef",
+        "expected_output": {
+          "detected": true,
+          "rule": "api_key_assignment",
+          "match_text": "sk-proj-aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdef"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: `api_key_assignment` 패턴이 `key=value` 할당문 형태만 인식. 값 단독 노출 불가. SLM(실측): 1676ms 응답으로 미탐, 컨텍스트 없어 의미 파악 불가."
+      },
+      {
+        "id": "FN-06",
+        "category": "PEM Private Key",
+        "description": "PEM Private Key (SLM만 사용 시 미탐)",
+        "input": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4\n-----END RSA PRIVATE KEY-----",
+        "expected_output": {
+          "detected": true,
+          "rule": "pem_private_key",
+          "match_text": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "SLM(실측): 1866ms 응답으로 미탐. 구조화된 암호화 객체로 자연어 패턴 인식 불가. (Regex는 정확히 탐지함 — 파이프라인에서 regex가 먼저 처리하므로 실무에서는 탐지 가능)"
+      },
+      {
+        "id": "FN-07",
+        "category": "여권번호",
+        "description": "소문자로 입력된 여권번호",
+        "input": "여권번호: m12345678",
+        "expected_output": {
+          "detected": true,
+          "rule": "kr_passport",
+          "match_text": "m12345678"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: `[A-Z]{1,2}\\d{7,8}` 패턴이 대문자만 허용. `re.IGNORECASE` 플래그 없음. 소문자 여권번호 미탐."
+      },
+      {
+        "id": "FN-08",
+        "category": "GitHub 토큰",
+        "description": "github_pat_ 형식 토큰 (Fine-grained PAT)",
+        "input": "GitHub 토큰: github_pat_11ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab",
+        "expected_output": {
+          "detected": true,
+          "rule": "github_pat",
+          "match_text": "github_pat_11ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: `\\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}\\b` 패턴이 `github_pat_` 형식(Fine-grained PAT)을 커버하지 않음. Classic PAT(ghp_)만 탐지."
+      },
+      {
+        "id": "FN-09",
+        "category": "신용카드번호",
+        "description": "점(.) 구분자를 사용한 카드번호",
+        "input": "카드번호: 4532.0151.1283.0366",
+        "expected_output": {
+          "detected": true,
+          "rule": "credit_card",
+          "match_text": "4532.0151.1283.0366"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: `(?:\\d[-\\s]?){13,19}` 패턴이 하이픈(-), 공백(\\s)만 구분자로 허용. 점(.) 구분자 미탐."
+      },
+      {
+        "id": "FN-10",
+        "category": "사업자등록번호",
+        "description": "한국 사업자등록번호 (패턴 미정의)",
+        "input": "사업자번호: 123-45-67890",
+        "expected_output": {
+          "detected": true,
+          "rule": "kr_business_reg",
+          "match_text": "123-45-67890"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "failure_reason": "regex: 사업자등록번호 패턴 자체가 미정의. us_ssn 패턴(`\\d{3}-\\d{2}-\\d{4}`)과 자릿수 다름(10자리). SLM도 미탐 예상 (별도 컨텍스트 필요)."
+      }
+    ]
+  },
+
+  "false_positives": {
+    "description": "감지가 안 되어야 하는데 감지가 된 케이스 (오탐 / False Positive)",
+    "note": "Regex 단계에서 실제로 탐지된 비PII 데이터. FP-01·FP-04~FP-10 실측 기반. FP-02·FP-03은 기본 password_assignment 패턴(미구현, 도입 예정) 기반 예상 오탐.",
+    "cases": [
+      {
+        "id": "FP-01",
+        "category": "신용카드",
+        "description": "제품 시리얼 번호가 Luhn 알고리즘을 우연히 통과",
+        "input": "제품 시리얼: 4532015112830366",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "credit_card",
+          "match_text": "4532015112830366"
+        },
+        "failure_reason": "Luhn 검증만으로는 카드번호와 우연히 동일한 체크섬을 가진 시리얼 번호 구분 불가. 컨텍스트(\"시리얼\") 활용 로직 없음."
+      },
+      {
+        "id": "FP-02",
+        "category": "패스워드",
+        "description": "환경변수 참조 템플릿이 패스워드 값으로 오탐 (도입 예정 패턴 기반)",
+        "input": "설정: DB_PASSWORD=${VAULT_SECRET_DB_PASS}",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "password_assignment",
+          "match_text": "${VAULT_SECRET_DB_PASS}"
+        },
+        "failure_reason": "기본 password_assignment 패턴 `(?i)(?:password|passwd|pwd)\\s*[=:]\\s*\\S+`이 `password=` 뒤의 모든 값을 캡처. 환경변수 참조(`${...}`)는 실제 패스워드가 아니지만 패턴이 구분하지 못함. 컨텍스트(Vault/K8s Secret 참조) 기반 제외 로직은 SLM 또는 추후 regex 파이프라인에서 처리 필요."
+      },
+      {
+        "id": "FP-03",
+        "category": "패스워드",
+        "description": "password_ 접두어를 포함한 비패스워드 필드명 오탐 (도입 예정 패턴 기반)",
+        "input": "회원가입: reset_password_url=https://auth.example.com/reset?token=abc123",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "password_assignment",
+          "match_text": "https://auth.example.com/reset?token=abc123"
+        },
+        "failure_reason": "기본 패턴이 `password`를 포함하는 모든 키 이름을 탐지 대상으로 처리. reset_password_url, password_hint, old_password_hash 등 패스워드 값이 아닌 URL·힌트·해시도 오탐. 키 이름 정확 매칭(word boundary) 또는 제외 목록 적용이 필요하며, 이 판단은 SLM 단계에서 처리하는 것이 적합."
+      },
+      {
+        "id": "FP-04",
+        "category": "AWS Access Key",
+        "description": "AKIA 접두어를 가진 내부 테스트 코드",
+        "input": "내부코드: AKIATEST0001234567AB",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "aws_access_key",
+          "match_text": "AKIATEST0001234567AB"
+        },
+        "failure_reason": "`AKIA[0-9A-Z]{16}` 패턴이 접두어 기반 탐지만 수행. 실제 AWS 키와 구분할 체크섬/검증 수단 없음."
+      },
+      {
+        "id": "FP-05",
+        "category": "GitHub PAT",
+        "description": "ghp_ 접두어를 포함한 내부 테스트 식별자",
+        "input": "테스트 ID: ghp_AbCdEfGhIjKlMnOpQrStUvWxYz1234567890",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "github_pat",
+          "match_text": "ghp_AbCdEfGhIjKlMnOpQrStUvWxYz12345"
+        },
+        "failure_reason": "접두어(ghp_) + 길이(36+) 기반 탐지. GitHub API로 유효성 검증하지 않아 만료/폐기된 토큰이나 내부 식별자도 오탐."
+      },
+      {
+        "id": "FP-06",
+        "category": "여권번호",
+        "description": "알파벳+숫자 조합 제품코드가 여권번호로 탐지",
+        "input": "제품코드: AB1234567",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "kr_passport",
+          "match_text": "AB1234567"
+        },
+        "failure_reason": "`[A-Z]{1,2}\\d{7,8}` 패턴이 영문+숫자 조합 코드를 과탐. 여권번호와 동일 형식을 가진 SKU, 모델번호, 시리얼 등 오탐."
+      },
+      {
+        "id": "FP-07",
+        "category": "운전면허번호",
+        "description": "NN-NN-NNNNNN-NN 형식 내부 관리코드",
+        "input": "코드번호: 12-34-567890-12",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "kr_driver_license",
+          "match_text": "12-34-567890-12"
+        },
+        "failure_reason": "`\\d{2}-\\d{2}-\\d{6}-\\d{2}` 형식은 운전면허 외에도 여러 내부 코드 체계에서 사용. 지역코드(앞 2자리: 01~28) 검증 없음."
+      },
+      {
+        "id": "FP-08",
+        "category": "신용카드",
+        "description": "은행 계좌번호가 신용카드 패턴에 매칭",
+        "input": "국민은행 계좌: 765402-01-123456",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "credit_card",
+          "match_text": "765402-01-123456"
+        },
+        "failure_reason": "credit_card 패턴 `(?:\\d[-\\s]?){13,19}`이 하이픈 구분 숫자 13~19자리를 모두 포함. 은행계좌(14자리)도 Luhn 우연 통과 시 오탐. 별도 bank_account 패턴이 없어 구분 불가."
+      },
+      {
+        "id": "FP-09",
+        "category": "JWT 토큰",
+        "description": "문서/블로그에 예시로 삽입된 공개 JWT 토큰",
+        "input": "JWT 예시: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "jwt_token",
+          "match_text": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ"
+        },
+        "failure_reason": "JWT 패턴이 구조(eyJ...) 기반 탐지만 수행. 키 사이닝 검증 없어 만료/예제 토큰과 유효 토큰 구분 불가. 기술 문서, 예제 코드에서 필연적으로 오탐."
+      },
+      {
+        "id": "FP-10",
+        "category": "전화번호",
+        "description": "010 접두어를 포함한 소켓/포트 번호",
+        "input": "바인딩 포트: 01012345678",
+        "expected_output": {
+          "detected": false,
+          "rule": null,
+          "match_text": null
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": "kr_phone",
+          "match_text": "01012345678"
+        },
+        "failure_reason": "`(?:010|011|...)[-.]?\\d{3,4}[-.]?\\d{4}` 패턴이 구분자 없이 연속된 숫자도 허용. `010` 접두어가 있으면 컨텍스트 무관하게 탐지."
+      }
+    ]
+  },
+
+  "regex_only_blind_spots": {
+    "description": "Regex 패턴만 사용했을 때 탐지가 힘든 항목",
+    "note": "패턴 매칭 특성상 구조화된 숫자열이 없거나, 정의된 규칙 외 형식이면 탐지 불가.",
+    "cases": [
+      {
+        "id": "R-01",
+        "category": "자연어 표현 PII",
+        "description": "숫자를 한글 발음으로 서술한 PII",
+        "input": "공일공에 일이삼사에 오육칠팔로 연락주세요.",
+        "expected_rule": "kr_phone",
+        "actual_rule": null,
+        "reason": "Regex는 정규 숫자 패턴만 인식. 한글 숫자 표현(공=0, 일=1 등) 변환 불가. 패턴 기반 매칭의 근본 한계."
+      },
+      {
+        "id": "R-02",
+        "category": "비연속 PII",
+        "description": "주민번호를 문장 내 분산 서술",
+        "input": "생년월일은 901215이고 성별/순서 코드는 1234567입니다.",
+        "expected_rule": "kr_rrn",
+        "actual_rule": null,
+        "reason": "Regex는 `901215-1234567` 연속 패턴만 인식. 중간에 텍스트가 삽입되면 단일 패턴으로 포착 불가."
+      },
+      {
+        "id": "R-03",
+        "category": "비정의 PII 유형",
+        "description": "한국 사업자등록번호 (규칙 미정의)",
+        "input": "사업자등록번호: 123-45-67890",
+        "expected_rule": "kr_business_reg",
+        "actual_rule": null,
+        "reason": "3-2-5 자릿수 형식의 사업자등록번호 패턴이 RULES에 없음. 추가 규칙 정의가 필요."
+      },
+      {
+        "id": "R-04",
+        "category": "비정의 PII 유형",
+        "description": "한국 계좌번호 (규칙 미정의)",
+        "input": "신한은행 계좌: 110-123-456789",
+        "expected_rule": "kr_bank_account",
+        "actual_rule": null,
+        "reason": "은행별 계좌 형식이 다양(10~14자리)하고 현재 별도 패턴 없음. credit_card 패턴에 오탐되거나 자릿수 밖이면 미탐."
+      },
+      {
+        "id": "R-05",
+        "category": "구분자 변형",
+        "description": "점(.) 구분자를 사용한 신용카드번호",
+        "input": "카드번호: 4532.0151.1283.0366",
+        "expected_rule": "credit_card",
+        "actual_rule": null,
+        "reason": "credit_card 패턴 구분자가 `[-\\s]?`로 하이픈/공백만 허용. 점(.), 슬래시(/), 콤마(,) 등은 미탐."
+      },
+      {
+        "id": "R-06",
+        "category": "대소문자 민감",
+        "description": "소문자로 입력된 여권번호",
+        "input": "passport: m12345678",
+        "expected_rule": "kr_passport",
+        "actual_rule": null,
+        "reason": "kr_passport 패턴 `[A-Z]{1,2}\\d{7,8}`이 대문자만 허용. 소문자 입력 페이로드 미탐."
+      },
+      {
+        "id": "R-07",
+        "category": "토큰 형식 미포함",
+        "description": "GitHub Fine-grained PAT (github_pat_ 형식)",
+        "input": "github_pat_11ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab",
+        "expected_rule": "github_pat",
+        "actual_rule": null,
+        "reason": "github_pat 패턴이 Classic PAT(ghp_, gho_, ghu_, ghs_, ghr_) 접두어만 포함. 2022년 도입된 Fine-grained PAT(github_pat_) 미포함."
+      },
+      {
+        "id": "R-08",
+        "category": "컨텍스트 없는 API 키",
+        "description": "API 키 값만 단독으로 전송 (할당문 없음)",
+        "input": "sk-proj-aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdef",
+        "expected_rule": "api_key_assignment",
+        "actual_rule": null,
+        "reason": "api_key_assignment 패턴이 `key=value` 할당 형식을 요구. 값 단독 노출은 탐지 불가. 접두어(sk-, sk-proj-) 기반 별도 패턴이 없음."
+      },
+      {
+        "id": "R-09",
+        "category": "의미 기반 탐지 필요",
+        "description": "숫자 없이 개인정보를 서술한 문장",
+        "input": "홍길동 씨는 우리 팀 팀장이고 집은 서울 강남구 역삼동이에요.",
+        "expected_rule": "person_name / address",
+        "actual_rule": null,
+        "reason": "이름, 주소는 고정 패턴이 없어 regex로 탐지 불가. 'NER(개체명 인식)' 수준의 이해가 필요하며 SLM/AI 단계가 필수."
+      },
+      {
+        "id": "R-10",
+        "category": "인코딩 변환",
+        "description": "Base64로 인코딩된 주민번호",
+        "input": "data: OTAxMjE1LTEyMzQ1Njc=",
+        "expected_rule": "kr_rrn",
+        "actual_rule": null,
+        "reason": "Base64/URL 인코딩된 PII를 regex가 디코딩해서 탐지하는 것은 불가. 디코딩 전처리 파이프라인이 별도 필요."
+      }
+    ]
+  },
+
+  "slm_only_blind_spots": {
+    "description": "SLM만 사용했을 때 탐지가 힘든 항목",
+    "note": "gemma-4-2b-it-q4_k_m.gguf(CPU) 실측 기반. 비정형 패턴/구조적 토큰은 SLM 추론 실패.",
+    "cases": [
+      {
+        "id": "S-01",
+        "category": "신용카드 (한글 자연어)",
+        "description": "카드번호 전체를 한글 표현으로 서술",
+        "input": "제 카드 앞 네 자리는 사오삼이이고 나머지는 천오백 두 자리씩 이어요.",
+        "expected_output": {
+          "detected": true,
+          "rule": "credit_card"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": []
+        },
+        "elapsed_ms": 1379,
+        "failure_reason": "1379ms 응답 — 정상 추론 시 15,000~36,000ms 소요. 사실상 추론 미실행(즉시 빈 배열 반환). 한글 숫자 발음을 아라비아 숫자로 변환하는 추론이 2B 모델 한계 이상."
+      },
+      {
+        "id": "S-02",
+        "category": "API 키 단독",
+        "description": "API 키 값만 컨텍스트 없이 전송",
+        "input": "sk-proj-aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890abcdef",
+        "expected_output": {
+          "detected": true,
+          "rule": "api_key_assignment"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": []
+        },
+        "elapsed_ms": 1676,
+        "failure_reason": "1676ms 응답 — 즉시 반환. 접두어(sk-proj-)가 OpenAI API 키의 특징이지만, 할당문 컨텍스트 없이 값만 있으면 SLM이 PII로 분류하지 못함."
+      },
+      {
+        "id": "S-03",
+        "category": "PEM Private Key",
+        "description": "RSA Private Key (BEGIN/END 마커 포함)",
+        "input": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4\n-----END RSA PRIVATE KEY-----",
+        "expected_output": {
+          "detected": true,
+          "rule": "pem_private_key"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": []
+        },
+        "elapsed_ms": 1866,
+        "failure_reason": "1866ms 응답 — 즉시 반환. SLM의 PII 분류 범주(person_name, address, account_number 등)에 private key가 명시적으로 없어 분류 실패. 암호화 구조 객체에 대한 시맨틱 이해 부재."
+      },
+      {
+        "id": "S-04",
+        "category": "전화번호 한글 서술",
+        "description": "전화번호를 한글 발음으로 서술",
+        "input": "제 전화는 공일공에 일이삼사에 오육칠팔 입니다.",
+        "expected_output": {
+          "detected": true,
+          "rule": "kr_phone"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": []
+        },
+        "elapsed_ms": 33888,
+        "failure_reason": "33888ms 추론 후 미탐. 충분한 추론을 했음에도 공일공='010' 변환 실패. 한글 발음-숫자 매핑이 2B 파라미터 수준에서 완전한 PII 추론으로 이어지지 못함."
+      },
+      {
+        "id": "S-05",
+        "category": "분류 오류 (탐지는 됨)",
+        "description": "신용카드를 account_number로 잘못 분류",
+        "input": "카드 번호는 4532 0151 1283 0366 입니다.",
+        "expected_output": {
+          "detected": true,
+          "rule": "credit_card"
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": ["account_number"]
+        },
+        "elapsed_ms": 20423,
+        "failure_reason": "탐지는 성공했으나 규칙 분류 오류. SLM의 분류 범주에 credit_card가 없어 account_number로 매핑. 마스킹 대상은 맞지만 로그/알림 분류 기준이 틀림."
+      },
+      {
+        "id": "S-06",
+        "category": "분류 오류 (탐지는 됨)",
+        "description": "AWS Access Key를 account_number로 잘못 분류",
+        "input": "AWS 키는 AKIAIOSFODNN7EXAMPLE 입니다.",
+        "expected_output": {
+          "detected": true,
+          "rule": "aws_access_key"
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": ["account_number"]
+        },
+        "elapsed_ms": 15580,
+        "failure_reason": "탐지 성공, 분류 오류. AWS Access Key의 AKIA 접두어 의미를 이해하지 못하고 긴 영숫자열을 account_number로 분류. 심각도(CRITICAL) 판단에 영향."
+      },
+      {
+        "id": "S-07",
+        "category": "분류 오류 (탐지는 됨)",
+        "description": "이메일 주소를 person_name으로 잘못 분류",
+        "input": "연락처: hong.gildong@company.co.kr",
+        "expected_output": {
+          "detected": true,
+          "rule": "email"
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": ["person_name"]
+        },
+        "elapsed_ms": 15453,
+        "failure_reason": "탐지 성공, 분류 오류. hong.gildong 부분에서 이름으로 해석. email 형식임에도 person_name으로 분류. 비식별화 시 마스킹 범위가 달라질 수 있음."
+      },
+      {
+        "id": "S-08",
+        "category": "분류 오류 (탐지는 됨)",
+        "description": "JWT 토큰을 account_number로 잘못 분류",
+        "input": "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+        "expected_output": {
+          "detected": true,
+          "rule": "jwt_token"
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": ["account_number"]
+        },
+        "elapsed_ms": 36285,
+        "failure_reason": "탐지 성공, 분류 오류. JWT 페이로드(eyJ...)를 인식하지 못하고 account_number로 분류. 심각도가 CRITICAL(jwt_token)이 아닌 기본값으로 처리될 수 있음."
+      },
+      {
+        "id": "S-09",
+        "category": "구조적 데이터 토큰",
+        "description": "암호화된 세션 쿠키값",
+        "input": "Set-Cookie: session=gAAAAABl9X2kQwHJmMz1ahXUQWkpLqNMbO8PuB3BxcCxF98LbsPkdj5wEXnR_nJMeCl0IFCjzqWL2d2A; HttpOnly",
+        "expected_output": {
+          "detected": true,
+          "rule": "session_token"
+        },
+        "actual_output": {
+          "detected": false,
+          "rule": []
+        },
+        "elapsed_ms": 17376,
+        "failure_reason": "17376ms 추론 후 미탐. Fernet/AES 암호화된 세션 쿠키를 SLM이 민감정보로 인식하지 못함. 구조가 random base64처럼 보이며 Set-Cookie HTTP 헤더 컨텍스트에서도 세션값 자체를 민감정보로 분류하지 못함."
+      },
+      {
+        "id": "S-10",
+        "category": "분산/다중 필드 PII",
+        "description": "JSON 다중 필드에 분산된 PII (이름+전화+주소)",
+        "input": "{\"name\": \"홍길동\", \"phone\": \"010-1234-5678\", \"address\": \"서울시 강남구 역삼동\"}",
+        "expected_output": {
+          "detected": true,
+          "rule": "multiple: person_name, kr_phone, address"
+        },
+        "actual_output": {
+          "detected": true,
+          "rule": ["person_name", "address"]
+        },
+        "elapsed_ms": 31063,
+        "failure_reason": "31063ms 추론 후 부분 탐지. person_name(홍길동)과 address(서울시 강남구 역삼동)는 탐지했으나 phone(010-1234-5678) 누락. SLM의 분류 범주에 kr_phone이 없어 전화번호를 별도 Finding으로 반환하지 못함. 다중 PII 중 일부 누락."
+      }
+    ]
+  }
+}

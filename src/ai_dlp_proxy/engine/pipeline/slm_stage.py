@@ -161,6 +161,11 @@ class SLMStage(Stage):
     def name(self) -> str:
         return "slm"
 
+    def runtime_warning_lines(self) -> list[str]:
+        if self._compute_mode == ComputeMode.CPU_ONLY:
+            return list(_CPU_ONLY_WARNING_LINES)
+        return []
+
     # ── 모델 로드 (최초 scan 호출 시 1회) ────────────────────────────────────
 
     def _ensure_loaded(self) -> bool:

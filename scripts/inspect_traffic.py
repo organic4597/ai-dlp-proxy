@@ -12,16 +12,24 @@ import json
 import logging
 import re
 import socket
+import sys
 import textwrap
 import time
 from datetime import datetime
 from pathlib import Path
+
+_SRC_DIR = Path(__file__).parent.parent / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from ai_dlp_proxy.engine.pipeline.masking import merge_mask_templates
 
 from mitmproxy import ctx, http
 
 # ── 엔진 서버 연결 설정 (별도 프로세스, UDS) ──────────────────────────────────
 _ENGINE_SOCK = "/tmp/dlp-engine.sock"
 _ENGINE_TIMEOUT = 5.0  # 초
+_ENGINE_STREAM_LIMIT = 4 * 1024 * 1024  # asyncio StreamReader 라인 버퍼 (서버와 동일)
 
 # 영속 연결 관리
 _engine_reader: asyncio.StreamReader | None = None
@@ -34,7 +42,7 @@ async def _engine_connect() -> tuple[asyncio.StreamReader, asyncio.StreamWriter]
     global _engine_reader, _engine_writer
     try:
         _engine_reader, _engine_writer = await asyncio.wait_for(
-            asyncio.open_unix_connection(_ENGINE_SOCK),
+            asyncio.open_unix_connection(_ENGINE_SOCK, limit=_ENGINE_STREAM_LIMIT),
             timeout=2.0,
         )
         return _engine_reader, _engine_writer
@@ -81,7 +89,7 @@ logging.basicConfig(
     format="%(message)s",
     handlers=[
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
-        logging.StreamHandler(),
+        logging.StreamHandler(stream=open(sys.stderr.fileno(), mode="w", encoding="utf-8", buffering=1, closefd=False)),
     ],
 )
 log = logging.getLogger("dlp.inspect")
@@ -148,36 +156,6 @@ class C:
 
 SEPARATOR = f"{C.DIM}{'═' * 90}{C.RESET}"
 
-# ── DLP 마스킹 ───────────────────────────────────────────────────────────────
-
-# 규칙별 마스킹 대체 텍스트
-_MASK_TEMPLATES: dict[str, str] = {
-    # Regex Stage 규칙
-    "kr_rrn":            "[주민등록번호]",
-    "kr_phone":          "[전화번호]",
-    "credit_card":       "[카드번호]",
-    "us_ssn":            "[SSN]",
-    "email":             "[이메일]",
-    "kr_passport":       "[여권번호]",
-    "kr_driver_license": "[운전면허]",
-    "aws_access_key":    "[AWS_KEY]",
-    "aws_secret_key":    "[AWS_SECRET]",
-    "api_key_assignment":"[API_KEY]",
-    "pem_private_key":   "[PRIVATE_KEY]",
-    "jwt_token":         "[JWT]",
-    "github_pat":        "[GH_TOKEN]",
-    # SLM Stage 규칙
-    "person_name":       "[이름]",
-    "address":           "[주소]",
-    "organization":      "[기관]",
-    "date_of_birth":     "[생년월일]",
-    "account_number":    "[계좌번호]",
-    "ip_address":        "[IP주소]",
-    "device_id":         "[기기ID]",
-    "medical_info":      "[의료정보]",
-    "biometric":         "[생체정보]",
-    "slm_pii":           "[개인정보]",
-}
 _MASK_DEFAULT = "[REDACTED]"
 
 
@@ -228,7 +206,7 @@ def _set_nested(obj, tokens: list, value) -> bool:
         return False
 
 
-def _apply_mask(body_obj: dict, findings: list[dict]) -> dict:
+def _apply_mask(body_obj: dict, findings: list[dict], mask_templates: dict[str, str]) -> dict:
     """
     findings의 field_path/match_start/match_end를 이용해
     body_obj를 deep copy 없이 직접 수정 — 마스킹 텍스트로 교체.
@@ -249,7 +227,7 @@ def _apply_mask(body_obj: dict, findings: list[dict]) -> dict:
         # offset 역순으로 적용 (큰 offset 먼저 교체 → 앞 offset 불변)
         for f in sorted(path_findings, key=lambda x: x.get("match_start", 0), reverse=True):
             rule = f.get("rule", "")
-            replacement = _MASK_TEMPLATES.get(rule, _MASK_DEFAULT)
+            replacement = mask_templates.get(rule, _MASK_DEFAULT)
             start = f.get("match_start", 0)
             end   = f.get("match_end",   0)
             if start < 0 or end <= start or end > len(text):
@@ -475,6 +453,7 @@ class InspectAddon:
                     ems = result.get("elapsed_ms", "?")
                     pa = result.get("pipeline_action", "pass")
                     fc = result.get("finding_count", 0)
+                    efc = result.get("effective_finding_count", fc)
 
                     action_c = {
                         "pass": C.GREEN, "alert": C.YELLOW,
@@ -484,16 +463,19 @@ class InspectAddon:
                     lines.append(
                         f"  {C.BOLD}── Engine: {tc}개 대상 ({tl:,}자) "
                         f"{action_c}[{pa.upper()}]{C.RESET} "
-                        f"findings={fc}  {C.DIM}{ems}ms{C.RESET} ──"
+                        f"findings={fc} effective={efc}  {C.DIM}{ems}ms{C.RESET} ──"
                     )
                     for f in result.get("findings", []):
                         sev_c = {
                             "critical": C.RED, "high": C.MAGENTA,
                             "medium": C.YELLOW, "low": C.DIM,
                         }.get(f.get("severity", ""), C.RESET)
+                        prefix = ""
+                        if f.get("suppressed"):
+                            prefix = f"{C.DIM}[suppressed]{C.RESET} "
                         lines.append(
-                            f"    {sev_c}[{f.get('severity','?').upper()}]{C.RESET} "
-                            f"{f.get('rule','?')}: {f.get('match_text','')[:60]!r} "
+                            f"    {prefix}{sev_c}[{f.get('severity','?').upper()}]{C.RESET} "
+                            f"{f.get('rule','?')}: {f.get('match_text','')[:60]!s} "
                             f"@ {C.DIM}{f.get('field_path','')}{C.RESET}"
                         )
             except Exception as _eng_err:
@@ -510,8 +492,18 @@ class InspectAddon:
                 _ctrl: dict = json.loads(Path("/tmp/dlp-control.json").read_text())
             except Exception:
                 _ctrl = {}
+            _mask_templates = merge_mask_templates(_ctrl.get("mask_templates", {}), allow_custom=True)
             _pa = result.get("pipeline_action", "pass")
             _findings = result.get("findings", [])
+            try:
+                _threshold = float(_ctrl.get("confidence_threshold", 0.5))
+            except (TypeError, ValueError):
+                _threshold = 0.5
+            _effective_findings = [
+                finding
+                for finding in _findings
+                if float(finding.get("confidence", 0.0)) >= _threshold and not finding.get("suppressed", False)
+            ]
 
             _do_mask  = bool(_ctrl.get("mask_on_detect") and _pa in ("mask", "alert"))
             _do_block = (
@@ -521,9 +513,9 @@ class InspectAddon:
                 )
             )
 
-            if _do_mask and _findings:
+            if _do_mask and _effective_findings:
                 # 마스킹 적용 후 flow.request.content 교체
-                masked_body = _apply_mask(body_obj, _findings)
+                masked_body = _apply_mask(body_obj, _effective_findings, _mask_templates)
                 masked_bytes = json.dumps(masked_body, ensure_ascii=False).encode("utf-8")
                 flow.request.content = masked_bytes
                 # Content-Length 재계산 (mitmproxy는 bytes length 기준)
@@ -534,14 +526,14 @@ class InspectAddon:
                     _engine_request({"action": "masked_inc", "id": req_id})
                 )
                 lines.append(
-                    f"  {C.CYAN}{C.BOLD}[DLP MASKED] {len(_findings)}개 필드 마스킹 후 통과"
+                    f"  {C.CYAN}{C.BOLD}[DLP MASKED] {len(_effective_findings)}개 필드 마스킹 후 통과"
                     f"  ({len(body_raw)}B → {len(masked_bytes)}B){C.RESET}"
                 )
-                for f in _findings:
+                for f in _effective_findings:
                     lines.append(
                         f"    {C.CYAN}▸ {f.get('rule','?')}: "
                         f"{f.get('match_text','')[:40]!r} → "
-                        f"{_MASK_TEMPLATES.get(f.get('rule',''), _MASK_DEFAULT)}{C.RESET}"
+                        f"{_mask_templates.get(f.get('rule',''), _MASK_DEFAULT)}{C.RESET}"
                     )
 
             elif _do_block:
@@ -554,6 +546,15 @@ class InspectAddon:
                 lines.append(
                     f"  {C.RED}{C.BOLD}[DLP BLOCKED] "
                     f"action={_pa.upper()} → 403 반환{C.RESET}"
+                )
+
+            if _applied_action in ("masked", "blocked"):
+                asyncio.ensure_future(
+                    _engine_request({
+                        "action": "applied_result",
+                        "id": req_id,
+                        "dlp_applied": _applied_action,
+                    })
                 )
 
         log.info("\n".join(lines))

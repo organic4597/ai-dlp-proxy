@@ -43,6 +43,8 @@ class Finding:
     context_before: str     # 매치 앞 컨텍스트 (최대 100자, 겹침 제외)
     context_after: str      # 매치 뒤 컨텍스트 (최대 100자, 겹침 제외)
     confidence: float = 1.0 # 0.0~1.0 (regex=1.0, sLM=모델 확신도)
+    suppressed: bool = False
+    history: bool = False   # True이면 이전 턴 히스토리 (마스킹은 하되 탐지 카운트 제외)
     metadata: dict = field(default_factory=dict)
 
     def context_window(self) -> str:
@@ -60,6 +62,13 @@ class PipelineResult:
     @property
     def has_findings(self) -> bool:
         return len(self.findings) > 0
+
+    def effective_findings(self, threshold: float) -> list[Finding]:
+        return [
+            finding
+            for finding in self.findings
+            if finding.confidence >= threshold and not finding.suppressed
+        ]
 
     def findings_by_severity(self, sev: Severity) -> list[Finding]:
         return [f for f in self.findings if f.severity == sev]

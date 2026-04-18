@@ -1,0 +1,62 @@
+case_id,category,input_text,expected_rule,max_confidence,expected_action,notes
+ODR-RRN-001,kr_rrn,"const rrnFixture = ""880515-1104333""; return rrnFixture;",kr_rrn,0.4,pass,예제/fixture 주민번호
+ODR-RRN-002,kr_rrn,schema.example.rrn=9507202218199,kr_rrn,0.4,pass,예제/fixture 주민번호
+ODR-RRN-003,kr_rrn,sample resident no 000301-3600132,kr_rrn,0.4,pass,예제/fixture 주민번호
+ODR-RRN-004,kr_rrn,README resident example 7511031389080,kr_rrn,0.4,pass,예제/fixture 주민번호
+ODR-CARD-001,credit_card,"const sampleCard = ""4539-1488-0343-6467""; return sampleCard;",credit_card,0.4,pass,문서/테스트 카드번호
+ODR-CARD-002,credit_card,docs.example.card=5425233430109903,credit_card,0.4,pass,문서/테스트 카드번호
+ODR-CARD-003,credit_card,test pan 6011 0009 9013 9424,credit_card,0.4,pass,문서/테스트 카드번호
+ODR-CARD-004,credit_card,README example 4556737586899855,credit_card,0.4,pass,문서/테스트 카드번호
+ODR-PHONE-001,kr_phone,"const samplePhone = ""010-1234-5678""; return samplePhone;",kr_phone,0.4,pass,문서/fixture 휴대전화
+ODR-PHONE-002,kr_phone,docs.phone.example=01098765432,kr_phone,0.4,pass,문서/fixture 휴대전화
+ODR-PHONE-003,kr_phone,fixture mobile 011-223-7788,kr_phone,0.4,pass,문서/fixture 휴대전화
+ODR-PHONE-004,kr_phone,placeholder number 019.9999.1234,kr_phone,0.4,pass,문서/fixture 휴대전화
+ODR-EMAIL-001,email,"const sampleEmail = ""notify@example.com""; return sampleEmail;",email,0.4,pass,문서/fixture 이메일
+ODR-EMAIL-002,email,docs.recipient.example=alerts@corp.internal,email,0.4,pass,문서/fixture 이메일
+ODR-EMAIL-003,email,fixture mailbox billing@service.io,email,0.4,pass,문서/fixture 이메일
+ODR-EMAIL-004,email,placeholder recipient owner@support.dev,email,0.4,pass,문서/fixture 이메일
+ODR-PASS-001,kr_passport,"const passportExample = ""M12345678""; return passportExample;",kr_passport,0.4,pass,예제 여권번호
+ODR-PASS-002,kr_passport,sample.passport.no=AB1234567,kr_passport,0.4,pass,예제 여권번호
+ODR-PASS-003,kr_passport,fixture travel doc MA9876543,kr_passport,0.4,pass,예제 여권번호
+ODR-PASS-004,kr_passport,README passport example P12345678,kr_passport,0.4,pass,예제 여권번호
+ODR-LIC-001,kr_driver_license,"const licenseExample = ""11-23-456789-01""; return licenseExample;",kr_driver_license,0.4,pass,예제 면허번호
+ODR-LIC-002,kr_driver_license,sample.license.no=12-34-567890-12,kr_driver_license,0.4,pass,예제 면허번호
+ODR-LIC-003,kr_driver_license,fixture driving number 26-12-345678-90,kr_driver_license,0.4,pass,예제 면허번호
+ODR-LIC-004,kr_driver_license,README license example 28-98-765432-10,kr_driver_license,0.4,pass,예제 면허번호
+ODR-AWS-001,aws_access_key,"const demoAwsKey = ""AKIAIOSFODNN7EXAMPLE""; return demoAwsKey;",aws_access_key,0.4,pass,예제 AWS 키
+ODR-AWS-002,aws_access_key,docs.example.aws_key=ASIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키
+ODR-AWS-003,aws_access_key,fixture aws key ABIAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키
+ODR-AWS-004,aws_access_key,README sample ACCAIOSFODNN7EXAMPLE,aws_access_key,0.4,pass,예제 AWS 키
+ODR-API-001,api_key_assignment,"import os
+API_KEY=process.env.SERVICE_API_KEY",api_key_assignment,0.4,pass,런타임 참조/템플릿 API 키
+ODR-API-002,api_key_assignment,"reference only
+secret_key=process.env.SECRET_KEY_REF",api_key_assignment,0.4,pass,런타임 참조/템플릿 API 키
+ODR-API-003,api_key_assignment,"docs config
+""access_token"":""runtime_access_token_ref_445566""",api_key_assignment,0.4,pass,런타임 참조/템플릿 API 키
+ODR-API-004,api_key_assignment,"template config
+auth_token=generated_private_key_ref_778899",api_key_assignment,0.4,pass,런타임 참조/템플릿 API 키
+ODR-PWD-001,password_assignment,DB_PASSWORD=${DB_PASSWORD},password_assignment,0.4,pass,비밀값 참조/힌트/워크플로 표현식
+ODR-PWD-002,password_assignment,db_password=process.env.DB_PASSWORD,password_assignment,0.4,pass,비밀값 참조/힌트/워크플로 표현식
+ODR-PWD-003,password_assignment,password_hint=remember-me-next-time,password_assignment,0.4,pass,비밀값 참조/힌트/워크플로 표현식
+ODR-PWD-004,password_assignment,password: ${{ secrets.DB_PASSWORD }},password_assignment,0.4,pass,비밀값 참조/힌트/워크플로 표현식
+ODR-PEM-001,pem_private_key,"def load_key():
+    return '''-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4ABCDEFGHIJKLMNOPQRSTUVWX1234567890abcd\n-----END RSA PRIVATE KEY-----'''",pem_private_key,0.4,pass,문서/코드 예제 PEM
+ODR-PEM-002,pem_private_key,"example tls key
+-----BEGIN RSA PRIVATE KEY-----
+MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDVexampleabcdef12345
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+ODR-PEM-003,pem_private_key,"README snippet -> -----BEGIN RSA PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgexample9876543210ABCDE
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+ODR-PEM-004,pem_private_key,"fixture pem block
+-----BEGIN RSA PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCfaketextpayload0011
+-----END RSA PRIVATE KEY-----",pem_private_key,0.4,pass,문서/코드 예제 PEM
+ODR-JWT-001,jwt_token,const jwtExample = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U'; return jwtExample;,jwt_token,0.4,pass,문서/예제 JWT
+ODR-JWT-002,jwt_token,docs.example.jwt=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlIn0.ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcde,jwt_token,0.4,pass,문서/예제 JWT
+ODR-JWT-003,jwt_token,sample bearer token eyJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJhcHAifQ.qwertyuiopasdfghjklzxcvbnm1234567890QWER,jwt_token,0.4,pass,문서/예제 JWT
+ODR-JWT-004,jwt_token,fixture jwt eyJhbGciOiJIUzUxMiJ9.eyJzY29wZSI6ImFwaSJ9.poiuytrewqlkjhgfdsamnbvcxz1234567890ASDF,jwt_token,0.4,pass,문서/예제 JWT
+ODR-GH-001,github_pat,const githubPatExample = 'ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789'; return githubPatExample;,github_pat,0.4,pass,문서/예제 GitHub PAT
+ODR-GH-002,github_pat,docs.example.gh_pat=gho_ZzYyXxWwVvUuTtSsRrQqPpOoNnMmLlKkJjIiHh,github_pat,0.4,pass,문서/예제 GitHub PAT
+ODR-GH-003,github_pat,sample personal token ghu_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZab,github_pat,0.4,pass,문서/예제 GitHub PAT
+ODR-GH-004,github_pat,fixture gh token ghs_QwertyUiopAsdfGhjkLzxcVbnm1234567890,github_pat,0.4,pass,문서/예제 GitHub PAT
