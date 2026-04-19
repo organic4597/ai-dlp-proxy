@@ -76,6 +76,9 @@ remove_all() {
     iptables -t nat -D PREROUTING -p tcp --dport 443 -m addrtype --dst-type LOCAL -j RETURN 2>/dev/null || true
     iptables -t nat -D OUTPUT     -p tcp --dport 443 -m addrtype --dst-type LOCAL -j RETURN 2>/dev/null || true
     iptables -t nat -D POSTROUTING -o "$ETH" -j MASQUERADE 2>/dev/null || true
+    # FORWARD 규칙 제거
+    iptables -D FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || true
+    iptables -D FORWARD -i "$ETH" -o "$ETH" -j ACCEPT 2>/dev/null || true
     ok "iptables 규칙 제거"
 
     # dnsmasq 설정 제거
@@ -138,6 +141,15 @@ iptables -t nat -D POSTROUTING -o "$ETH" -j MASQUERADE 2>/dev/null || true
 # MASQUERADE (아웃바운드 NAT)
 iptables -t nat -A POSTROUTING -o "$ETH" -j MASQUERADE
 ok "NAT MASQUERADE ($ETH)"
+
+# FORWARD 체인 — 게이트웨이 역할 허용 (기본 policy=DROP 우회)
+# ESTABLISHED/RELATED: TCP 응답 패킷 통과 (없으면 단방향만 됨)
+# eth0→eth0: LAN 클라이언트 ↔ 인터넷 (라우터가 같은 인터페이스)
+iptables -D FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || true
+iptables -D FORWARD -i "$ETH" -o "$ETH" -j ACCEPT 2>/dev/null || true
+iptables -I FORWARD 1 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -I FORWARD 2 -i "$ETH" -o "$ETH" -j ACCEPT
+ok "FORWARD 허용 (게이트웨이 모드: ESTABLISHED + $ETH → $ETH)"
 
 # 로컬 주소행 및 이 서버 자신의 443 제외 (루프 방지)
 iptables -t nat -I PREROUTING 1 -p tcp --dport 443 -m addrtype --dst-type LOCAL -j RETURN
