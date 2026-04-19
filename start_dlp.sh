@@ -250,42 +250,59 @@ for i in $(seq 1 20); do
 done
 
 # =============================================================================
-# 3-a. 투명 프록시 모드: iptables + DHCP 자동 설정 (--transparent)
+# 3-a. iptables 투명 프록시 규칙 자동 확인 및 적용
+# PREROUTING에 :443→:4443 REDIRECT 규칙이 없으면 setup_transparent.sh 실행
 # =============================================================================
-if [[ "$OPT_TRANSPARENT" == true ]]; then
-    SETUP_SCRIPT="$BASE_DIR/setup_transparent.sh"
+SETUP_SCRIPT="$BASE_DIR/setup_transparent.sh"
+_ipt_ok=false
+if sudo iptables -t nat -L PREROUTING -n 2>/dev/null | grep -q "redir ports 4443"; then
+    _ipt_ok=true
+fi
+
+if [[ "$_ipt_ok" == false ]]; then
+    warn "iptables 투명 프록시 규칙 없음 — 자동 설정 중..."
     if [[ ! -f "$SETUP_SCRIPT" ]]; then
-        error "setup_transparent.sh 없음: $SETUP_SCRIPT"
-    fi
-    info "투명 프록시 설정 실행 (sudo 필요)..."
-    if [[ $EUID -eq 0 ]]; then
+        warn "setup_transparent.sh 없음 — iptables 설정 건너뜀"
+    elif [[ $EUID -eq 0 ]]; then
         bash "$SETUP_SCRIPT"
     elif command -v sudo &>/dev/null; then
         sudo bash "$SETUP_SCRIPT"
     else
-        error "iptables 설정에 root 권한 필요. sudo가 없습니다."
+        warn "sudo 없음 — iptables 설정 건너뜀 (root 권한 필요)"
     fi
+else
+    ok "iptables 투명 프록시 규칙 확인 완료"
 fi
 
 # =============================================================================
-# 3-b. SNI 라우터 시작 (--sni / --transparent 옵션 시)
+# 3-b. SNI 라우터 시작 (바이너리가 존재하면 항상 시작)
 # =============================================================================
-if [[ "$OPT_SNI" == true ]]; then
-    if [[ ! -x "$SNI_BINARY" ]]; then
-        warn "sni-router 바이너리 없음 — 빌드 중..."
-        (cd "$BASE_DIR/sni-router" && cargo build --release 2>&1) \
-            || error "sni-router 빌드 실패. Rust(cargo)가 설치되어 있는지 확인하세요"
+SNI_PID=""
+if [[ -x "$SNI_BINARY" ]]; then
+    # 이미 실행 중이면 스킵
+    if [[ -f "$SNI_PID_FILE" ]]; then
+        old_sni_pid=$(cat "$SNI_PID_FILE" 2>/dev/null || echo "")
+        if [[ -n "$old_sni_pid" ]] && kill -0 "$old_sni_pid" 2>/dev/null; then
+            ok "sni-router 이미 실행 중 (PID $old_sni_pid)"
+            SNI_PID=$old_sni_pid
+        fi
     fi
-    info "SNI 라우터 시작 (포트 $SNI_PORT → mitmproxy $MITM_PORT)..."
-    "$SNI_BINARY" >> "$LOG_DIR/sni.log" 2>&1 &
-    SNI_PID=$!
-    echo "$SNI_PID" > "$SNI_PID_FILE"
-    sleep 0.3
-    if ! kill -0 "$SNI_PID" 2>/dev/null; then
-        error "sni-router가 시작 직후 종료되었습니다.\n  로그 확인: tail -20 $LOG_DIR/sni.log"
+    if [[ -z "$SNI_PID" ]]; then
+        info "SNI 라우터 시작 (포트 $SNI_PORT → mitmproxy $MITM_PORT)..."
+        sudo "$SNI_BINARY" >> "$LOG_DIR/sni.log" 2>&1 &
+        SNI_PID=$!
+        echo "$SNI_PID" > "$SNI_PID_FILE"
+        sleep 0.5
+        if ! kill -0 "$SNI_PID" 2>/dev/null; then
+            warn "sni-router 시작 실패 (무시하고 계속).\n  로그 확인: tail -20 $LOG_DIR/sni.log"
+            SNI_PID=""
+        else
+            ok "sni-router 시작 (PID $SNI_PID, 포트 $SNI_PORT)"
+            info "  로그: $LOG_DIR/sni.log"
+        fi
     fi
-    ok "sni-router 시작 (PID $SNI_PID, 포트 $SNI_PORT)"
-    info "  로그: $LOG_DIR/sni.log"
+else
+    warn "sni-router 바이너리 없음 — SNI 라우터 건너뜀 ($SNI_BINARY)"
 fi
 
 # =============================================================================
@@ -320,8 +337,8 @@ echo ""
 echo -e "${GREEN}${BOLD}── 실행 중 ─────────────────────────────────────${RESET}"
 echo -e "  엔진 서버   PID ${ENGINE_PID}  (UDS $ENGINE_SOCK)"
 echo -e "  mitmproxy   PID ${MITM_PID}   (0.0.0.0:$MITM_PORT)"
-if [[ "$OPT_SNI" == true ]]; then
-    echo -e "  sni-router  PID ${SNI_PID:-N/A}   (0.0.0.0:$SNI_PORT)"
+if [[ -n "${SNI_PID:-}" ]]; then
+    echo -e "  sni-router  PID ${SNI_PID}   (0.0.0.0:$SNI_PORT)"
 fi
 echo ""
 echo -e "${BOLD}── 클라이언트 프록시 설정 ──────────────────────${RESET}"

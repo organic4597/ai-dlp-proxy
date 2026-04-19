@@ -689,19 +689,48 @@ class Turn:
 class TurnTracker:
     def __init__(self):
         self.turns: list[Turn] = []
-        self._prev = -1
+        self._prev_mc = -1
+        self._prev_user_sig: str = ""  # 마지막 user 메시지 시그니처
+
+    @staticmethod
+    def _user_sig(ev: dict) -> str:
+        """마지막 user 메시지의 role+content 해시 — 새 턴 판별용."""
+        msgs = ev.get("messages") or []
+        # 히스토리 끝에서 마지막 user 메시지 찾기
+        for m in reversed(msgs):
+            if m.get("role") == "user":
+                content = m.get("content", "")
+                # tool_result 등 자동 메시지 제외: 실제 텍스트가 있어야 함
+                text = content if isinstance(content, str) else str(content)
+                text = text.strip()
+                if text and not text.startswith("[tool_result"):
+                    return text[:200]  # 앞 200자로 시그니처
+        return ""
 
     def ingest(self, ev: dict) -> Turn:
         mc = ev.get("msg_count") or 0
-        if not self.turns or mc > self._prev:
-            t = Turn(len(self.turns) + 1, ev.get("ts", ""),
-                     ev.get("model") or "?", mc)
+        user_sig = self._user_sig(ev)
+        model = ev.get("model") or "?"
+
+        # 새 턴 조건: 마지막 user 메시지가 이전과 다를 때
+        is_new_turn = (
+            not self.turns
+            or (user_sig and user_sig != self._prev_user_sig)
+        )
+        if is_new_turn:
+            t = Turn(len(self.turns) + 1, ev.get("ts", ""), model, mc)
             self.turns.append(t)
+            if user_sig:
+                self._prev_user_sig = user_sig
         else:
             t = self.turns[-1]
+            # 같은 턴 내에서도 모델명 업데이트 (멀티모델 요청 시)
+            if model and model != "?" and t.model in ("?", ""):
+                t.model = model
+
         t.add(ev)
         if mc > 0:
-            self._prev = mc
+            self._prev_mc = mc
         return t
 
 
@@ -2814,18 +2843,6 @@ class DLPApp(App):
                     self._write_plain_block(d, "      [dim]앞 컨텍스트:[/]", cb)
                 if ca:
                     self._write_plain_block(d, "      [dim]뒤 컨텍스트:[/]", ca)
-            event_targets = self._targets_for_event(rq)
-            if event_targets:
-                d.write("  [bold]대상 전체 내용[/]")
-            for target in event_targets:
-                role = str(target.get("role", "?") or "?")
-                field_path = str(target.get("field_path", "") or "")
-                self._write_plain_block(
-                    d,
-                    f"    {role} [dim]({markup_escape(field_path)})[/]",
-                    target.get("text", ""),
-                    indent="      ",
-                )
             d.write("")
         # ── 전송 내용 탭 ─────────────────────────────────────────────────
         ds = self.query_one("#dsent", RichLog)
@@ -2838,24 +2855,17 @@ class DLPApp(App):
             targets = rq.get("targets", [])
             applied = self._applied_action_for_event(rq)
             if not targets:
-                # targets가 없으면 raw messages로 폴백
+                # targets 없음 — 새 메시지(messages)에서 user 입력만 표시
                 raw_msgs = rq.get("messages", [])
-                if raw_msgs:
-                    ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 전송 내용 (messages 기준) ──[/]")
-                    for msg in raw_msgs:
-                        role = msg.get("role", "?")
+                user_msgs = [m for m in raw_msgs if m.get("role") == "user"]
+                if user_msgs:
+                    ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 사용자 입력 ──[/]")
+                    for msg in user_msgs:
                         content = str(msg.get("content", ""))
-                        role_color = "cyan" if role == "system" else "green" if role == "assistant" else "yellow"
-                        ds.write(f"  [{role_color}]{role}[/]")
-                        if len(content) > 2000:
-                            ds.write(Text(f"    {content[:2000]}"))
-                            ds.write(f"    [dim]… ({len(content):,}자 중 2000자만 표시)[/]")
-                        else:
-                            ds.write(Text(f"    {content}"))
-                        ds.write("")
-                    continue
-                ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 전송 내용 없음 (히스토리) ──[/]")
-                ds.write("")
+                        ds.write(Text(f"  {content[:500]}"))
+                        if len(content) > 500:
+                            ds.write(f"  [dim]… (+{len(content)-500}자)[/]")
+                    ds.write("")
                 continue
             effective_findings = self._effective_findings_for_event(rq)
             effective_fc = len(effective_findings)
@@ -2885,26 +2895,37 @@ class DLPApp(App):
                 note = f"억제된 탐지 {suppressed_fc}건 — 최종 전송은 원문 PASS"
                 ds.write(f"  [dim]▶ {note}[/]")
                 sent_lines.append(f"  ▶ {note}")
-            for tgt in targets:
-                fp = tgt.get("field_path", "")
-                role = tgt.get("role", "?")
-                text = tgt.get("text", "")
-                # 실제 마스킹이 적용된 요청만 전송 내용에 치환 텍스트 반영
-                if applied == "masked" and effective_findings:
-                    text = _simulate_mask(text, effective_findings, fp, self._threshold(), self._mask_templates())
-                role_color = "cyan" if role == "system" else "green" if role == "assistant" else "yellow"
-                ds.write(f"  [{role_color}]{role}[/] [dim]({markup_escape(fp)})[/]")
-                sent_lines.append(f"  {role} ({fp})")
-                if len(text) > 2000:
-                    ds.write(Text(f"    {text[:2000]}"))
-                    ds.write(f"    [dim]… ({len(text):,}자 중 2000자만 표시)[/]")
-                    sent_lines.append(f"    {text[:2000]}")
-                    sent_lines.append(f"    … ({len(text):,}자 중 2000자만 표시)")
-                else:
-                    ds.write(Text(f"    {text}"))
-                    sent_lines.append(f"    {text}")
+            # 탐지된 필드만 표시: 원문 → 마스킹 결과
+            shown_fps = set()
+            for f in effective_findings:
+                fp = f.get("field_path", "")
+                if fp in shown_fps:
+                    continue
+                shown_fps.add(fp)
+                # 해당 field_path의 target 텍스트 찾기
+                orig = next((tgt.get("text", "") for tgt in targets if tgt.get("field_path") == fp), "")
+                masked = _simulate_mask(orig, effective_findings, fp, self._threshold(), self._mask_templates()) if applied == "masked" else orig
+                sev = f.get("severity") or "?"
+                ds.write(f"  [{SEV_S.get(sev,'')}]{f.get('rule','?')}[/] [dim]{markup_escape(fp)}[/]")
+                self._write_plain_block(ds, "    원문:", orig[:300])
+                if applied == "masked":
+                    self._write_plain_block(ds, "    [cyan]전송:[/]", masked[:300])
                 ds.write("")
+                sent_lines.append(f"  {f.get('rule','?')} ({fp})")
+                sent_lines.append(f"    원문: {orig[:300]}")
+                if applied == "masked":
+                    sent_lines.append(f"    전송: {masked[:300]}")
                 sent_lines.append("")
+            # 탐지 없는 경우 새 user 메시지만 표시
+            if not effective_findings:
+                user_msgs = [m for m in rq.get("messages", []) if m.get("role") == "user"]
+                for msg in user_msgs:
+                    content = str(msg.get("content", ""))
+                    ds.write(Text(f"  {content[:500]}"))
+                    if len(content) > 500:
+                        ds.write(f"  [dim]… (+{len(content)-500}자)[/]")
+                    sent_lines.append(f"  {content[:500]}")
+                ds.write("")
         self._sent_text_cache = "\n".join(sent_lines).strip()
 
     # ── 탐지 상세 ─────────────────────────────────────────────────────────────
@@ -3235,6 +3256,10 @@ def _sts(ts: str) -> str:
 def _rec2ev(rec: dict) -> dict | None:
     s = rec.get("dlp_summary") or {}
     model = s.get("model")
+    # dlp_summary에 model이 없으면 engine.targets나 provider로 폴백
+    if not model:
+        eng = rec.get("engine") or {}
+        model = eng.get("model")
     if not model:
         return None
     eng = rec.get("engine") or {}
@@ -3243,7 +3268,7 @@ def _rec2ev(rec: dict) -> dict | None:
         "ts": rec.get("ts", ""),
         "provider": rec.get("provider", "?"),
         "model": model,
-        "msg_count": s.get("msg_count", 0),
+        "msg_count": s.get("msg_count") or s.get("content_count", 0),
         "body_size": rec.get("body_size", 0),
         "pipeline_action": eng.get("pipeline_action", "pass"),
         "finding_count": eng.get("finding_count", 0),

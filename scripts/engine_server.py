@@ -357,7 +357,7 @@ async def main(sock_path: str | None = None, tcp_port: int | None = None):
             handle_client, path=sock_path,
             limit=4 * 1024 * 1024,
         )
-        os.chmod(sock_path, 0o660)
+        os.chmod(sock_path, 0o666)  # 모든 사용자 접근 허용 (로컬 UDS는 안전)
         addr_str = f"UDS {sock_path}"
         test_cmd = f"echo '{{\"action\":\"ping\"}}' | socat - UNIX-CONNECT:{sock_path}"
     else:

@@ -21,7 +21,9 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
     stream = bool(body.get("stream", False))
     targets: list[DLPTarget] = []
 
-    messages = body.get("messages", [])
+    # chat/completions: messages 키 / Responses API (/responses): input 키
+    messages = body.get("messages") or []
+    _input_items = body.get("input") or []  # Responses API
 
     # ── 히스토리 경계 판별 ────────────────────────────────────────────────────
     # 마지막 assistant 메시지 이후 = 새 메시지 (history=False)
@@ -93,6 +95,33 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
                 role="tool_def",
                 text=desc,
             ))
+
+    # ── Responses API: input 배열 (/responses 엔드포인트) ────────────────────
+    # 포맷: input[i].content[j].type = "input_text" | "output_text" | "text"
+    for i, item in enumerate(_input_items):
+        role = item.get("role", "unknown")
+        content = item.get("content", "")
+        # system/assistant 출력은 스캔 제외
+        if role in ("assistant", "system"):
+            continue
+        if isinstance(content, str):
+            if content.strip():
+                targets.append(DLPTarget(
+                    field_path=f"input[{i}].content",
+                    role=role,
+                    text=content,
+                ))
+        elif isinstance(content, list):
+            for j, part in enumerate(content):
+                ptype = part.get("type", "")
+                if ptype in ("input_text", "text"):
+                    text = part.get("text", "")
+                    if text.strip():
+                        targets.append(DLPTarget(
+                            field_path=f"input[{i}].content[{j}].text",
+                            role=role,
+                            text=text,
+                        ))
 
     # ── user 식별자 필드 ──────────────────────────────────────────────────────
     user_field = body.get("user", "")

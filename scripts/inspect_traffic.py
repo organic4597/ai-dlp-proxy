@@ -654,16 +654,20 @@ def _summarize_request(obj: dict, provider: str, lines: list) -> dict:
                      "Mistral", "GitHub Copilot", "DeepSeek", "xAI"):
         model = obj.get("model", "N/A")
         stream = obj.get("stream", False)
-        messages = obj.get("messages", [])
+        # chat/completions: messages / Responses API: input
+        messages = obj.get("messages") or obj.get("input") or []
+        msg_key = "messages" if obj.get("messages") else "input" if obj.get("input") else "messages"
         tools = obj.get("tools", [])
         summary = {"model": model, "stream": stream, "msg_count": len(messages), "tool_count": len(tools)}
-        lines.append(f"    {C.GREEN}model={model}{C.RESET}  stream={stream}  messages={len(messages)}개  tools={len(tools)}개")
+        lines.append(f"    {C.GREEN}model={model}{C.RESET}  stream={stream}  {msg_key}={len(messages)}개  tools={len(tools)}개")
         for i, msg in enumerate(messages):
             role = msg.get("role", "?")
             content = msg.get("content", "")
             if isinstance(content, list):
-                text_parts = [p.get("text", "") for p in content if p.get("type") == "text"]
-                img_count = sum(1 for p in content if p.get("type") == "image_url")
+                # chat/completions: type=text / Responses API: type=input_text,output_text
+                text_parts = [p.get("text", "") for p in content
+                              if p.get("type") in ("text", "input_text", "output_text")]
+                img_count = sum(1 for p in content if p.get("type") in ("image_url", "input_image"))
                 content_preview = " | ".join(text_parts)
                 if img_count:
                     content_preview += f" + [image×{img_count}]"
@@ -671,7 +675,7 @@ def _summarize_request(obj: dict, provider: str, lines: list) -> dict:
                 content_preview = str(content)
             preview = content_preview[:200].replace("\n", "↵")
             role_color = C.CYAN if role == "system" else C.GREEN if role == "assistant" else C.YELLOW
-            lines.append(f"    messages[{i}] {role_color}role={role}{C.RESET}: {preview}")
+            lines.append(f"    {msg_key}[{i}] {role_color}role={role}{C.RESET}: {preview}")
 
     elif provider == "Anthropic":
         model = obj.get("model", "N/A")
@@ -714,14 +718,13 @@ def _summarize_request(obj: dict, provider: str, lines: list) -> dict:
 
 # ── 메시지 내용 추출 (JSONL 로그용) ─────────────────────────────────────────
 
-_MSG_MAX = 2000  # 메시지 하나당 최대 문자 수 (로그 용량 절약)
+_MSG_MAX = 500  # 메시지 하나당 최대 문자 수 (로그 용량 절약, 기존 2000→500)
 
 
 def _extract_messages(obj: dict, provider: str) -> list[dict]:
-    """요청 바디에서 실제 대화 메시지를 추출해 [{role, content}] 리스트로 반환.
+    """요청 바디에서 새 메시지만 추출 — 히스토리(이전 턴) 제외.
 
-    content가 긴 경우 _MSG_MAX 자로 truncate.
-    system / tool_result / tool_use 등 비-사용자 메시지도 포함.
+    last_assistant 이후 메시지만 반환해 로그 용량을 최소화.
     """
     msgs: list[dict] = []
 
@@ -749,33 +752,62 @@ def _extract_messages(obj: dict, provider: str) -> list[dict]:
                     inner = part.get("content", "")
                     if isinstance(inner, list):
                         inner = " ".join(p.get("text", "") for p in inner if isinstance(p, dict))
-                    parts.append(f"[tool_result: {str(inner)[:200]}]")
+                    parts.append(f"[tool_result: {str(inner)[:100]}]")
                 else:
                     parts.append(f"[{t}]")
             return _clip(" ".join(parts))
         return _clip(str(content))
 
-    # OpenAI 호환 (OpenAI, Azure, Groq, Together, Mistral, OpenRouter,
-    #               GitHub Copilot, DeepSeek, xAI)
+    def _new_only(raw_msgs: list) -> list:
+        """last_assistant 이후 메시지만 반환. 없으면 마지막 user 1개만."""
+        last_asst = -1
+        for i, m in enumerate(raw_msgs):
+            if m.get("role") in ("assistant", "model"):
+                last_asst = i
+        if last_asst >= 0:
+            return raw_msgs[last_asst + 1:]
+        # assistant가 없으면 (첫 턴) — user 메시지만
+        return [m for m in raw_msgs if m.get("role") not in ("system", "developer")]
+
+    # OpenAI 호환 (messages 또는 Responses API input)
     if provider in (
         "OpenAI", "Azure OpenAI", "Groq", "Together", "Mistral",
         "OpenRouter", "GitHub Copilot", "DeepSeek", "xAI",
     ):
-        for msg in obj.get("messages", []):
+        raw_msgs = obj.get("messages") or obj.get("input") or []
+        for msg in _new_only(raw_msgs):
             role    = msg.get("role", "?")
             content = msg.get("content", "")
-            name    = msg.get("name")
-            entry: dict = {"role": role, "content": _content_str(content)}
+            if isinstance(content, list):
+                parts = []
+                for part in content:
+                    if not isinstance(part, dict):
+                        continue
+                    t = part.get("type", "")
+                    if t in ("input_text", "output_text", "text"):
+                        parts.append(part.get("text", ""))
+                    elif t in ("image_url", "input_image"):
+                        parts.append("[image]")
+                    elif t == "tool_use":
+                        parts.append(f"[tool_use: {part.get('name', '?')}]")
+                    elif t == "tool_result":
+                        inner = part.get("content", "")
+                        if isinstance(inner, list):
+                            inner = " ".join(p.get("text", "") for p in inner if isinstance(p, dict))
+                        parts.append(f"[tool_result: {str(inner)[:100]}]")
+                    else:
+                        parts.append(f"[{t}]")
+                content = " ".join(parts)
+            entry: dict = {"role": role, "content": _clip(str(content))}
+            name = msg.get("name")
             if name:
                 entry["name"] = name
             msgs.append(entry)
 
     # Anthropic
     elif provider == "Anthropic":
-        sys_prompt = obj.get("system", "")
-        if sys_prompt:
-            msgs.append({"role": "system", "content": _clip(str(sys_prompt))})
-        for msg in obj.get("messages", []):
+        raw_msgs = obj.get("messages", [])
+        for msg in _new_only(raw_msgs):
             msgs.append({
                 "role":    msg.get("role", "?"),
                 "content": _content_str(msg.get("content", "")),
@@ -783,13 +815,8 @@ def _extract_messages(obj: dict, provider: str) -> list[dict]:
 
     # Google Gemini
     elif provider == "Gemini":
-        si = obj.get("systemInstruction", {})
-        if si:
-            parts = si.get("parts", [])
-            text  = " ".join(p.get("text", "") for p in parts if "text" in p)
-            if text:
-                msgs.append({"role": "system", "content": _clip(text)})
-        for c in obj.get("contents", []):
+        raw_msgs = obj.get("contents", [])
+        for c in _new_only(raw_msgs):
             role  = c.get("role", "?")
             parts = c.get("parts", [])
             text  = " ".join(p.get("text", "") for p in parts if "text" in p)

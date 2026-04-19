@@ -75,6 +75,8 @@ remove_all() {
     done
     iptables -t nat -D PREROUTING -p tcp --dport 443 -m addrtype --dst-type LOCAL -j RETURN 2>/dev/null || true
     iptables -t nat -D OUTPUT     -p tcp --dport 443 -m addrtype --dst-type LOCAL -j RETURN 2>/dev/null || true
+    iptables -t nat -D OUTPUT     -p tcp --dport 443 -m owner --uid-owner 0 -j RETURN 2>/dev/null || true
+    iptables -t nat -D OUTPUT     -p tcp --dport 443 -m owner ! --uid-owner 0 -j REDIRECT --to-ports "$SNI_PORT" 2>/dev/null || true
     iptables -t nat -D POSTROUTING -o "$ETH" -j MASQUERADE 2>/dev/null || true
     # FORWARD 규칙 제거
     iptables -D FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT 2>/dev/null || true
@@ -160,12 +162,17 @@ ok "로컬/루프백 제외 규칙"
 iptables -t nat -A PREROUTING -p tcp --dport 443 -j REDIRECT --to-port "$SNI_PORT"
 ok "PREROUTING :443 → :$SNI_PORT (sni-router)"
 
-# mitmproxy 사용자 아웃바운드 제외 (루프 방지)
-MITM_USER=$(id -un 2>/dev/null || echo "ubuntu")
-iptables -t nat -I OUTPUT 1 -p tcp --dport 443 \
-    -m owner --uid-owner "$MITM_USER" -j RETURN 2>/dev/null \
-    && ok "mitmproxy($MITM_USER) 아웃바운드 루프 방지" \
-    || warn "owner 모듈 없음 — xt_owner 커널 모듈 필요"
+# root(mitmproxy/sni-router) 아웃바운드 제외 — 루프 방지
+iptables -t nat -D OUTPUT -p tcp --dport 443 -m owner --uid-owner 0 -j RETURN 2>/dev/null || true
+iptables -t nat -I OUTPUT 1 -p tcp --dport 443 -m owner --uid-owner 0 -j RETURN
+ok "root 아웃바운드 루프 방지 (UID=0 RETURN)"
+
+# 로컬 비-root 프로세스(VS Code, ubuntu 등) 443 → SNI 라우터
+# root 제외 규칙 바로 뒤에 삽입
+iptables -t nat -D OUTPUT -p tcp --dport 443 -m owner ! --uid-owner 0 -j REDIRECT --to-ports "$SNI_PORT" 2>/dev/null || true
+iptables -t nat -A OUTPUT -p tcp --dport 443 -m owner ! --uid-owner 0 -j REDIRECT --to-ports "$SNI_PORT" \
+    && ok "OUTPUT :443 → :$SNI_PORT (로컬 프로세스: VS Code 등)" \
+    || warn "OUTPUT REDIRECT 실패 — xt_owner 모듈 확인 필요"
 
 # 영구 저장
 if command -v netfilter-persistent &>/dev/null; then

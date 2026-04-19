@@ -162,7 +162,11 @@ def _context_multiplier(rule_name: str, ctx_before: str, ctx_after: str) -> floa
         return 1.3
     if hits == 1:
         return 1.0
-    return 0.4
+    # 0-hit: 주변 문맥이 없거나 PII 키워드가 없는 경우.
+    # 패턴 자체가 충분히 distinctive한 경우(kr_phone, kr_rrn, credit_card 등)
+    # 0.4는 threshold 0.5 미만이 되어 단독 입력 시 마스킹이 누락됨.
+    # 0.6으로 상향: 단독 입력도 탐지하되 코드 문맥 페널티(×0.3)와 조합 시 여전히 낮게 유지.
+    return 0.6
 
 
 def _select_match_span(match: re.Match, group: int | None = None) -> tuple[str, int, int]:
