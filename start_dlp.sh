@@ -33,18 +33,24 @@ LOG_DIR="$BASE_DIR/logs"
 ENGINE_SOCK="/tmp/dlp-engine.sock"
 ENGINE_PID_FILE="/tmp/dlp-engine.pid"
 MITM_PID_FILE="/tmp/dlp-mitm.pid"
+SNI_PID_FILE="/tmp/dlp-sni.pid"
+SNI_BINARY="$BASE_DIR/sni-router/target/release/sni-router"
 
 # ── 인수 파싱 ─────────────────────────────────────────────────────────────────
 OPT_NO_TUI=false
 OPT_STOP=false
+OPT_SNI=false
 MITM_PORT=4001
+SNI_PORT=4443
 
 for arg in "$@"; do
     case "$arg" in
         --no-tui)    OPT_NO_TUI=true ;;
         --stop)      OPT_STOP=true ;;
+        --sni)       OPT_SNI=true ;;     # 투명 프록시용 SNI 라우터 활성화
         --port)      shift; MITM_PORT="$1" ;;
         --port=*)    MITM_PORT="${arg#--port=}" ;;
+        --sni-port=*)SNI_PORT="${arg#--sni-port=}" ;;
         --help|-h)
             grep '^#  ' "$0" | sed 's/^#  //'
             exit 0 ;;
@@ -57,6 +63,15 @@ done
 stop_all() {
     info "DLP 프록시 프로세스 종료 중..."
     local stopped=0
+
+    if [[ -f "$SNI_PID_FILE" ]]; then
+        local pid; pid=$(cat "$SNI_PID_FILE" 2>/dev/null || echo "")
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null && ok "sni-router 종료 (PID $pid)"
+            stopped=$((stopped+1))
+        fi
+        rm -f "$SNI_PID_FILE"
+    fi
 
     if [[ -f "$MITM_PID_FILE" ]]; then
         local pid; pid=$(cat "$MITM_PID_FILE" 2>/dev/null || echo "")
@@ -80,6 +95,7 @@ stop_all() {
     rm -f "$ENGINE_SOCK"
 
     # PID 파일 없이 프로세스명으로 추가 정리
+    pkill -f "sni-router" 2>/dev/null && stopped=$((stopped+1)) || true
     pkill -f "engine_server.py" 2>/dev/null && stopped=$((stopped+1)) || true
     pkill -f "inspect_traffic.py" 2>/dev/null && stopped=$((stopped+1)) || true
 
@@ -101,6 +117,12 @@ fi
 cleanup() {
     echo ""
     info "종료 신호 수신 — 프로세스 정리 중..."
+
+    if [[ -f "$SNI_PID_FILE" ]]; then
+        local pid; pid=$(cat "$SNI_PID_FILE" 2>/dev/null || echo "")
+        [[ -n "$pid" ]] && kill "$pid" 2>/dev/null && info "  sni-router 종료 (PID $pid)"
+        rm -f "$SNI_PID_FILE"
+    fi
 
     if [[ -f "$MITM_PID_FILE" ]]; then
         local pid; pid=$(cat "$MITM_PID_FILE" 2>/dev/null || echo "")
@@ -186,6 +208,27 @@ for i in $(seq 1 20); do
 done
 
 # =============================================================================
+# 3-b. SNI 라우터 시작 (--sni 옵션 시)
+# =============================================================================
+if [[ "$OPT_SNI" == true ]]; then
+    if [[ ! -x "$SNI_BINARY" ]]; then
+        warn "sni-router 바이너리 없음 — 빌드 중..."
+        (cd "$BASE_DIR/sni-router" && cargo build --release 2>&1) \
+            || error "sni-router 빌드 실패. Rust(cargo)가 설치되어 있는지 확인하세요"
+    fi
+    info "SNI 라우터 시작 (포트 $SNI_PORT → mitmproxy $MITM_PORT)..."
+    "$SNI_BINARY" >> "$LOG_DIR/sni.log" 2>&1 &
+    SNI_PID=$!
+    echo "$SNI_PID" > "$SNI_PID_FILE"
+    sleep 0.3
+    if ! kill -0 "$SNI_PID" 2>/dev/null; then
+        error "sni-router가 시작 직후 종료되었습니다.\n  로그 확인: tail -20 $LOG_DIR/sni.log"
+    fi
+    ok "sni-router 시작 (PID $SNI_PID, 포트 $SNI_PORT)"
+    info "  로그: $LOG_DIR/sni.log"
+fi
+
+# =============================================================================
 # 4. mitmproxy 시작
 # =============================================================================
 info "mitmproxy 시작 (포트 $MITM_PORT)..."
@@ -217,9 +260,16 @@ echo ""
 echo -e "${GREEN}${BOLD}── 실행 중 ─────────────────────────────────────${RESET}"
 echo -e "  엔진 서버   PID ${ENGINE_PID}  (UDS $ENGINE_SOCK)"
 echo -e "  mitmproxy   PID ${MITM_PID}   (0.0.0.0:$MITM_PORT)"
+if [[ "$OPT_SNI" == true ]]; then
+    echo -e "  sni-router  PID ${SNI_PID:-N/A}   (0.0.0.0:$SNI_PORT)"
+fi
 echo ""
 echo -e "${BOLD}── 클라이언트 프록시 설정 ──────────────────────${RESET}"
-echo -e "  HTTP/HTTPS:  ${SERVER_IP}:${MITM_PORT}"
+if [[ "$OPT_SNI" == true ]]; then
+    echo -e "  투명 프록시 (iptables 필요):  setup_iptables.sh 실행"
+else
+    echo -e "  HTTP/HTTPS:  ${SERVER_IP}:${MITM_PORT}"
+fi
 echo ""
 echo -e "${BOLD}── 로그 실시간 확인 ────────────────────────────${RESET}"
 echo -e "  tail -f $LOG_DIR/engine.log"
