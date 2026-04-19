@@ -10,9 +10,11 @@
 #    5. TUI 종료 시 엔진·프록시 자동 정리
 #
 #  사용법:
-#    bash start_dlp.sh                  # 기본 실행 (명시적 프록시)
+#    bash start_dlp.sh                  # 기본 실행 (서비스 + TUI 한 번에)
+#    bash start_dlp.sh --service        # 서비스만 시작 (엔진+mitm, TUI 없음, 백그라운드 유지)
+#    bash start_dlp.sh --tui            # TUI만 실행 (서비스가 이미 떠 있어야 함)
 #    bash start_dlp.sh --transparent    # 투명 프록시 모드 (iptables + SNI 라우터)
-#    bash start_dlp.sh --no-tui         # TUI 없이 서비스만 실행 (서버 모드)
+#    bash start_dlp.sh --no-tui         # (구) 서비스만 실행, --service와 동일
 #    bash start_dlp.sh --port 4001      # mitmproxy 포트 변경
 #    bash start_dlp.sh --stop           # 실행 중인 프로세스 종료
 # =============================================================================
@@ -39,6 +41,8 @@ SNI_BINARY="$BASE_DIR/sni-router/target/release/sni-router"
 
 # ── 인수 파싱 ─────────────────────────────────────────────────────────────────
 OPT_NO_TUI=false
+OPT_SERVICE=false
+OPT_TUI_ONLY=false
 OPT_STOP=false
 OPT_SNI=false
 OPT_TRANSPARENT=false
@@ -47,10 +51,12 @@ SNI_PORT=4443
 
 for arg in "$@"; do
     case "$arg" in
-        --no-tui)       OPT_NO_TUI=true ;;
+        --no-tui)       OPT_NO_TUI=true; OPT_SERVICE=true ;;
+        --service)      OPT_SERVICE=true ;;
+        --tui)          OPT_TUI_ONLY=true ;;
         --stop)         OPT_STOP=true ;;
         --sni)          OPT_SNI=true ;;
-        --transparent)  OPT_TRANSPARENT=true; OPT_SNI=true ;;  # iptables+SNI 풀세트
+        --transparent)  OPT_TRANSPARENT=true; OPT_SNI=true ;;
         --port)         shift; MITM_PORT="$1" ;;
         --port=*)       MITM_PORT="${arg#--port=}" ;;
         --sni-port=*)   SNI_PORT="${arg#--sni-port=}" ;;
@@ -124,7 +130,27 @@ if [[ "$OPT_STOP" == true ]]; then
 fi
 
 # =============================================================================
-# 종료 시 자동 정리 (TUI Ctrl+C, 스크립트 exit 등)
+# --tui: TUI만 단독 실행 (서비스는 이미 떠 있어야 함)
+# =============================================================================
+if [[ "$OPT_TUI_ONLY" == true ]]; then
+    if [[ ! -f "$VENV_DIR/bin/activate" ]]; then
+        error "venv가 없습니다: bash install.sh 먼저 실행"
+    fi
+    source "$VENV_DIR/bin/activate"
+    # 서비스 동작 여부 확인
+    if [[ ! -S "$ENGINE_SOCK" ]]; then
+        warn "엔진 소켓 없음 ($ENGINE_SOCK) — 서비스가 실행 중인지 확인하세요"
+        warn "  bash start_dlp.sh --service"
+    fi
+    info "TUI 대시보드 시작 (서비스 독립 모드)..."
+    PYTHONPATH="$BASE_DIR/src" python "$BASE_DIR/scripts/tui.py" || true
+    exit 0
+fi
+
+# =============================================================================
+# 종료 시 자동 정리
+# --service 모드: trap 없음 → TUI 꺼져도 서비스 유지
+# 기본 모드: TUI 종료 시 서비스도 함께 종료
 # =============================================================================
 cleanup() {
     echo ""
@@ -151,7 +177,11 @@ cleanup() {
     rm -f "$ENGINE_SOCK"
     ok "정리 완료. 안녕히 가세요!"
 }
-trap cleanup EXIT INT TERM
+
+# --service 모드는 cleanup trap 등록 안 함 (서비스 독립 유지)
+if [[ "$OPT_SERVICE" == false ]]; then
+    trap cleanup EXIT INT TERM
+fi
 
 # =============================================================================
 # 1. 사전 확인
@@ -309,16 +339,18 @@ echo ""
 # =============================================================================
 # 6. TUI 실행 (포그라운드)
 # =============================================================================
-if [[ "$OPT_NO_TUI" == true ]]; then
-    info "--no-tui 모드 — TUI 없이 서비스 실행 중"
-    info "종료하려면: bash start_dlp.sh --stop"
-    # 포그라운드 유지 (Ctrl+C 대기)
-    wait "$ENGINE_PID"
+if [[ "$OPT_SERVICE" == true ]]; then
+    echo ""
+    ok "서비스 모드 — 백그라운드에서 계속 실행 중"
+    info "TUI 실행: bash start_dlp.sh --tui"
+    info "서비스 종료: bash start_dlp.sh --stop"
+    # 스크립트 종료 (trap 없으므로 서비스 프로세스는 살아 있음)
 else
     info "TUI 대시보드 시작..."
-    echo -e "${YELLOW}  종료: Ctrl+C 또는 TUI 내 q키${RESET}\n"
+    echo -e "${YELLOW}  TUI 종료 시 서비스도 함께 종료됩니다.${RESET}"
+    echo -e "${YELLOW}  서비스 유지하려면: bash start_dlp.sh --service${RESET}\n"
 
     PYTHONPATH="$BASE_DIR/src" \
         python "$BASE_DIR/scripts/tui.py" || true
-    # TUI 정상/비정상 종료 모두 cleanup 트리거
+    # TUI 종료 → cleanup trap 트리거 → 서비스 종료
 fi
