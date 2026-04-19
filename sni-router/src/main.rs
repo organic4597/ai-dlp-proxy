@@ -200,7 +200,29 @@ async fn handle(mut client: TcpStream, domains: Arc<HashSet<&'static str>>) {
         Ok(mut up) => {
             let _ = copy_bidirectional(&mut client, &mut up).await;
         }
-        Err(e) => eprintln!("[ERR] connect {target}: {e}"),
+        Err(e) => {
+            eprintln!("[ERR] connect {target}: {e}");
+
+            // mitmproxy 연결 실패 시 원본 목적지로 바이패스 (AI 도메인이어도)
+            if is_ai {
+                match orig {
+                    Some(orig_dst) => {
+                        eprintln!(
+                            "[BYPASS] mitmproxy 불가 → 직통: {} ({})",
+                            sni.as_deref().unwrap_or("?"),
+                            orig_dst
+                        );
+                        match TcpStream::connect(orig_dst).await {
+                            Ok(mut up) => {
+                                let _ = copy_bidirectional(&mut client, &mut up).await;
+                            }
+                            Err(e2) => eprintln!("[ERR] bypass {orig_dst}: {e2}"),
+                        }
+                    }
+                    None => eprintln!("[ERR] 바이패스 불가 — SO_ORIGINAL_DST 없음"),
+                }
+            }
+        }
     }
 }
 

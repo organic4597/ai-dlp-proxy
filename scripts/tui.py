@@ -3226,14 +3226,43 @@ def _rec2ev(rec: dict) -> dict | None:
     }
 
 
+def _reset_terminal() -> None:
+    """TUI 종료 후 터미널 마우스 추적 및 상태 초기화.
+
+    Textual이 비정상 종료(SIGKILL, SSH 끊김 후 재접속 등)되면
+    마우스 추적 escape sequence가 터미널에 남아 hover 시 ^[[<35;75;34M 같은
+    raw 코드가 화면에 출력된다.  atexit으로 항상 해제 코드를 전송한다.
+    """
+    try:
+        seq = (
+            "\033[?1000l"   # 마우스 클릭 추적 해제
+            "\033[?1002l"   # 마우스 버튼 모션 추적 해제
+            "\033[?1003l"   # 모든 마우스 모션 추적 해제
+            "\033[?1006l"   # SGR 확장 마우스 모드 해제
+            "\033[?1015l"   # URXVT 마우스 모드 해제
+            "\033[?25h"     # 커서 표시 복원
+            "\033[0m"       # 색상/속성 초기화
+        )
+        sys.stdout.write(seq)
+        sys.stdout.flush()
+    except Exception:
+        pass
+
+
 def main():
+    import atexit
+    atexit.register(_reset_terminal)
+
     p = argparse.ArgumentParser(description="AI DLP Proxy TUI")
     p.add_argument("--sock", default=_DEFAULT_SOCK)
     p.add_argument("--jsonl", default=None)
     p.add_argument("--no-supervisor", action="store_true",
                    help="engine/mitmproxy 자동 시작·감시 비활성화")
     a = p.parse_args()
-    DLPApp(sock=a.sock, jsonl_path=a.jsonl, supervise=not a.no_supervisor).run()
+    try:
+        DLPApp(sock=a.sock, jsonl_path=a.jsonl, supervise=not a.no_supervisor).run()
+    finally:
+        _reset_terminal()
 
 
 if __name__ == "__main__":
