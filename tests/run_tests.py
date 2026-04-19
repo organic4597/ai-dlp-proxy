@@ -14,9 +14,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from ai_dlp_proxy.engine.api.base import DLPTarget
-from ai_dlp_proxy.engine.pipeline import run_pipeline, get_cache_stats
-from ai_dlp_proxy.engine.pipeline.regex_stage import RegexStage
+from engine.api.base import DLPTarget
+from engine.pipeline import run_pipeline, get_cache_stats
+from engine.pipeline.regex_stage import RegexStage
 
 HERE = Path(__file__).resolve().parent
 
@@ -96,7 +96,7 @@ def run_json_tests() -> tuple[int, int]:
         cases = json.load(f)
 
     # 파이프라인 캐시 리셋
-    from ai_dlp_proxy.engine.pipeline import _msg_cache, _cache_stats
+    from engine.pipeline import _msg_cache, _cache_stats
     _msg_cache.clear()
     _cache_stats["hits"] = 0
     _cache_stats["misses"] = 0

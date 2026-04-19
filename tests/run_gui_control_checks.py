@@ -29,10 +29,10 @@ sys.path.insert(0, str(ROOT / "mitmproxy_lib"))
 import scripts.engine_server as engine_server
 import scripts.inspect_traffic as inspect_traffic
 import scripts.tui as tui
-from ai_dlp_proxy.engine.api.base import DLPTarget
-from ai_dlp_proxy.engine.pipeline import run_pipeline
-from ai_dlp_proxy.engine.pipeline import _cache_stats, _msg_cache
-from ai_dlp_proxy.engine.pipeline.base import Action, PipelineResult
+from engine.api.base import DLPTarget
+from engine.pipeline import run_pipeline
+from engine.pipeline import _cache_stats, _msg_cache
+from engine.pipeline.base import Action, PipelineResult
 from textual.widgets import DataTable, Input, RichLog, Switch, TabbedContent
 
 
@@ -522,7 +522,7 @@ async def _verify_runtime_controls(res: _Result) -> None:
     orig_extract = engine_server.extract
     orig_run_pipeline = engine_server.run_pipeline
     try:
-        from ai_dlp_proxy.engine.pipeline.base import Finding, Severity
+        from engine.pipeline.base import Finding, Severity
 
         def fake_extract_threshold(host, url, content_type, body_bytes):
             return SimpleNamespace(

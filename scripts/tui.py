@@ -32,9 +32,9 @@ _SRC_DIR = Path(__file__).parent.parent / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from ai_dlp_proxy.engine.pipeline import get_runtime_warning_lines
-from ai_dlp_proxy.engine.pipeline.default_assets import ensure_default_assets_file
-from ai_dlp_proxy.engine.pipeline.masking import (
+from engine.pipeline import get_runtime_warning_lines
+from engine.pipeline.default_assets import ensure_default_assets_file
+from engine.pipeline.masking import (
     DEFAULT_MASK_TEMPLATES,
     EDITABLE_MASK_RULES,
     merge_mask_templates,

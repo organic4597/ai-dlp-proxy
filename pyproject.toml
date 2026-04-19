@@ -19,7 +19,7 @@ vllm = ["vllm>=0.4.0"]
 dev  = ["pytest", "pytest-asyncio"]
 
 [project.scripts]
-ai-dlp-proxy = "ai_dlp_proxy.__main__:main"
+ai-dlp-proxy = "__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

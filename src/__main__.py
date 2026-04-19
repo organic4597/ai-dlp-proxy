@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 # mitmproxy_lib/ 임베드 경로를 sys.path에 추가
-_LIB_DIR = Path(__file__).resolve().parent.parent.parent / "mitmproxy_lib"
+_LIB_DIR = Path(__file__).resolve().parent.parent / "mitmproxy_lib"
 if _LIB_DIR.is_dir() and str(_LIB_DIR) not in sys.path:
     sys.path.insert(0, str(_LIB_DIR))
 

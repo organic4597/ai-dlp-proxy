@@ -22,7 +22,7 @@ _SRC_DIR = Path(__file__).parent.parent / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from ai_dlp_proxy.engine.pipeline.masking import merge_mask_templates
+from engine.pipeline.masking import merge_mask_templates
 
 from mitmproxy import ctx, http
 

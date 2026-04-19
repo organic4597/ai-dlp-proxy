@@ -31,9 +31,9 @@ _SRC_DIR = Path(__file__).parent.parent / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from ai_dlp_proxy.engine import extract, run_pipeline  # noqa: E402
-from ai_dlp_proxy.engine.pipeline import get_cache_stats  # noqa: E402
-from ai_dlp_proxy.engine.pipeline.control import load_control  # noqa: E402
+from engine import extract, run_pipeline  # noqa: E402
+from engine.pipeline import get_cache_stats  # noqa: E402
+from engine.pipeline.control import load_control  # noqa: E402
 
 # ── 로깅 설정 ────────────────────────────────────────────────────────────────
 logging.basicConfig(
