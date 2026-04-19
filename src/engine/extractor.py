@@ -88,3 +88,38 @@ def extract(
         return _gemini.parse(provider, url, body)
 
     return None
+
+
+# ── 공급자별 로그용 함수 라우팅 ─────────────────────────────────────────────
+
+_OPENAI_COMPAT_PROVIDERS = frozenset({
+    "OpenAI", "Azure OpenAI", "GitHub Copilot", "Groq",
+    "Together", "Mistral", "OpenRouter", "DeepSeek", "xAI",
+})
+
+
+def summarize_request(provider: str, body: dict) -> dict:
+    """
+    공급자별 파서의 summarize()를 호출해 로그/TUI 표시용 요약 dict 반환.
+    """
+    if provider in _OPENAI_COMPAT_PROVIDERS:
+        return _openai.summarize(body)
+    elif provider == "Anthropic":
+        return _anthropic.summarize(body)
+    elif provider == "Gemini":
+        return _gemini.summarize(body)
+    return {}
+
+
+def extract_messages(provider: str, body: dict, msg_max: int = 500) -> list[dict]:
+    """
+    공급자별 파서의 extract_messages()를 호출해 JSONL 로그용 메시지 목록 반환.
+    히스토리 제외, 신규 메시지만 포함.
+    """
+    if provider in _OPENAI_COMPAT_PROVIDERS:
+        return _openai.extract_messages(body, msg_max)
+    elif provider == "Anthropic":
+        return _anthropic.extract_messages(body, msg_max)
+    elif provider == "Gemini":
+        return _gemini.extract_messages(body, msg_max)
+    return []

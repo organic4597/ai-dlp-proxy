@@ -14,6 +14,51 @@ from __future__ import annotations
 from .base import DLPTarget, ParsedRequest
 
 
+# ── 공통 유틸 ───────────────────────────────────────────────────────────────
+
+def _clip(text: str, max_len: int = 500) -> str:
+    if len(text) <= max_len:
+        return text
+    return text[:max_len] + f"…[+{len(text) - max_len}chars]"
+
+
+def _new_only(raw_msgs: list) -> list:
+    """last_assistant 이후 메시지만 반환. 없으면 마지막 user 1개만."""
+    last_asst = -1
+    for i, m in enumerate(raw_msgs):
+        if m.get("role") in ("assistant", "model"):
+            last_asst = i
+    if last_asst >= 0:
+        return raw_msgs[last_asst + 1:]
+    return [m for m in raw_msgs if m.get("role") not in ("system", "developer")]
+
+
+def _content_str(content, max_len: int = 500) -> str:
+    if isinstance(content, str):
+        return _clip(content, max_len)
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if not isinstance(block, dict):
+                continue
+            t = block.get("type", "")
+            if t == "text":
+                parts.append(block.get("text", ""))
+            elif t == "image":
+                parts.append("[image]")
+            elif t == "tool_use":
+                parts.append(f"[tool_use: {block.get('name', '?')}]")
+            elif t == "tool_result":
+                inner = block.get("content", "")
+                if isinstance(inner, list):
+                    inner = " ".join(p.get("text", "") for p in inner if isinstance(p, dict))
+                parts.append(f"[tool_result: {str(inner)[:100]}]")
+            else:
+                parts.append(f"[{t}]")
+        return _clip(" ".join(parts), max_len)
+    return _clip(str(content), max_len)
+
+
 def _extract_user_content(
     content,
     base_path: str,
@@ -83,3 +128,26 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
         targets=targets,
         raw_body=body,
     )
+
+
+# ── 로그용 요약 ───────────────────────────────────────────────────────────────
+
+def summarize(obj: dict) -> dict:
+    """요청 바디에서 로그/TUI 표시용 요약 dict 반환."""
+    messages = obj.get("messages", [])
+    return {
+        "model":      obj.get("model", "N/A"),
+        "stream":     bool(obj.get("stream", False)),
+        "msg_count":  len(messages),
+        "system":     str(obj.get("system", ""))[:200].replace("\n", "↵"),
+        "messages":   messages,
+    }
+
+
+def extract_messages(obj: dict, msg_max: int = 500) -> list[dict]:
+    """JSONL 로그용: 신규 메시지만 추출 (히스토리 제외)."""
+    raw_msgs = obj.get("messages", [])
+    return [
+        {"role": msg.get("role", "?"), "content": _content_str(msg.get("content", ""), msg_max)}
+        for msg in _new_only(raw_msgs)
+    ]

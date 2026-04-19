@@ -15,6 +15,25 @@ import json
 from .base import DLPTarget, ParsedRequest
 
 
+# ── 공통 유틸 ───────────────────────────────────────────────────────────────
+
+def _clip(text: str, max_len: int = 500) -> str:
+    if len(text) <= max_len:
+        return text
+    return text[:max_len] + f"…[+{len(text) - max_len}chars]"
+
+
+def _new_only(raw_msgs: list) -> list:
+    """last_model 이후 콘텐츠만 반환. 없으면 user 콘텐츠만."""
+    last_model = -1
+    for i, m in enumerate(raw_msgs):
+        if m.get("role") == "model":
+            last_model = i
+    if last_model >= 0:
+        return raw_msgs[last_model + 1:]
+    return [m for m in raw_msgs if m.get("role") != "model"]
+
+
 def _model_from_url(url: str) -> str:
     """URL에서 모델명 추출: /models/gemini-2.5-pro:generateContent → gemini-2.5-pro"""
     if "/models/" in url:
@@ -78,3 +97,35 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
         targets=targets,
         raw_body=body,
     )
+
+
+# ── 로그용 요약 ───────────────────────────────────────────────────────────────
+
+def summarize(obj: dict) -> dict:
+    """요청 바디에서 로그/TUI 표시용 요약 dict 반환."""
+    contents = obj.get("contents", [])
+    sys_inst = obj.get("systemInstruction", {})
+    sys_text = ""
+    if sys_inst:
+        parts = sys_inst.get("parts", [])
+        sys_text = " ".join(p.get("text", "") for p in parts)[:200].replace("\n", "↵")
+    return {
+        "model":         obj.get("model", "N/A"),
+        "stream":        False,  # Gemini는 URL로 판별 (이미 parse() 에서)
+        "content_count": len(contents),
+        "system":        sys_text,
+        "contents":      contents,
+    }
+
+
+def extract_messages(obj: dict, msg_max: int = 500) -> list[dict]:
+    """JSONL 로그용: 신규 콘텐츠만 추출 (히스토리 제외)."""
+    raw_msgs = obj.get("contents", [])
+    msgs: list[dict] = []
+    for c in _new_only(raw_msgs):
+        role  = c.get("role", "?")
+        parts = c.get("parts", [])
+        text  = " ".join(p.get("text", "") for p in parts if "text" in p)
+        if text:
+            msgs.append({"role": role, "content": _clip(text, msg_max)})
+    return msgs
