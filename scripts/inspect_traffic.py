@@ -576,6 +576,12 @@ class InspectAddon:
         }
         if "json" in content_type and body_raw:
             jsonl_record["engine"] = result if result else None
+            # 실제 메시지 내용 로깅
+            try:
+                _raw_obj = json.loads(body_raw) if body_obj is None else body_obj
+                jsonl_record["messages"] = _extract_messages(_raw_obj, provider)
+            except Exception:
+                pass
         _write_jsonl(jsonl_record)
 
     def response(self, flow: http.HTTPFlow) -> None:
@@ -703,6 +709,93 @@ def _summarize_request(obj: dict, provider: str, lines: list) -> dict:
         summary = {"auth_exchange": True}
 
     return summary
+
+
+# ── 메시지 내용 추출 (JSONL 로그용) ─────────────────────────────────────────
+
+_MSG_MAX = 2000  # 메시지 하나당 최대 문자 수 (로그 용량 절약)
+
+
+def _extract_messages(obj: dict, provider: str) -> list[dict]:
+    """요청 바디에서 실제 대화 메시지를 추출해 [{role, content}] 리스트로 반환.
+
+    content가 긴 경우 _MSG_MAX 자로 truncate.
+    system / tool_result / tool_use 등 비-사용자 메시지도 포함.
+    """
+    msgs: list[dict] = []
+
+    def _clip(text: str) -> str:
+        if len(text) <= _MSG_MAX:
+            return text
+        return text[:_MSG_MAX] + f"…[+{len(text) - _MSG_MAX}chars]"
+
+    def _content_str(content) -> str:
+        if isinstance(content, str):
+            return _clip(content)
+        if isinstance(content, list):
+            parts = []
+            for part in content:
+                if not isinstance(part, dict):
+                    continue
+                t = part.get("type", "")
+                if t == "text":
+                    parts.append(part.get("text", ""))
+                elif t == "image_url":
+                    parts.append("[image]")
+                elif t == "tool_use":
+                    parts.append(f"[tool_use: {part.get('name', '?')}]")
+                elif t == "tool_result":
+                    inner = part.get("content", "")
+                    if isinstance(inner, list):
+                        inner = " ".join(p.get("text", "") for p in inner if isinstance(p, dict))
+                    parts.append(f"[tool_result: {str(inner)[:200]}]")
+                else:
+                    parts.append(f"[{t}]")
+            return _clip(" ".join(parts))
+        return _clip(str(content))
+
+    # OpenAI 호환 (OpenAI, Azure, Groq, Together, Mistral, OpenRouter,
+    #               GitHub Copilot, DeepSeek, xAI)
+    if provider in (
+        "OpenAI", "Azure OpenAI", "Groq", "Together", "Mistral",
+        "OpenRouter", "GitHub Copilot", "DeepSeek", "xAI",
+    ):
+        for msg in obj.get("messages", []):
+            role    = msg.get("role", "?")
+            content = msg.get("content", "")
+            name    = msg.get("name")
+            entry: dict = {"role": role, "content": _content_str(content)}
+            if name:
+                entry["name"] = name
+            msgs.append(entry)
+
+    # Anthropic
+    elif provider == "Anthropic":
+        sys_prompt = obj.get("system", "")
+        if sys_prompt:
+            msgs.append({"role": "system", "content": _clip(str(sys_prompt))})
+        for msg in obj.get("messages", []):
+            msgs.append({
+                "role":    msg.get("role", "?"),
+                "content": _content_str(msg.get("content", "")),
+            })
+
+    # Google Gemini
+    elif provider == "Gemini":
+        si = obj.get("systemInstruction", {})
+        if si:
+            parts = si.get("parts", [])
+            text  = " ".join(p.get("text", "") for p in parts if "text" in p)
+            if text:
+                msgs.append({"role": "system", "content": _clip(text)})
+        for c in obj.get("contents", []):
+            role  = c.get("role", "?")
+            parts = c.get("parts", [])
+            text  = " ".join(p.get("text", "") for p in parts if "text" in p)
+            if text:
+                msgs.append({"role": role, "content": _clip(text)})
+
+    return msgs
 
 
 # mitmproxy가 로드할 addon 인스턴스
