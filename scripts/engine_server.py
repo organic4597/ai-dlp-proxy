@@ -329,6 +329,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                     "findings": resp.get("findings", []),
                     "elapsed_ms": elapsed,
                     "targets": resp.get("targets", []),
+                    "messages": request.get("messages", []),  # inspect_traffic이 전달한 원본 메시지
                     "dlp_applied": "pass",
                 })
 

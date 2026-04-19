@@ -444,6 +444,7 @@ class InspectAddon:
                     "content_type": content_type,
                     "body": body_obj,
                     "msg_count": dlp_summary.get("msg_count", 0),
+                    "messages": _extract_messages(body_obj, provider),
                 })
                 if result is None:
                     lines.append(f"  {C.DIM}[Engine 미연결 — UDS {_ENGINE_SOCK}]{C.RESET}")

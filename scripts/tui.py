@@ -2838,9 +2838,23 @@ class DLPApp(App):
             targets = rq.get("targets", [])
             applied = self._applied_action_for_event(rq)
             if not targets:
+                # targets가 없으면 raw messages로 폴백
+                raw_msgs = rq.get("messages", [])
+                if raw_msgs:
+                    ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 전송 내용 (messages 기준) ──[/]")
+                    for msg in raw_msgs:
+                        role = msg.get("role", "?")
+                        content = str(msg.get("content", ""))
+                        role_color = "cyan" if role == "system" else "green" if role == "assistant" else "yellow"
+                        ds.write(f"  [{role_color}]{role}[/]")
+                        if len(content) > 2000:
+                            ds.write(Text(f"    {content[:2000]}"))
+                            ds.write(f"    [dim]… ({len(content):,}자 중 2000자만 표시)[/]")
+                        else:
+                            ds.write(Text(f"    {content}"))
+                        ds.write("")
+                    continue
                 ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 전송 내용 없음 (히스토리) ──[/]")
-                sent_lines.append(f"── 요청 #{rq.get('id','?')} — 전송 내용 없음 (히스토리) ──")
-                sent_lines.append("")
                 ds.write("")
                 continue
             effective_findings = self._effective_findings_for_event(rq)
@@ -3078,6 +3092,25 @@ class DLPApp(App):
             f"[green]{ev.get('model','?')}[/] "
             f"[{ACT_S.get(pa,'')}]{ACT_LB.get(pa, pa.upper())}[/] "
             f"effective=[red]{fc}[/]{suppressed_text}{suffix} [dim]{ev.get('elapsed_ms',0)}ms[/]")
+
+        # 마지막 user 메시지 내용 출력 — targets 또는 messages에서 추출
+        _last_user = None
+        # targets (role-filtered scan targets) 우선
+        for tgt in reversed(ev.get("targets", [])):
+            if tgt.get("role") == "user":
+                _last_user = tgt.get("text", "")
+                break
+        # targets에 없으면 messages에서
+        if _last_user is None:
+            for msg in reversed(ev.get("messages", [])):
+                if msg.get("role") == "user":
+                    _last_user = msg.get("content", "")
+                    break
+        if _last_user:
+            _preview = _last_user.replace("\n", " ").strip()
+            if len(_preview) > 200:
+                _preview = _preview[:200] + "…"
+            self._lg(f"  [dim yellow]▶ user:[/] {markup_escape(_preview)}")
         for f in ev.get("findings", []):
             sev = f.get("severity") or "?"
             low_tag = self._finding_prefix(f)
@@ -3222,6 +3255,7 @@ def _rec2ev(rec: dict) -> dict | None:
         "target_count": eng.get("target_count", 0),
         "total_text_len": eng.get("total_text_len", 0),
         "targets": eng.get("targets", []),
+        "messages": rec.get("messages", []),   # 전체 원본 메시지 (role-filter 없음)
         "dlp_applied": rec.get("dlp_applied", "pass"),
     }
 
