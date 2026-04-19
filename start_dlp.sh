@@ -10,10 +10,11 @@
 #    5. TUI 종료 시 엔진·프록시 자동 정리
 #
 #  사용법:
-#    bash start_dlp.sh               # 기본 실행
-#    bash start_dlp.sh --no-tui      # TUI 없이 서비스만 실행 (서버 모드)
-#    bash start_dlp.sh --port 4001   # mitmproxy 포트 변경
-#    bash start_dlp.sh --stop        # 실행 중인 프로세스 종료
+#    bash start_dlp.sh                  # 기본 실행 (명시적 프록시)
+#    bash start_dlp.sh --transparent    # 투명 프록시 모드 (iptables + SNI 라우터)
+#    bash start_dlp.sh --no-tui         # TUI 없이 서비스만 실행 (서버 모드)
+#    bash start_dlp.sh --port 4001      # mitmproxy 포트 변경
+#    bash start_dlp.sh --stop           # 실행 중인 프로세스 종료
 # =============================================================================
 set -euo pipefail
 
@@ -40,17 +41,19 @@ SNI_BINARY="$BASE_DIR/sni-router/target/release/sni-router"
 OPT_NO_TUI=false
 OPT_STOP=false
 OPT_SNI=false
+OPT_TRANSPARENT=false
 MITM_PORT=4001
 SNI_PORT=4443
 
 for arg in "$@"; do
     case "$arg" in
-        --no-tui)    OPT_NO_TUI=true ;;
-        --stop)      OPT_STOP=true ;;
-        --sni)       OPT_SNI=true ;;     # 투명 프록시용 SNI 라우터 활성화
-        --port)      shift; MITM_PORT="$1" ;;
-        --port=*)    MITM_PORT="${arg#--port=}" ;;
-        --sni-port=*)SNI_PORT="${arg#--sni-port=}" ;;
+        --no-tui)       OPT_NO_TUI=true ;;
+        --stop)         OPT_STOP=true ;;
+        --sni)          OPT_SNI=true ;;
+        --transparent)  OPT_TRANSPARENT=true; OPT_SNI=true ;;  # iptables+SNI 풀세트
+        --port)         shift; MITM_PORT="$1" ;;
+        --port=*)       MITM_PORT="${arg#--port=}" ;;
+        --sni-port=*)   SNI_PORT="${arg#--sni-port=}" ;;
         --help|-h)
             grep '^#  ' "$0" | sed 's/^#  //'
             exit 0 ;;
@@ -98,6 +101,15 @@ stop_all() {
     pkill -f "sni-router" 2>/dev/null && stopped=$((stopped+1)) || true
     pkill -f "engine_server.py" 2>/dev/null && stopped=$((stopped+1)) || true
     pkill -f "inspect_traffic.py" 2>/dev/null && stopped=$((stopped+1)) || true
+
+    # --transparent 모드였다면 iptables + dnsmasq 제거
+    if [[ -f "/etc/dnsmasq.d/dlp-transparent.conf" ]]; then
+        if command -v sudo &>/dev/null && [[ $EUID -ne 0 ]]; then
+            sudo bash "$BASE_DIR/setup_transparent.sh" --remove 2>/dev/null || true
+        elif [[ $EUID -eq 0 ]]; then
+            bash "$BASE_DIR/setup_transparent.sh" --remove 2>/dev/null || true
+        fi
+    fi
 
     if [[ $stopped -eq 0 ]]; then
         warn "실행 중인 DLP 프로세스를 찾지 못했습니다"
@@ -208,7 +220,25 @@ for i in $(seq 1 20); do
 done
 
 # =============================================================================
-# 3-b. SNI 라우터 시작 (--sni 옵션 시)
+# 3-a. 투명 프록시 모드: iptables + DHCP 자동 설정 (--transparent)
+# =============================================================================
+if [[ "$OPT_TRANSPARENT" == true ]]; then
+    SETUP_SCRIPT="$BASE_DIR/setup_transparent.sh"
+    if [[ ! -f "$SETUP_SCRIPT" ]]; then
+        error "setup_transparent.sh 없음: $SETUP_SCRIPT"
+    fi
+    info "투명 프록시 설정 실행 (sudo 필요)..."
+    if [[ $EUID -eq 0 ]]; then
+        bash "$SETUP_SCRIPT"
+    elif command -v sudo &>/dev/null; then
+        sudo bash "$SETUP_SCRIPT"
+    else
+        error "iptables 설정에 root 권한 필요. sudo가 없습니다."
+    fi
+fi
+
+# =============================================================================
+# 3-b. SNI 라우터 시작 (--sni / --transparent 옵션 시)
 # =============================================================================
 if [[ "$OPT_SNI" == true ]]; then
     if [[ ! -x "$SNI_BINARY" ]]; then
