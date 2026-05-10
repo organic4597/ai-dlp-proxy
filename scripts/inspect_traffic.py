@@ -126,6 +126,14 @@ TARGET_HOSTS = {
     "api.x.ai":                             "xAI",
 }
 
+TARGET_IP_PATTERNS = [
+    # GitHub/Copilot transparent mode may expose only the destination IP.
+    r"140\.82\.(112|113|114|115)\.\d+",
+    # Common OpenAI/Cloudflare ranges seen when SNI/Host is unavailable.
+    r"104\.18\.\d+\.\d+",
+    r"172\.(6[4-9]|7[0-1])\.\d+\.\d+",
+]
+
 # Azure OpenAI 패턴: *.openai.azure.com
 AZURE_SUFFIX = ".openai.azure.com"
 
@@ -247,6 +255,15 @@ def _apply_mask(body_obj: dict, findings: list[dict], mask_templates: dict[str, 
 _flow_timings: dict[str, float] = {}
 _request_counter = 0
 
+
+def _next_request_id() -> tuple[int, str]:
+    """화면 표시용 순번과 DB/SSE용 고유 request_id를 함께 생성."""
+    global _request_counter
+    _request_counter += 1
+    display_id = _request_counter
+    unique_id = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+    return display_id, f"{unique_id}-{display_id:06d}"
+
 # ── 패킷 캡처 플래그 ─────────────────────────────────────────────────────────
 # /tmp/dlp-capture-next 파일이 존재하면 다음 LLM 요청 1개를 JSON으로 저장하고 삭제
 _CAPTURE_FLAG = Path("/tmp/dlp-capture-next")
@@ -259,6 +276,20 @@ def _provider(host: str, path: str = "") -> str | None:
         return TARGET_HOSTS[host]
     if host.endswith(AZURE_SUFFIX):
         return "Azure OpenAI"
+    # GitHub Copilot IP 대역 (140.82.112.0/22) → /v1/messages 경로
+    # transparent 프록시에서 SNI 없이 IP로 도달하는 경우
+    if path.startswith("/v1/messages") or path.startswith("/v1/chat/completions"):
+        import ipaddress
+        try:
+            ip = ipaddress.ip_address(host)
+            # GitHub IP 범위: 140.82.112.0/22
+            if ip in ipaddress.ip_network("140.82.112.0/22"):
+                return "GitHub Copilot"
+            # OpenAI IP 범위: 104.18.x.x, 172.64.x.x 등 Cloudflare (openai)
+            if ip in ipaddress.ip_network("104.18.0.0/16") or ip in ipaddress.ip_network("172.64.0.0/13"):
+                return "OpenAI"
+        except ValueError:
+            pass
     # api.github.com 토큰 교환 — 감시 대상 제외
     return None
 
@@ -335,7 +366,7 @@ class InspectAddon:
         try:
             _target_patterns = [
                 re.escape(host) for host in TARGET_HOSTS
-            ] + [r".*\.openai\.azure\.com"]  # Azure OpenAI 와일드카드
+            ] + [r".*\.openai\.azure\.com", *TARGET_IP_PATTERNS]  # Azure + IP fallback
             ctx.options.allow_hosts = _target_patterns
             log.info(
                 f"[CONFIG] ✓ TLS 인터셉트 대상 {len(_target_patterns)}개 호스트로 제한"
@@ -361,9 +392,7 @@ class InspectAddon:
         if not body_check or "json" not in content_type_check:
             return
 
-        global _request_counter
-        _request_counter += 1
-        req_id = _request_counter
+        display_id, req_id = _next_request_id()
 
         # 타이밍 시작
         _flow_timings[flow.id] = time.monotonic()
@@ -412,7 +441,7 @@ class InspectAddon:
         pc = _provider_color(provider)
         lines = [
             SEPARATOR,
-            f"{C.BOLD}[REQ #{req_id}]{C.RESET}  {ts}  {C.BOLD}▶{C.RESET}  {pc}{provider}{C.RESET}",
+            f"{C.BOLD}[REQ #{display_id}]{C.RESET}  {ts}  {C.BOLD}▶{C.RESET}  {pc}{provider}{C.RESET}",
             f"  {C.CYAN}{method}{C.RESET} {url}",
             f"  {C.DIM}Content-Length: {len(body_raw)}  Content-Type: {content_type}{C.RESET}",
             f"  {C.DIM}Headers:{C.RESET}",
@@ -427,7 +456,7 @@ class InspectAddon:
             lines.append(f"  {C.YELLOW}── DLP 대상 필드 요약 ──{C.RESET}")
             try:
                 obj = json.loads(body_raw)
-                dlp_summary = _summarize_request(obj, provider, lines)
+                dlp_summary = _summarize_request(obj, provider, lines, url=url)
             except Exception:
                 pass
 
@@ -445,7 +474,7 @@ class InspectAddon:
                     "content_type": content_type,
                     "body": body_obj,
                     "msg_count": dlp_summary.get("msg_count", 0),
-                    "messages": _extract_messages(body_obj, provider),
+                    "messages": _extract_messages(body_obj, provider, url=url),
                 })
                 if result is None:
                     lines.append(f"  {C.DIM}[Engine 미연결 — UDS {_ENGINE_SOCK}]{C.RESET}")
@@ -495,8 +524,8 @@ class InspectAddon:
             except Exception:
                 _ctrl = {}
             _mask_templates = merge_mask_templates(_ctrl.get("mask_templates", {}), allow_custom=True)
-            _pa = result.get("pipeline_action", "pass")
-            _findings = result.get("findings", [])
+            _pa = result.get("protection_action", result.get("pipeline_action", "pass"))
+            _findings = result.get("protection_findings") or result.get("findings", [])
             try:
                 _threshold = float(_ctrl.get("confidence_threshold", 0.5))
             except (TypeError, ValueError):
@@ -504,10 +533,23 @@ class InspectAddon:
             _effective_findings = [
                 finding
                 for finding in _findings
-                if float(finding.get("confidence", 0.0)) >= _threshold and not finding.get("suppressed", False)
+                if (
+                    float(finding.get("confidence", 0.0)) >= _threshold
+                    and not finding.get("suppressed", False)
+                )
             ]
 
-            _do_mask  = bool(_ctrl.get("mask_on_detect") and _pa in ("mask", "alert"))
+            # mask_on_detect: suppressed 여부 무관하게 threshold 이상 탐지 마스킹
+            # (ML FP 필터가 억제해도 사용자가 명시적으로 마스킹 요청한 경우 적용)
+            _mask_candidates = (
+                _effective_findings
+                if not _ctrl.get("mask_on_detect")
+                else [
+                    f for f in _findings
+                    if float(f.get("confidence", 0.0)) >= _threshold
+                ]
+            )
+            _do_mask  = bool(_ctrl.get("mask_on_detect") and _mask_candidates)
             _do_block = (
                 not _do_mask and (
                     (_pa in ("mask", "block") and _ctrl.get("block_on_mask")) or
@@ -515,9 +557,9 @@ class InspectAddon:
                 )
             )
 
-            if _do_mask and _effective_findings:
+            if _do_mask and _mask_candidates:
                 # 마스킹 적용 후 flow.request.content 교체
-                masked_body = _apply_mask(body_obj, _effective_findings, _mask_templates)
+                masked_body = _apply_mask(body_obj, _mask_candidates, _mask_templates)
                 masked_bytes = json.dumps(masked_body, ensure_ascii=False).encode("utf-8")
                 flow.request.content = masked_bytes
                 # Content-Length 재계산 (mitmproxy는 bytes length 기준)
@@ -528,10 +570,10 @@ class InspectAddon:
                     _engine_request({"action": "masked_inc", "id": req_id})
                 )
                 lines.append(
-                    f"  {C.CYAN}{C.BOLD}[DLP MASKED] {len(_effective_findings)}개 필드 마스킹 후 통과"
+                    f"  {C.CYAN}{C.BOLD}[DLP MASKED] {len(_mask_candidates)}개 필드 마스킹 후 통과"
                     f"  ({len(body_raw)}B → {len(masked_bytes)}B){C.RESET}"
                 )
-                for f in _effective_findings:
+                for f in _mask_candidates:
                     lines.append(
                         f"    {C.CYAN}▸ {f.get('rule','?')}: "
                         f"{f.get('match_text','')[:40]!r} → "
@@ -565,6 +607,8 @@ class InspectAddon:
         jsonl_record = {
             "type": "request",
             "id": req_id,
+            "request_id": req_id,
+            "display_id": display_id,
             "ts": ts,
             "provider": provider,
             "method": method,
@@ -581,7 +625,7 @@ class InspectAddon:
             # 실제 메시지 내용 로깅
             try:
                 _raw_obj = json.loads(body_raw) if body_obj is None else body_obj
-                jsonl_record["messages"] = _extract_messages(_raw_obj, provider)
+                jsonl_record["messages"] = _extract_messages(_raw_obj, provider, url=url)
             except Exception:
                 pass
         _write_jsonl(jsonl_record)
@@ -647,13 +691,15 @@ class InspectAddon:
             flow.response.stream = True
 
 
-def _summarize_request(obj: dict, provider: str, lines: list) -> dict:
+def _summarize_request(obj: dict, provider: str, lines: list, url: str = "") -> dict:
     """공급자별 파서의 summarize()로 위임. 로그 라인(터미널 출력)은 여기서 포맷."""
     if provider == "GitHub Copilot (Auth)":
         lines.append(f"    {C.RED}[AUTH TOKEN EXCHANGE]{C.RESET}")
         return {"auth_exchange": True}
 
-    summary = summarize_request(provider, obj)
+    # /v1/messages 경로는 Anthropic 포맷으로 파싱하되, Copilot은 전용 어댑터를 사용
+    effective_provider = "Anthropic" if "/v1/messages" in url and provider != "GitHub Copilot" else provider
+    summary = summarize_request(effective_provider, obj)
     if not summary:
         return {}
 
@@ -715,9 +761,11 @@ def _summarize_request(obj: dict, provider: str, lines: list) -> dict:
     return summary
 
 
-def _extract_messages(obj: dict, provider: str) -> list[dict]:
+def _extract_messages(obj: dict, provider: str, url: str = "") -> list[dict]:
     """공급자별 파서의 extract_messages()로 위임."""
-    return _extract_msgs_by_provider(provider, obj)
+    # /v1/messages 경로는 Anthropic 포맷으로 파싱하되, Copilot은 전용 어댑터를 사용
+    effective_provider = "Anthropic" if "/v1/messages" in url and provider != "GitHub Copilot" else provider
+    return _extract_msgs_by_provider(effective_provider, obj)
 
 
 

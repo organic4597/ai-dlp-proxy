@@ -66,6 +66,8 @@ class PipelineControl:
     confidence_threshold: float = 0.5
     context_penalty_enabled: bool = True
     asset_enabled: bool = True
+    ml_filter_enabled: bool = False      # 기본 OFF (옵트인) — 모델 없으면 no-op
+    ml_filter_threshold: float = 0.4    # TP 확률 임계값 (보수적, Recall 우선)
     disabled_rules: list[str] = field(default_factory=list)
     allowlist: list[AllowlistEntry] = field(default_factory=list)
     mask_templates: dict[str, str] = field(default_factory=lambda: dict(DEFAULT_MASK_TEMPLATES))
@@ -184,6 +186,8 @@ def load_control(path: str = DEFAULT_CONTROL_PATH) -> PipelineControl:
         confidence_threshold=threshold,
         context_penalty_enabled=bool(data.get("context_penalty_enabled", True)),
         asset_enabled=bool(data.get("asset_enabled", True)),
+        ml_filter_enabled=bool(data.get("ml_filter_enabled", False)),
+        ml_filter_threshold=float(data.get("ml_filter_threshold", 0.4)),
         disabled_rules=disabled_rules,
         allowlist=allowlist,
         mask_templates=merge_mask_templates(data.get("mask_templates", {}), allow_custom=True),

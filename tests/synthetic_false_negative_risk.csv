@@ -1,0 +1,113 @@
+case_id,category,input_text,expected_rule,min_confidence,expected_action,notes
+SYN-FN-KR_PHONE-0001,kr_phone,전화번호: 016-13**-273,kr_phone,0.5,mask,합성 FN위험 — [중간 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0002,kr_phone,연락처 정보 mobile=010/7412/4108,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0003,kr_phone,장예준의 휴대폰 번호는 010-71**-7800,kr_phone,0.5,mask,합성 FN위험 — [중간 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0004,kr_phone,긴급 연락처: 010/9131/8665,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0005,kr_phone,contact: +82-19-2067-5051,kr_phone,0.5,mask,합성 FN위험 — [국제번호 +82] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0006,kr_phone,phone number 016-43**-5615,kr_phone,0.5,mask,합성 FN위험 — [중간 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0007,kr_phone,통화 요청 번호 019/1426/185,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0008,kr_phone,담당자 핸드폰: 010/6170/8654,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0009,kr_phone,모바일 번호 입력: +82-19-8296-7069,kr_phone,0.5,mask,합성 FN위험 — [국제번호 +82] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0010,kr_phone,call me at 공일공-6903-860,kr_phone,0.5,mask,합성 FN위험 — [한글 앞자리 (공일공)] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0011,kr_phone,"연락처
+장예준: (011)1094-7678",kr_phone,0.5,mask,합성 FN위험 — [괄호 지역코드] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0012,kr_phone,수신자 전화번호: (010)9692-4937,kr_phone,0.5,mask,합성 FN위험 — [괄호 지역코드] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0013,kr_phone,비상연락망 등록 +82-10-7151-1728,kr_phone,0.5,mask,합성 FN위험 — [국제번호 +82] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0014,kr_phone,모바일 인증번호 발송 대상: +82-10-9280-4428,kr_phone,0.5,mask,합성 FN위험 — [국제번호 +82] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0015,kr_phone,my number is 공일공-9841-5790,kr_phone,0.5,mask,합성 FN위험 — [한글 앞자리 (공일공)] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0016,kr_phone,전화번호: 010-75**-6843,kr_phone,0.5,mask,합성 FN위험 — [중간 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0017,kr_phone,연락처 정보 mobile=+82-10-1648-5009,kr_phone,0.5,mask,합성 FN위험 — [국제번호 +82] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0018,kr_phone,정시우의 휴대폰 번호는 (010)2180-1414,kr_phone,0.5,mask,합성 FN위험 — [괄호 지역코드] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0019,kr_phone,긴급 연락처: 016/3659/683,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0020,kr_phone,contact: 011/5554/1427,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0021,kr_phone,phone number 017–6411–7875,kr_phone,0.5,mask,합성 FN위험 — [en-dash] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0022,kr_phone,통화 요청 번호 019-32**-8730,kr_phone,0.5,mask,합성 FN위험 — [중간 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0023,kr_phone,담당자 핸드폰: 011/7704/2458,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0024,kr_phone,모바일 번호 입력: 010/7015/4259,kr_phone,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_PHONE-0025,kr_phone,call me at (010)4316-5123,kr_phone,0.5,mask,합성 FN위험 — [괄호 지역코드] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0001,kr_rrn,주민 등록 번호: 670708-221****,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0002,kr_rrn,본인확인 주민등록번호 = 830818-259****,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0003,kr_rrn,윤채원 고객님의 resident identification: 600602_2488860,kr_rrn,0.5,mask,합성 FN위험 — [언더스코어] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0004,kr_rrn,신분확인용 주민등록번호는 610813-144**** 입니다.,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0005,kr_rrn,생년월일 기반 본인확인 값 4202**-2953932,kr_rrn,0.5,mask,합성 FN위험 — [앞자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0006,kr_rrn,"고객 정보
+이름: 박도윤
+주민번호: 431006_2532764
+연락처: 010-xxxx-xxxx",kr_rrn,0.5,mask,합성 FN위험 — [언더스코어] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0007,kr_rrn,"resident_registration_number: ""420102-124****""",kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0008,kr_rrn,rrn=531130-241**** 처리 완료,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0009,kr_rrn,identification number 621122-202**** confirmed,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0010,kr_rrn,주민등록번호 입력 완료 — 810530-137****,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0011,kr_rrn,신분증 번호: 420429/1149826 (발급기관: 행정안전부),kr_rrn,0.5,mask,합성 FN위험 — [슬래시 구분] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0012,kr_rrn,birth registration: 710309-182****,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0013,kr_rrn,오지호님 본인인증 완료: 451015_2536460,kr_rrn,0.5,mask,합성 FN위험 — [언더스코어] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0014,kr_rrn,주민번호 앞뒤 7자리 확인 980117/2328066,kr_rrn,0.5,mask,합성 FN위험 — [슬래시 구분] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0015,kr_rrn,"고객정보 수집 동의서
+주민등록번호: 5008**-1814211",kr_rrn,0.5,mask,합성 FN위험 — [앞자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0016,kr_rrn,주민 등록 번호: 530801/2629911,kr_rrn,0.5,mask,합성 FN위험 — [슬래시 구분] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0017,kr_rrn,본인확인 주민등록번호 = 431011_1660205,kr_rrn,0.5,mask,합성 FN위험 — [언더스코어] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0018,kr_rrn,문태양 고객님의 resident identification: 98/07/19-2554071,kr_rrn,0.5,mask,합성 FN위험 — [날짜 슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0019,kr_rrn,신분확인용 주민등록번호는 90/02/09-2549620 입니다.,kr_rrn,0.5,mask,합성 FN위험 — [날짜 슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0020,kr_rrn,생년월일 기반 본인확인 값 850124-224****,kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0021,kr_rrn,"고객 정보
+이름: 조민서
+주민번호: 89/07/26-2117423
+연락처: 010-xxxx-xxxx",kr_rrn,0.5,mask,합성 FN위험 — [날짜 슬래시] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0022,kr_rrn,"resident_registration_number: ""860619-221****""",kr_rrn,0.5,mask,합성 FN위험 — [뒷자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0023,kr_rrn,rrn=6408**-2450583 처리 완료,kr_rrn,0.5,mask,합성 FN위험 — [앞자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0024,kr_rrn,identification number 9511**-2244456 confirmed,kr_rrn,0.5,mask,합성 FN위험 — [앞자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-KR_RRN-0025,kr_rrn,주민등록번호 입력 완료 — 6505**-2033050,kr_rrn,0.5,mask,합성 FN위험 — [앞자리 부분마스킹] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0001,credit_card,카드 결제 승인 번호: 4014#6580#7302#1736,credit_card,0.5,mask,합성 FN위험 — [해시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0002,credit_card,신용카드 정보 payment card = 5519 **** **** 2025,credit_card,0.5,mask,합성 FN위험 — [중간 마스킹] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0003,credit_card,billing card number: 5268.2860.7349.7837,credit_card,0.5,mask,합성 FN위험 — [점 구분] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0004,credit_card,결제 카드 번호 6011–9293–4487–5756,credit_card,0.5,mask,합성 FN위험 — [en-dash] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0005,credit_card,credit card: 6011#2033#4561#5870,credit_card,0.5,mask,합성 FN위험 — [해시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0006,credit_card,카드 명세서 번호 6011.4710.6976.6621,credit_card,0.5,mask,합성 FN위험 — [점 구분] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0007,credit_card,payment method: card 5129#3032#5260#5970,credit_card,0.5,mask,합성 FN위험 — [해시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0008,credit_card,카드번호 5211/7292/0232/5807 로 결제 요청,credit_card,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0009,credit_card,"카드 결제 정보
+번호: 4746 **** **** 2833
+유효기간: 10/29",credit_card,0.5,mask,합성 FN위험 — [중간 마스킹] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0010,credit_card,card_number=5105 **** **** 5768,credit_card,0.5,mask,합성 FN위험 — [중간 마스킹] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0011,credit_card,신용카드 번호: 5571.1559.1998.8923 (유효기간 11/30),credit_card,0.5,mask,합성 FN위험 — [점 구분] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0012,credit_card,purchase authorized — card 5393.6233.5338.9805,credit_card,0.5,mask,합성 FN위험 — [점 구분] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0013,credit_card,결제수단: 4000/4084/5446/8619,credit_card,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0014,credit_card,credit billing: 6011–2211–5723–1917 expires 09/26,credit_card,0.5,mask,합성 FN위험 — [en-dash] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0015,credit_card,카드 번호 입력 완료: 6011/7129/0335/5265,credit_card,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0016,credit_card,카드 결제 승인 번호: 5557.3571.1751.2178,credit_card,0.5,mask,합성 FN위험 — [점 구분] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0017,credit_card,신용카드 정보 payment card = 5477–4514–8202–4351,credit_card,0.5,mask,합성 FN위험 — [en-dash] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0018,credit_card,billing card number: 4338–5198–0411–3680,credit_card,0.5,mask,합성 FN위험 — [en-dash] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0019,credit_card,결제 카드 번호 5412#3026#0318#1596,credit_card,0.5,mask,합성 FN위험 — [해시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0020,credit_card,credit card: 6011 **** **** 8905,credit_card,0.5,mask,합성 FN위험 — [중간 마스킹] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0021,credit_card,카드 명세서 번호 4000/6431/8723/1104,credit_card,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0022,credit_card,payment method: card 5580 **** **** 1910,credit_card,0.5,mask,합성 FN위험 — [중간 마스킹] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0023,credit_card,카드번호 4829#3058#7242#0892 로 결제 요청,credit_card,0.5,mask,합성 FN위험 — [해시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0024,credit_card,"카드 결제 정보
+번호: 4341/0168/8527/0666
+유효기간: 12/25",credit_card,0.5,mask,합성 FN위험 — [슬래시] 변조 포맷 seed=1778327754
+SYN-FN-CREDIT_C-0025,credit_card,card_number=5366–9343–7587–1420,credit_card,0.5,mask,합성 FN위험 — [en-dash] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0001,email,이메일: 49dwv @ naver.com,email,0.5,mask,합성 FN위험 — [@ 주변 공백] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0002,email,연락처 메일 주소 jnyqcs [at] nate.com,email,0.5,mask,합성 FN위험 — [[at] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0003,email,수신자 email=bljxetjcx(at)example.com,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0004,email,담당자 이메일: 7qkc5qd5qn.yq @ company.co.kr,email,0.5,mask,합성 FN위험 — [@ 주변 공백] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0005,email,send to ngm3_tdoh @ korea.ac.kr,email,0.5,mask,합성 FN위험 — [@ 주변 공백] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0006,email,mail recipient: 0pgbw@gmail[.]com,email,0.5,mask,합성 FN위험 — [[.] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0007,email,오지호의 이메일 주소는 9vtwtmigzl[골뱅이]company.co.kr 입니다,email,0.5,mask,합성 FN위험 — [한글 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0008,email,회신 주소: 1gh6rrudo(at)company.co.kr,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0009,email,inbox 3wcpmerb7l9vwq(at)korea.ac.kr,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0010,email,이메일 주소 등록: 6qwaa43bu @ outlook.com,email,0.5,mask,합성 FN위험 — [@ 주변 공백] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0011,email,contact email 38mxpet6z7no @ korea.ac.kr,email,0.5,mask,합성 FN위험 — [@ 주변 공백] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0012,email,메일 보내기 → dkw5ibhppasbdn[골뱅이]example.com,email,0.5,mask,합성 FN위험 — [한글 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0013,email,고객 이메일: h64i83da52fu@company[.]co[.]kr,email,0.5,mask,합성 FN위험 — [[.] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0014,email,email address for 이서연: 0htm9h7[골뱅이]hanmail.net,email,0.5,mask,합성 FN위험 — [한글 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0015,email,수신 메일: vqhtyw_alsqp[골뱅이]company.co.kr,email,0.5,mask,합성 FN위험 — [한글 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0016,email,이메일: 1yg633wyka@nate[.]com,email,0.5,mask,합성 FN위험 — [[.] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0017,email,연락처 메일 주소 9431whl9v.mvg [at] snu.ac.kr,email,0.5,mask,합성 FN위험 — [[at] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0018,email,수신자 email=fpf2_peo [at] hanmail.net,email,0.5,mask,합성 FN위험 — [[at] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0019,email,담당자 이메일: obfyuzpw1u6q(at)hanmail.net,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0020,email,send to hhya0v(at)kakao.com,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0021,email,mail recipient: tti2ig1dwd(at)gmail.com,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0022,email,최지우의 이메일 주소는 we2iou4li6pf@outlook[.]com 입니다,email,0.5,mask,합성 FN위험 — [[.] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0023,email,회신 주소: 0jbf.7xga0 [at] hanmail.net,email,0.5,mask,합성 FN위험 — [[at] 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0024,email,inbox aj_0o8tl[골뱅이]nate.com,email,0.5,mask,합성 FN위험 — [한글 치환] 변조 포맷 seed=1778327754
+SYN-FN-EMAIL-0025,email,이메일 주소 등록: 58rqpiesicq(at)example.com,email,0.5,mask,합성 FN위험 — [(at) 치환] 변조 포맷 seed=1778327754

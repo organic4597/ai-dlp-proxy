@@ -19,6 +19,7 @@ from .control import DEFAULT_CONTROL_PATH, load_control
 from .regex_stage import RegexStage
 from .asset_stage import AssetStage
 from .slm_stage import SLMStage
+from .ml_filter import FalsePositiveFilter, load_filter, get_filter_status
 
 log = logging.getLogger(__name__)
 
@@ -67,10 +68,19 @@ def get_cache_stats() -> dict:
     return {**_cache_stats, "size": len(_msg_cache)}
 
 
+def get_slm_stats() -> dict:
+    """SLM 추론 통계 조회 (TUI/모니터링용)."""
+    return SLMStage.get_stats()
+
+
 def get_runtime_warning_lines() -> list[str]:
     warnings: list[str] = []
     warnings.extend(_asset_stage.runtime_warning_lines())
     warnings.extend(_slm_stage.runtime_warning_lines())
+    if _fp_filter is None and Path(
+        __file__
+    ).parent.joinpath("ml_filter", "models", "fp_filter_xgb.pkl").exists():
+        warnings.append("[ML Filter] 모델 파일은 존재하지만 로드 실패 — ML 필터 비활성화 상태")
     return warnings
 
 
@@ -135,6 +145,60 @@ def _decide_action(findings: list[Finding], threshold: float = 0.5) -> Action:
 _regex_stage = RegexStage()
 _asset_stage = AssetStage()
 _slm_stage   = SLMStage()   # 지연 로드 — 첫 scan() 호출 시 모델 로드
+
+# ML FP 필터 싱글톤 (모델 파일 없으면 None)
+_fp_filter: FalsePositiveFilter | None = load_filter()
+
+
+def reload_ml_filter(threshold: float | None = None) -> bool:
+    """ML 필터 모델 재로드 (모델 파일 교체 후 hot-reload용).
+
+    Returns True if loaded successfully, False if unavailable.
+    """
+    global _fp_filter
+    _fp_filter = load_filter(threshold=threshold)
+    return _fp_filter is not None
+
+
+def get_ml_filter_stats() -> dict:
+    """ML 필터 런타임 통계 조회."""
+    if _fp_filter is None:
+        return {**get_filter_status(), "enabled": False, "loaded": False}
+    return {**_fp_filter.get_stats(), **get_filter_status(), "enabled": True, "loaded": True}
+
+
+def _apply_ml_filter(
+    findings: list[Finding],
+    targets: list,
+    control,
+) -> list[Finding]:
+    """Regex Finding에 ML FP 필터 적용.
+
+    - stage == "regex" 인 finding만 대상 (Asset / SLM finding 보호)
+    - suppressed=True 이미 된 finding은 건너뜀
+    - 모델 없거나 ml_filter_enabled=False이면 no-op
+    """
+    if not control.ml_filter_enabled or _fp_filter is None:
+        return findings
+
+    # field_path → 원문 텍스트 조회 맵
+    text_lookup: dict[str, str] = {t.field_path: t.text for t in targets}
+
+    for f in findings:
+        if f.stage != "regex" or f.suppressed:
+            continue
+        full_text = text_lookup.get(f.field_path, "")
+        keep, prob_tp = _fp_filter.predict(f, full_text)
+        if not keep:
+            meta = dict(f.metadata or {})
+            meta["suppressed_reason"] = "ml_fp_filter"
+            meta["ml_prob_tp"]        = round(prob_tp, 4)
+            meta["ml_prob_fp"]        = round(1.0 - prob_tp, 4)
+            meta["ml_threshold"]      = _fp_filter.threshold
+            f.metadata   = meta
+            f.suppressed = True
+
+    return findings
 
 
 def _mask_text_for_slm(
@@ -231,6 +295,12 @@ def run_pipeline(
 
     all_findings = cached_findings + regex_new_findings
 
+    # ── 1-1단계: ML FP 필터 (Regex 직후, Asset 이전) ────────────────────────
+    # stage=="regex" findings만 대상, suppressed=True인 것 스킵
+    # 모델 없거나 ml_filter_enabled=False이면 no-op (fallback 안전)
+    if control.ml_filter_enabled:
+        all_findings = _apply_ml_filter(all_findings, targets, control)
+
     # ── 1-2단계: Asset Stage (Regex 이후, SLM 이전) ─────────────────────────
     if control.asset_enabled:
         try:
@@ -266,6 +336,7 @@ def run_pipeline(
                     field_path=target.field_path,
                     role=target.role,
                     text=masked_text,
+                    history=getattr(target, "history", False),
                 ))
             slm_findings = _slm_stage.scan(slm_targets, effective_findings)
             all_findings.extend(slm_findings)
@@ -273,7 +344,8 @@ def run_pipeline(
             log.error("[pipeline] slm 스테이지 오류: %s", e)
 
     elapsed = round((time.monotonic() - t0) * 1000, 2)
-    action = _decide_action(all_findings, control.confidence_threshold)
+    current_findings = [finding for finding in all_findings if not finding.history]
+    action = _decide_action(current_findings, control.confidence_threshold)
 
     cache_hit_count = len(cached_findings)
     if cache_hit_count > 0 or len(new_targets) > 0:

@@ -131,6 +131,15 @@ class SLMStage(Stage):
 
     _lock = threading.Lock()  # 모델은 싱글톤, 멀티스레드 직렬화
 
+    # ── 추론 통계 (클래스 레벨, 싱글톤 공유) ─────────────────────────────────
+    _infer_stats: dict = {
+        "total_calls": 0,
+        "total_findings": 0,
+        "errors": 0,
+        "elapsed_ms_sum": 0,
+        "elapsed_ms_p95_buf": [],  # 최근 100개 보관 (p95 계산용)
+    }
+
     def __init__(
         self,
         model_path: str | None = None,
@@ -276,12 +285,28 @@ class SLMStage(Stage):
                     context_before=rf.context_before,
                     context_after=rf.context_after,
                     confidence=rf.confidence,
+                    history=getattr(target, "history", False),
                     metadata=rf.metadata,
                 ))
 
+            SLMStage._infer_stats["total_findings"] += len(results)
             return results
 
-    # ── 내부 메서드 ───────────────────────────────────────────────────────────
+    @classmethod
+    def get_stats(cls) -> dict:
+        """추론 통계 반환 (TUI/모니터링용)."""
+        s = cls._infer_stats
+        total = s["total_calls"]
+        avg_ms = round(s["elapsed_ms_sum"] / total) if total else 0
+        buf = sorted(s["elapsed_ms_p95_buf"])
+        p95_ms = buf[int(len(buf) * 0.95)] if buf else 0
+        return {
+            "total_calls": total,
+            "total_findings": s["total_findings"],
+            "errors": s["errors"],
+            "avg_ms": avg_ms,
+            "p95_ms": p95_ms,
+        }
 
     def _scan_text(
         self,
@@ -321,6 +346,7 @@ class SLMStage(Stage):
             from llama_cpp import LlamaGrammar
             grammar = LlamaGrammar.from_string(_GRAMMAR)
 
+            t0 = time.monotonic()
             response = self._llm.create_chat_completion(
                 messages=[
                     {"role": "system", "content": _SYSTEM_PROMPT},
@@ -330,9 +356,17 @@ class SLMStage(Stage):
                 temperature=TEMPERATURE,
                 grammar=grammar,
             )
+            elapsed_ms = round((time.monotonic() - t0) * 1000)
+            SLMStage._infer_stats["total_calls"] += 1
+            SLMStage._infer_stats["elapsed_ms_sum"] += elapsed_ms
+            buf = SLMStage._infer_stats["elapsed_ms_p95_buf"]
+            buf.append(elapsed_ms)
+            if len(buf) > 100:
+                buf.pop(0)
             return response["choices"][0]["message"]["content"].strip()
         except Exception as e:
             log.warning("[SLM] 추론 오류: %s", e)
+            SLMStage._infer_stats["errors"] += 1
             return None
 
     def _item_to_finding(

@@ -1,4 +1,4 @@
 from .base import ParsedRequest, DLPTarget
-from . import openai, anthropic, gemini
+from . import openai, anthropic, gemini, copilot
 
-__all__ = ["ParsedRequest", "DLPTarget", "openai", "anthropic", "gemini"]
+__all__ = ["ParsedRequest", "DLPTarget", "openai", "anthropic", "gemini", "copilot"]

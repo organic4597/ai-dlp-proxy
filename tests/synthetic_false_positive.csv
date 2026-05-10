@@ -1,0 +1,211 @@
+case_id,category,input_text,expected_rule,min_confidence,expected_action,notes
+SYN-FP-KR_RRN-0001,kr_rrn,# 예시용 주민번호: 890228-1097835 (테스트 데이터),kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0002,kr_rrn,"test_rrn = ""440409-2169098""  # 단위 테스트용",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0003,kr_rrn,주민번호 형식 예시: 880101-1234567 또는 470925-1611996,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0004,kr_rrn,// 더미 데이터: 940623-1678185,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0005,kr_rrn,"sample_rrn = ""580501-1865030""",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0006,kr_rrn,"FORMAT: YYMMDD-GXXXXXXC, example 971015-1782041",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0007,kr_rrn,# 예시용 주민번호: 611019-1886605 (테스트 데이터),kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0008,kr_rrn,"test_rrn = ""491114-1766258""  # 단위 테스트용",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0009,kr_rrn,주민번호 형식 예시: 880101-1234567 또는 770412-2961219,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0010,kr_rrn,// 더미 데이터: 450404-1437204,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0011,kr_rrn,"sample_rrn = ""740628-1935702""",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0012,kr_rrn,"FORMAT: YYMMDD-GXXXXXXC, example 410516-1058491",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0013,kr_rrn,# 예시용 주민번호: 420330-2588123 (테스트 데이터),kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0014,kr_rrn,"test_rrn = ""871216-2812253""  # 단위 테스트용",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0015,kr_rrn,주민번호 형식 예시: 880101-1234567 또는 460211-2777601,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0016,kr_rrn,// 더미 데이터: 910417-1748591,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0017,kr_rrn,"sample_rrn = ""940402-2654270""",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0018,kr_rrn,"FORMAT: YYMMDD-GXXXXXXC, example 491226-1043917",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0019,kr_rrn,# 예시용 주민번호: 540614-2422742 (테스트 데이터),kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0020,kr_rrn,"test_rrn = ""660625-2818468""  # 단위 테스트용",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0021,kr_rrn,주민번호 형식 예시: 880101-1234567 또는 760722-2538734,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0022,kr_rrn,// 더미 데이터: 590221-2371581,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0023,kr_rrn,"sample_rrn = ""550804-2616319""",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0024,kr_rrn,"FORMAT: YYMMDD-GXXXXXXC, example 730730-1995726",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0025,kr_rrn,# 예시용 주민번호: 650108-1723756 (테스트 데이터),kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0026,kr_rrn,"test_rrn = ""420214-1319543""  # 단위 테스트용",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0027,kr_rrn,주민번호 형식 예시: 880101-1234567 또는 561229-1121161,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0028,kr_rrn,// 더미 데이터: 640427-2157281,kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0029,kr_rrn,"sample_rrn = ""610115-1977754""",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_RRN-0030,kr_rrn,"FORMAT: YYMMDD-GXXXXXXC, example 890827-2805610",kr_rrn,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0001,kr_phone,# test phone: 019 744 6925,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0002,kr_phone,"phone_regex_test = ""01053864382""  # 정규식 검증용",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0003,kr_phone,예시 전화번호: 016-242-2282 (실제 번호 아님),kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0004,kr_phone,"dummy_phone = ""011 1285 1412""",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0005,kr_phone,mock phone number 011 463 1749,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0006,kr_phone,// 테스트 연락처 011 369 1643,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0007,kr_phone,# test phone: 016-992-2213,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0008,kr_phone,"phone_regex_test = ""016 527 3561""  # 정규식 검증용",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0009,kr_phone,예시 전화번호: 010-4749-3569 (실제 번호 아님),kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0010,kr_phone,"dummy_phone = ""01089527863""",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0011,kr_phone,mock phone number 017-208-6045,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0012,kr_phone,// 테스트 연락처 010-8632-2858,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0013,kr_phone,# test phone: 0168831421,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0014,kr_phone,"phone_regex_test = ""010-5353-8920""  # 정규식 검증용",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0015,kr_phone,예시 전화번호: 010-4292-3210 (실제 번호 아님),kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0016,kr_phone,"dummy_phone = ""010 5191 9735""",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0017,kr_phone,mock phone number 01090929721,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0018,kr_phone,// 테스트 연락처 016-979-4400,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0019,kr_phone,# test phone: 017-5465-1907,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0020,kr_phone,"phone_regex_test = ""011 8523 3435""  # 정규식 검증용",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0021,kr_phone,예시 전화번호: 010-8944-9983 (실제 번호 아님),kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0022,kr_phone,"dummy_phone = ""019 160 9353""",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0023,kr_phone,mock phone number 010 2554 9457,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0024,kr_phone,// 테스트 연락처 0174197857,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0025,kr_phone,# test phone: 010-4722-8195,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0026,kr_phone,"phone_regex_test = ""019 585 9337""  # 정규식 검증용",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0027,kr_phone,예시 전화번호: 01066808841 (실제 번호 아님),kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0028,kr_phone,"dummy_phone = ""010-6597-4562""",kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0029,kr_phone,mock phone number 01095924836,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PHONE-0030,kr_phone,// 테스트 연락처 010 4553 7550,kr_phone,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0001,credit_card,# 테스트용 카드번호 4327-7371-3288-9143,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0002,credit_card,"test_card_number = ""5203872399533252""",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0003,credit_card,// dummy card: 5194448616331779,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0004,credit_card,"sample_payment_number = ""6011-2818-1145-3794""  # 실결제 아님",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0005,credit_card,card regex test 5580856155929385,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0006,credit_card,test_credit_card=4650900830764797  # ci test,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0007,credit_card,# 테스트용 카드번호 5532-6285-9737-8615,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0008,credit_card,"test_card_number = ""6011602713885470""",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0009,credit_card,// dummy card: 4763-5300-6078-1486,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0010,credit_card,"sample_payment_number = ""4557-0211-6786-9234""  # 실결제 아님",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0011,credit_card,card regex test 5314-8370-5123-3422,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0012,credit_card,test_credit_card=5280430173273300  # ci test,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0013,credit_card,# 테스트용 카드번호 5380560372154460,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0014,credit_card,"test_card_number = ""5256120498314893""",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0015,credit_card,// dummy card: 4711-9935-9342-2346,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0016,credit_card,"sample_payment_number = ""5151-3346-7897-2604""  # 실결제 아님",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0017,credit_card,card regex test 5289-2141-6316-1696,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0018,credit_card,test_credit_card=5561-6501-4143-6180  # ci test,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0019,credit_card,# 테스트용 카드번호 5571112434451978,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0020,credit_card,"test_card_number = ""5266-7024-3616-8529""",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0021,credit_card,// dummy card: 6011-3771-1424-8921,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0022,credit_card,"sample_payment_number = ""5194808273829409""  # 실결제 아님",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0023,credit_card,card regex test 6011-2568-0779-2777,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0024,credit_card,test_credit_card=5549-0062-9227-0471  # ci test,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0025,credit_card,# 테스트용 카드번호 5229-7188-0020-5016,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0026,credit_card,"test_card_number = ""5238420375529065""",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0027,credit_card,// dummy card: 5578700006169292,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0028,credit_card,"sample_payment_number = ""4971-8138-1996-6451""  # 실결제 아님",credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0029,credit_card,card regex test 5300-1512-5145-4671,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-CREDIT_C-0030,credit_card,test_credit_card=5392-5641-5153-2363  # ci test,credit_card,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0001,email,# example: c7oxh6pj.esqaiw@daum.net,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0002,email,// placeholder email hyxu0fx4x_ex@gmail.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0003,email,no-reply@example.com 또는 nc7ll@snu.ac.kr 같은 형식,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0004,email,"test_email = ""3vuj9h0g1_006hu@gmail.com""",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0005,email,"sample_email_addr = ""k2q1216wyi3ck@gmail.com""  # 더미",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0006,email,dummy_recipient=6jk3uhi@example.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0007,email,# example: b3jb9o.46@snu.ac.kr,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0008,email,// placeholder email mc2i5j@kakao.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0009,email,no-reply@example.com 또는 co.hht8bnlcw60@outlook.com 같은 형식,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0010,email,"test_email = ""9zglq2@example.com""",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0011,email,"sample_email_addr = ""627td4@gmail.com""  # 더미",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0012,email,dummy_recipient=rkula85mom8ox@snu.ac.kr,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0013,email,# example: b8y0wl.z8iaf@example.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0014,email,// placeholder email 0ebbhvt0k4cf@naver.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0015,email,no-reply@example.com 또는 msofe0xft5.4sfz@company.co.kr 같은 형식,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0016,email,"test_email = ""b65u5h@gmail.com""",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0017,email,"sample_email_addr = ""0vv0b_s5@korea.ac.kr""  # 더미",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0018,email,dummy_recipient=k649p@company.co.kr,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0019,email,# example: vizehv_qo@daum.net,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0020,email,// placeholder email 7h0hw@kakao.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0021,email,no-reply@example.com 또는 5i91yav1.oa52x@outlook.com 같은 형식,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0022,email,"test_email = ""4ahp5@naver.com""",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0023,email,"sample_email_addr = ""jt.bbjrc@nate.com""  # 더미",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0024,email,dummy_recipient=qei1ht9@gmail.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0025,email,# example: h48c30v3d@gmail.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0026,email,// placeholder email iauqhp781@kakao.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0027,email,no-reply@example.com 또는 ocqw7u@nate.com 같은 형식,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0028,email,"test_email = ""uszsj@naver.com""",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0029,email,"sample_email_addr = ""1gxuazzon@example.com""  # 더미",email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-EMAIL-0030,email,dummy_recipient=tfm8udqko43t@example.com,email,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0001,aws_access_key,# EXAMPLE KEY — not real: AKIAA0D1D1PJKYE8I3LR,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0002,aws_access_key,// placeholder aws_access_key_id = AKIAYCER5D97IJ2DLGAB,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0003,aws_access_key,"test_key = ""AKIAUI1BG5NE898T1NP2""  # 테스트용",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0004,aws_access_key,sample_access_key = AKIAG0PBWC5Y71Y1C2JO  # CI 환경 아님,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0005,aws_access_key,"aws_access_key_id = ""YOUR_KEY_HERE""  # e.g. AKIACOYXL0WPHNUQVYH3",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0006,aws_access_key,fake_aws_key=AKIARX05BKJYA2AL472Z  # unit test,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0007,aws_access_key,# EXAMPLE KEY — not real: AKIAZNEC5VB9ZNDQD1KP,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0008,aws_access_key,// placeholder aws_access_key_id = AKIA1Y88Q2CO2EG50L9J,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0009,aws_access_key,"test_key = ""AKIAEF5QNK9CV5RBZ609""  # 테스트용",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0010,aws_access_key,sample_access_key = AKIA92FOQ8HDV3NSE7QP  # CI 환경 아님,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0011,aws_access_key,"aws_access_key_id = ""YOUR_KEY_HERE""  # e.g. AKIAFJN50E98LM5G3547",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0012,aws_access_key,fake_aws_key=AKIATUMDVXCEWQMPARHD  # unit test,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0013,aws_access_key,# EXAMPLE KEY — not real: AKIALDZ4M1QPOM7K7HVL,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0014,aws_access_key,// placeholder aws_access_key_id = AKIAIMP0CYR2TX3C7JIX,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0015,aws_access_key,"test_key = ""AKIASVM2TB4KRWI1NFX3""  # 테스트용",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0016,aws_access_key,sample_access_key = AKIA4J7GM7VB2DF6KD4Q  # CI 환경 아님,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0017,aws_access_key,"aws_access_key_id = ""YOUR_KEY_HERE""  # e.g. AKIABHQW3Z6EDTQMAX2M",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0018,aws_access_key,fake_aws_key=AKIAKNS8TNKYG42THFEM  # unit test,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0019,aws_access_key,# EXAMPLE KEY — not real: AKIAY91Y05QADEZV08BM,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0020,aws_access_key,// placeholder aws_access_key_id = AKIAJKKYJMU5TCWSM69J,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0021,aws_access_key,"test_key = ""AKIAFXBZLSYHH0Z6IIMO""  # 테스트용",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0022,aws_access_key,sample_access_key = AKIA7DJ5YYYBJSR4603M  # CI 환경 아님,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0023,aws_access_key,"aws_access_key_id = ""YOUR_KEY_HERE""  # e.g. AKIAWB3KO2LPQ6E93AJF",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0024,aws_access_key,fake_aws_key=AKIAU36D62QDP4EGY0SM  # unit test,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0025,aws_access_key,# EXAMPLE KEY — not real: AKIA7WIVF9CD2M0CVBM5,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0026,aws_access_key,// placeholder aws_access_key_id = AKIAHBI3MDE4EHS0GF8C,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0027,aws_access_key,"test_key = ""AKIAD2WJQWP335BBMRY9""  # 테스트용",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0028,aws_access_key,sample_access_key = AKIADXUQKYBB14CC69ZF  # CI 환경 아님,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0029,aws_access_key,"aws_access_key_id = ""YOUR_KEY_HERE""  # e.g. AKIAOAKJZKBG0OR8RMMV",aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-AWS_ACCE-0030,aws_access_key,fake_aws_key=AKIAL73APC24TJW8QKWM  # unit test,aws_access_key,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0001,api_key_assignment,"api_key = ""YOUR_API_KEY""  # e.g. mTVLKqMtZalqYfeFqEgFtnbAgffwrJHO",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0002,api_key_assignment,# placeholder: api_key=5bee117f1e0c3332f087c32f002fb50aa797bf35,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0003,api_key_assignment,"example_api_key = ""2B4fcxXvFtXzTlHQoKKaKwiCW1B6ZKi9""  # 실제 키 아님",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0004,api_key_assignment,// test api_key 80724e05446f64d32510d44e69486b37,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0005,api_key_assignment,sample_service_key=58dc88ee87bce9bcdf090e714a327b59  # mock,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0006,api_key_assignment,"access_token = ""<TOKEN>""  # like 60bb11987b85a5f40b7f13ebe86b4df0",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0007,api_key_assignment,"api_key = ""YOUR_API_KEY""  # e.g. 97e6d0409d9a83288e3af75ebb8b6ad73fd6bfc3",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0008,api_key_assignment,# placeholder: api_key=b704a98e625b0fc1ef2f1c0d80780e23,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0009,api_key_assignment,"example_api_key = ""52518490dc084c4106bd3b2cfad76e8ff71a87ba""  # 실제 키 아님",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0010,api_key_assignment,// test api_key ebd0a2352a9356cc19d1bc7e269acb07abf2ed00,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0011,api_key_assignment,sample_service_key=3X2ucuDaJZNdQtoh1rbR6liA52Y7neMp  # mock,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0012,api_key_assignment,"access_token = ""<TOKEN>""  # like 30LyN0bzumuZOyA8RT7YnxqUmbUa7eLv",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0013,api_key_assignment,"api_key = ""YOUR_API_KEY""  # e.g. XMc1td3W7zpHK88q5dJJ12VepEu0melO",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0014,api_key_assignment,# placeholder: api_key=ojxX5JC7QZ6nK89LLWo1tEPB0eHgzSBW,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0015,api_key_assignment,"example_api_key = ""5af27b9429ad187c9a3cdde745d59746ec0b0ebc""  # 실제 키 아님",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0016,api_key_assignment,// test api_key 0e520ac8ca837b238df722fe834edd7d4ff9c3ab,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0017,api_key_assignment,sample_service_key=6MnJzkpU5cMgWp9elrDp8XtlwqCyeGCH  # mock,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0018,api_key_assignment,"access_token = ""<TOKEN>""  # like 8dde515a47e999a0d2df91585d8bef4afb1c45bf",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0019,api_key_assignment,"api_key = ""YOUR_API_KEY""  # e.g. 0e6569b6af5a7c6b09119a320db9dd83",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0020,api_key_assignment,# placeholder: api_key=8014f373a19a4fa6ab02bf10de6a45cb,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0021,api_key_assignment,"example_api_key = ""MeB4rXm9ON5Bs9sjLdwn2vKcdz7A4eCT""  # 실제 키 아님",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0022,api_key_assignment,// test api_key 2620db64a60294e7631efdef2d0ca13e19501131,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0023,api_key_assignment,sample_service_key=94766a55cc7fec4d97d707dae7a9abf29811ed62  # mock,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0024,api_key_assignment,"access_token = ""<TOKEN>""  # like 55e9afe56997f727ce4ad5286d54d547",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0025,api_key_assignment,"api_key = ""YOUR_API_KEY""  # e.g. b9947842a3e8c1f4eb4bf8890935b31a",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0026,api_key_assignment,# placeholder: api_key=3862cfbb624646d0692f048def0855d2169ae552,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0027,api_key_assignment,"example_api_key = ""2cbf32703440e158124b1cd2b029cbd4d6d8deaf""  # 실제 키 아님",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0028,api_key_assignment,// test api_key 3926951b7adb891aa9620e7215d9101652f318bb,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0029,api_key_assignment,sample_service_key=c737af1442725d3eecf8539c0ca5fde01d6e40b8  # mock,api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-API_KEY_-0030,api_key_assignment,"access_token = ""<TOKEN>""  # like 4b392db521ca903ebd15e34657f35d9034d460d2",api_key_assignment,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0001,kr_passport,# example passport: S59505257,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0002,kr_passport,"test_passport_num = ""M02617951""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0003,kr_passport,// dummy passport R35566241,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0004,kr_passport,sample_passport=S45120180  # 테스트,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0005,kr_passport,여권번호 형식 예시 S11859316,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0006,kr_passport,"mock_passport_id=""M65569065""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0007,kr_passport,# example passport: A64521999,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0008,kr_passport,"test_passport_num = ""A26056940""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0009,kr_passport,// dummy passport M93236380,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0010,kr_passport,sample_passport=A62583336  # 테스트,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0011,kr_passport,여권번호 형식 예시 R72400368,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0012,kr_passport,"mock_passport_id=""A86630415""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0013,kr_passport,# example passport: S07429549,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0014,kr_passport,"test_passport_num = ""M01577379""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0015,kr_passport,// dummy passport A40470277,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0016,kr_passport,sample_passport=M90890996  # 테스트,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0017,kr_passport,여권번호 형식 예시 A38692973,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0018,kr_passport,"mock_passport_id=""R23152407""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0019,kr_passport,# example passport: S93334126,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0020,kr_passport,"test_passport_num = ""S71400247""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0021,kr_passport,// dummy passport R51728113,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0022,kr_passport,sample_passport=R90310733  # 테스트,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0023,kr_passport,여권번호 형식 예시 S47853884,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0024,kr_passport,"mock_passport_id=""R56400567""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0025,kr_passport,# example passport: A41589867,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0026,kr_passport,"test_passport_num = ""R74343404""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0027,kr_passport,// dummy passport R06542024,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0028,kr_passport,sample_passport=A58338176  # 테스트,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0029,kr_passport,여권번호 형식 예시 R56695818,kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754
+SYN-FP-KR_PASSP-0030,kr_passport,"mock_passport_id=""A41812892""",kr_passport,0.0,pass,합성 FP — 코드/테스트 문맥 seed=1778327754

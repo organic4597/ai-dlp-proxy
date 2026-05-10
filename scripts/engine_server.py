@@ -32,7 +32,7 @@ if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
 from engine import extract, run_pipeline  # noqa: E402
-from engine.pipeline import get_cache_stats  # noqa: E402
+from engine.pipeline import get_cache_stats, get_slm_stats  # noqa: E402
 from engine.pipeline.control import load_control  # noqa: E402
 
 # ── 로깅 설정 ────────────────────────────────────────────────────────────────
@@ -65,6 +65,46 @@ _stats = {"total": 0, "scanned": 0, "findings": 0, "errors": 0, "masked": 0}
 # ── 이벤트 구독자 (TUI 등) ───────────────────────────────────────────────────
 _subscribers: list[asyncio.Queue] = []
 
+# ── 로그 구독자 (웹 대시보드 등) ─────────────────────────────────────────────
+_log_subscribers: list[asyncio.Queue] = []
+_log_queue: asyncio.Queue = asyncio.Queue(maxsize=5000)
+
+
+class _AsyncLogHandler(logging.Handler):
+    """로그 레코드를 _log_queue에 넣어 log_subscribe 구독자에게 전달."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            msg = self.format(record)
+            _log_queue.put_nowait({
+                "type": "log",
+                "ts": time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(record.created)),
+                "level": record.levelname,
+                "message": msg,
+            })
+        except Exception:
+            pass
+
+
+async def _log_fan_out() -> None:
+    """_log_queue 드레인 → 모든 _log_subscribers에 fan-out."""
+    while True:
+        try:
+            event = await asyncio.wait_for(_log_queue.get(), timeout=2.0)
+            dead: list[asyncio.Queue] = []
+            for q in _log_subscribers:
+                try:
+                    q.put_nowait(event)
+                except asyncio.QueueFull:
+                    dead.append(q)
+            for q in dead:
+                if q in _log_subscribers:
+                    _log_subscribers.remove(q)
+        except asyncio.TimeoutError:
+            pass
+        except asyncio.CancelledError:
+            return
+
 
 def _broadcast_event(event: dict) -> None:
     """모든 구독자에게 이벤트 전파. 큐가 가득 차면 오래된 항목 드롭."""
@@ -83,6 +123,41 @@ def _broadcast_event(event: dict) -> None:
 
 
 # ── 요청 핸들러 ──────────────────────────────────────────────────────────────
+
+def _action_from_findings(findings: list, threshold: float) -> str:
+    effective = [
+        f for f in findings
+        if f.confidence >= threshold and not f.suppressed
+    ]
+    if not effective:
+        return "pass"
+    max_sev = max(f.severity.value for f in effective)
+    if max_sev >= 4:
+        return "mask"
+    if max_sev >= 3:
+        return "alert"
+    return "alert"
+
+
+def _finding_to_dict(f) -> dict:
+    return {
+        "stage": f.stage,
+        "rule": f.rule,
+        "severity": f.severity.label,
+        "field_path": f.field_path,
+        "role": f.role,
+        "match_text": f.match_text,
+        "match_start": f.match_start,
+        "match_end": f.match_end,
+        "context_before": f.context_before,
+        "context_after": f.context_after,
+        "confidence": f.confidence,
+        "suppressed": f.suppressed,
+        "history": f.history,
+        "description": f.metadata.get("description", ""),
+        "metadata": f.metadata,
+    }
+
 
 def _handle_scan(request: dict) -> dict:
     """scan 액션: 추출 + 파이프라인 실행."""
@@ -130,9 +205,11 @@ def _handle_scan(request: dict) -> dict:
     # history 플래그 기준: 이전 턴 히스토리 finding 분리
     new_findings = [f for f in result.findings if not f.history]
     new_effective = [f for f in effective_findings if not f.history]
+    protection_findings = list(result.findings)
     raw_finding_count = len(new_findings)
     effective_finding_count = len(new_effective)
     suppressed_finding_count = max(0, raw_finding_count - effective_finding_count)
+    history_finding_count = len(protection_findings) - raw_finding_count
 
     return {
         "ok": True,
@@ -148,31 +225,16 @@ def _handle_scan(request: dict) -> dict:
         "total_text_len": parsed.total_text_len,
         # 파이프라인 결과
         "pipeline_action": result.action.value,
+        "protection_action": _action_from_findings(protection_findings, control.confidence_threshold),
         "pipeline_elapsed_ms": result.elapsed_ms,
         "finding_count": raw_finding_count,
         "raw_finding_count": raw_finding_count,
         "effective_finding_count": effective_finding_count,
         "suppressed_finding_count": suppressed_finding_count,
-        "findings": [
-            {
-                "stage": f.stage,
-                "rule": f.rule,
-                "severity": f.severity.label,
-                "field_path": f.field_path,
-                "role": f.role,
-                "match_text": f.match_text,
-                "match_start": f.match_start,
-                "match_end": f.match_end,
-                "context_before": f.context_before,
-                "context_after": f.context_after,
-                "confidence": f.confidence,
-                "suppressed": f.suppressed,
-                "history": f.history,
-                "description": f.metadata.get("description", ""),
-                "metadata": f.metadata,
-            }
-            for f in result.findings
-        ],
+        "history_finding_count": history_finding_count,
+        "protection_finding_count": len(protection_findings),
+        "findings": [_finding_to_dict(f) for f in new_findings],
+        "protection_findings": [_finding_to_dict(f) for f in protection_findings],
         "pipeline_summary": result.summary(),
         # TUI 전송 내용 표시용 — scan_targets만 (skip된 role 제외)
         "targets": [
@@ -233,7 +295,27 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                         "dlp_applied": applied,
                     })
             elif action == "stats":
-                resp = {"ok": True, **_stats, "cache": get_cache_stats()}
+                resp = {"ok": True, **_stats, "cache": get_cache_stats(), "slm": get_slm_stats()}
+            elif action == "log_subscribe":
+                # 로그 스트림 구독 — 연결 유지하며 로그를 push
+                lq: asyncio.Queue = asyncio.Queue(maxsize=1000)
+                _log_subscribers.append(lq)
+                ack2 = {"ok": True, "action": "log_subscribed", "id": req_id}
+                writer.write(json.dumps(ack2).encode() + b"\n")
+                await writer.drain()
+                log.info(f"  {C.CYAN}[LOG-SUB]{C.RESET} 로그 구독자 추가 ({len(_log_subscribers)}명)")
+                try:
+                    while True:
+                        event = await lq.get()
+                        writer.write(json.dumps(event, ensure_ascii=False).encode() + b"\n")
+                        await writer.drain()
+                except (ConnectionResetError, BrokenPipeError, OSError):
+                    pass
+                finally:
+                    if lq in _log_subscribers:
+                        _log_subscribers.remove(lq)
+                    log.info(f"  {C.DIM}[LOG-UNSUB]{C.RESET} 로그 구독자 해제 ({len(_log_subscribers)}명)")
+                break
             elif action == "subscribe":
                 # 이벤트 스트림 구독 — 연결 유지하며 이벤트를 push
                 q: asyncio.Queue = asyncio.Queue(maxsize=500)
@@ -314,6 +396,7 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                 _broadcast_event({
                     "type": "scan_result",
                     "id": req_id,
+                    "request_id": str(req_id),
                     "ts": time.strftime("%Y-%m-%d %H:%M:%S"),
                     "provider": resp.get("provider"),
                     "model": resp.get("model"),
@@ -333,15 +416,16 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                     "dlp_applied": "pass",
                 })
 
-    except asyncio.IncompleteReadError:
-        pass
-    except ConnectionResetError:
+    except (asyncio.IncompleteReadError, ConnectionResetError, BrokenPipeError):
         pass
     except Exception as e:
         log.error(f"  {C.RED}[ERR]{C.RESET} {peer} — {e}")
     finally:
-        writer.close()
-        await writer.wait_closed()
+        try:
+            writer.close()
+            await writer.wait_closed()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
         if _logged_conn:
             log.info(f"{C.DIM}[DISC]{C.RESET} {peer}")
 
@@ -399,8 +483,16 @@ async def main(sock_path: str | None = None, tcp_port: int | None = None):
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, _signal_handler)
 
+    # 로그 fan-out 백그라운드 태스크 시작
+    log_fan_task = asyncio.ensure_future(_log_fan_out())
+    # _AsyncLogHandler 등록 (루프 시작 후 등록해야 put_nowait 안전)
+    _log_handler = _AsyncLogHandler()
+    _log_handler.setFormatter(logging.Formatter("%(asctime)s [ENGINE] %(message)s", "%H:%M:%S"))
+    logging.getLogger().addHandler(_log_handler)
+
     async with server:
         await stop.wait()
+        log_fan_task.cancel()
         server.close()
         await server.wait_closed()
         tasks = [t for t in asyncio.all_tasks(loop) if t is not asyncio.current_task()]

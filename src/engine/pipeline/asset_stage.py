@@ -282,6 +282,7 @@ class AssetStage(Stage):
                     context_before=text[max(0, idx - 100):idx],
                     context_after=text[end:min(len(text), end + 100)],
                     confidence=1.0,
+                    history=getattr(target, "history", False),
                     metadata={"asset_id": asset.id, "match_type": "keyword", "keyword": keyword},
                 ))
                 break  # 자산당 첫 번째 키워드 매치만 (중복 방지)
@@ -342,6 +343,7 @@ class AssetStage(Stage):
                     context_before=text[max(0, chunk_start - 100):chunk_start],
                     context_after=text[chunk_end:min(len(text), chunk_end + 100)],
                     confidence=round(best_sim, 4),
+                    history=getattr(target, "history", False),
                     metadata={"asset_id": asset.id, "match_type": "embedding", "similarity": best_sim},
                 ))
 

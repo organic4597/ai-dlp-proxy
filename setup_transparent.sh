@@ -33,15 +33,19 @@ SNI_PORT=4443
 DNSMASQ_CONF="/etc/dnsmasq.d/dlp-transparent.conf"
 DNSMASQ_PID_FILE="/tmp/dlp-dnsmasq.pid"
 
-# 네트워크 인터페이스 자동 감지
-ETH=$(ip route show default 2>/dev/null | awk '/default/ {print $5}' | head -1)
-GATEWAY=$(ip route show default 2>/dev/null | awk '/default/ {print $3}' | head -1)
-MY_IP=$(ip -4 addr show "$ETH" 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -1)
-SUBNET_PREFIX=$(echo "$MY_IP" | cut -d. -f1-3)  # 예: 192.168.0
-
 [[ $EUID -eq 0 ]] || error "root 권한 필요: sudo bash $0"
-[[ -n "$ETH" ]]    || error "기본 네트워크 인터페이스를 찾을 수 없습니다"
-[[ -n "$MY_IP" ]]  || error "이 서버의 IP를 감지할 수 없습니다"
+
+# 네트워크 인터페이스 자동 감지 (호출할 때마다 최신 환경 반영)
+detect_network() {
+    ETH=$(ip route show default 2>/dev/null | awk '/default/ {print $5}' | head -1)
+    GATEWAY=$(ip route show default 2>/dev/null | awk '/default/ {print $3}' | head -1)
+    MY_IP=$(ip -4 addr show "$ETH" 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -1)
+    SUBNET_PREFIX=$(echo "$MY_IP" | cut -d. -f1-3)  # 예: 192.168.0
+}
+
+detect_network
+[[ -n "$ETH" ]]   || error "기본 네트워크 인터페이스를 찾을 수 없습니다"
+[[ -n "$MY_IP" ]] || error "이 서버의 IP를 감지할 수 없습니다"
 
 # ── 상태 확인 ────────────────────────────────────────────────────────────────
 status() {
@@ -97,25 +101,44 @@ remove_all() {
     ok "제거 완료"
 }
 
+# ── TUI 메인 메뉴 ────────────────────────────────────────────────────────────
+tui_menu() {
+    while true; do
+        detect_network
+        echo ""
+        echo -e "${BOLD}╔══════════════════════════════════════════════════╗${RESET}"
+        echo -e "${BOLD}║    AI DLP 투명 프록시 관리                       ║${RESET}"
+        echo -e "${BOLD}╚══════════════════════════════════════════════════╝${RESET}"
+        echo -e "  서버 IP    : ${BOLD}${MY_IP:-감지 실패}${RESET}"
+        echo -e "  인터페이스 : ${ETH:-감지 실패}"
+        echo -e "  현재 GW    : ${GATEWAY:-감지 실패}"
+        echo ""
+        echo -e "  ${BOLD}1)${RESET} 투명 프록시 설정 적용"
+        echo -e "  ${BOLD}2)${RESET} 현재 상태 확인"
+        echo -e "  ${BOLD}3)${RESET} 설정 제거 (복구)"
+        echo -e "  ${BOLD}q)${RESET} 종료"
+        echo ""
+        printf "  선택 > "
+        read -r choice
+        echo ""
+        case "$choice" in
+            1) return 0 ;;           # 메뉴 종료 후 설정 적용 계속 진행
+            2) status; continue ;;
+            3) remove_all; exit 0 ;;
+            q|Q) echo "종료합니다."; exit 0 ;;
+            *) echo -e "  ${YELLOW}[!]${RESET} 1, 2, 3, q 중 하나를 입력하세요." ;;
+        esac
+    done
+}
+
 # ── 인수 처리 ────────────────────────────────────────────────────────────────
 case "${1:-}" in
     --remove) remove_all; exit 0 ;;
     --status) status; exit 0 ;;
-    "") ;;
-    *) error "알 수 없는 옵션: $1\n  사용법: sudo bash $0 [--remove|--status]" ;;
+    --apply) ;;   # TUI 없이 바로 적용
+    "") tui_menu ;;
+    *) error "알 수 없는 옵션: $1\n  사용법: sudo bash $0 [--remove|--status|--apply]" ;;
 esac
-
-# =============================================================================
-# 시작 배너
-# =============================================================================
-echo -e "\n${BOLD}╔══════════════════════════════════════════════════╗${RESET}"
-echo -e "${BOLD}║    AI DLP 투명 프록시 자동 설정                  ║${RESET}"
-echo -e "${BOLD}╚══════════════════════════════════════════════════╝${RESET}"
-echo -e "  서버 IP    : ${BOLD}$MY_IP${RESET}"
-echo -e "  인터페이스 : $ETH"
-echo -e "  현재 GW    : $GATEWAY"
-echo -e "  서브넷     : $SUBNET_PREFIX.0/24"
-echo ""
 
 # =============================================================================
 # STEP 1. IP 포워딩
@@ -349,8 +372,8 @@ if [[ -f "$CERT_PATH" ]]; then
     [[ -f "$CERT_P12" ]] && echo -e "  Windows: ${CERT_P12} 더블클릭 → '신뢰할 루트 인증 기관'"
 fi
 echo ""
-echo -e "${BOLD}제거:${RESET}"
-echo -e "  sudo bash setup_transparent.sh --remove"
+echo -e "${BOLD}제거하려면:${RESET}"
+echo -e "  sudo bash setup_transparent.sh  (메뉴에서 3번 선택)"
 echo ""
 
 # 수동 설정이 필요한 경우 안내

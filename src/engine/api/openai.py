@@ -80,6 +80,27 @@ def parse(provider: str, url: str, body: dict) -> ParsedRequest:
                                 text=text,
                                 history=is_hist,
                             ))
+                    elif btype == "tool_result":
+                        # Anthropic 포맷 tool_result 블록 (Copilot 프록시 경유 시 등장)
+                        inner = block.get("content", "")
+                        if isinstance(inner, str):
+                            if inner.strip():
+                                targets.append(DLPTarget(
+                                    field_path=f"messages[{i}].content[{j}].content",
+                                    role="tool_result",
+                                    text=inner,
+                                    history=is_hist,
+                                ))
+                        elif isinstance(inner, list):
+                            for k, rb in enumerate(inner):
+                                text = rb.get("text", "") if isinstance(rb, dict) else str(rb)
+                                if text.strip():
+                                    targets.append(DLPTarget(
+                                        field_path=f"messages[{i}].content[{j}].content[{k}].text",
+                                        role="tool_result",
+                                        text=text,
+                                        history=is_hist,
+                                    ))
 
         # tool_calls: 함수 인자 (JSON 문자열)
         for k, tc in enumerate(msg.get("tool_calls", [])):

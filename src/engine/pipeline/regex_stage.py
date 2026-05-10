@@ -395,6 +395,16 @@ class RegexStage(Stage):
                     confidence = min(confidence, 1.0)
 
                 suppressed = is_allowlisted(rule.name, candidate_value, control.allowlist)
+                metadata = {
+                    "description": rule.description,
+                    "candidate_value": candidate_value,
+                    "code_context": code_context,
+                    "context_multiplier": multiplier,
+                    "validator_floor": floor,
+                    "allowlisted": suppressed,
+                }
+                if suppressed:
+                    metadata["suppressed_reason"] = "allowlist"
                 new_findings.append(Finding(
                     stage=self.name,
                     rule=rule.name,
@@ -409,14 +419,7 @@ class RegexStage(Stage):
                     confidence=confidence,
                     suppressed=suppressed,
                     history=getattr(target, "history", False),
-                    metadata={
-                        "description": rule.description,
-                        "candidate_value": candidate_value,
-                        "code_context": code_context,
-                        "context_multiplier": multiplier,
-                        "validator_floor": floor,
-                        "allowlisted": suppressed,
-                    },
+                    metadata=metadata,
                 ))
 
         return new_findings

@@ -1,0 +1,534 @@
+case_id,category,input_text,expected_rule,min_confidence,expected_action,notes
+SYN-TP-KR_RRN-0001,kr_rrn,주민 등록 번호: 4607222187741,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0002,kr_rrn,본인확인 주민등록번호 = 8110191432742,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0003,kr_rrn,이서연 고객님의 resident identification: 4202101595651,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0004,kr_rrn,신분확인용 주민등록번호는 9004082608174 입니다.,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0005,kr_rrn,생년월일 기반 본인확인 값 660410 1683711,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0006,kr_rrn,"고객 정보
+이름: 정시우
+주민번호: 781108 1454236
+연락처: 010-xxxx-xxxx",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0007,kr_rrn,"resident_registration_number: ""490127-1086711""",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0008,kr_rrn,rrn=620404 1776054 처리 완료,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0009,kr_rrn,identification number 530525 2595728 confirmed,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0010,kr_rrn,주민등록번호 입력 완료 — 7904111317128,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0011,kr_rrn,신분증 번호: 760626 1748433 (발급기관: 행정안전부),kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0012,kr_rrn,birth registration: 890903-2920062,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0013,kr_rrn,서준혁님 본인인증 완료: 450123 1622517,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0014,kr_rrn,주민번호 앞뒤 7자리 확인 511105-2233868,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0015,kr_rrn,"고객정보 수집 동의서
+주민등록번호: 921206-2584348",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0016,kr_rrn,주민 등록 번호: 6411132825857,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0017,kr_rrn,본인확인 주민등록번호 = 780422 2146131,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0018,kr_rrn,오지호 고객님의 resident identification: 6811122588218,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0019,kr_rrn,신분확인용 주민등록번호는 7901091738564 입니다.,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0020,kr_rrn,생년월일 기반 본인확인 값 7011121828963,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0021,kr_rrn,"고객 정보
+이름: 문태양
+주민번호: 880909 2352385
+연락처: 010-xxxx-xxxx",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0022,kr_rrn,"resident_registration_number: ""8810051568328""",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0023,kr_rrn,rrn=590830-2802841 처리 완료,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0024,kr_rrn,identification number 6705181191556 confirmed,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0025,kr_rrn,주민등록번호 입력 완료 — 620808 1108751,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0026,kr_rrn,신분증 번호: 8402242888601 (발급기관: 행정안전부),kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0027,kr_rrn,birth registration: 5303131787770,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0028,kr_rrn,임수아님 본인인증 완료: 711108-1099279,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0029,kr_rrn,주민번호 앞뒤 7자리 확인 700904-1595734,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0030,kr_rrn,"고객정보 수집 동의서
+주민등록번호: 410316-2949420",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0031,kr_rrn,주민 등록 번호: 400616-2602963,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0032,kr_rrn,본인확인 주민등록번호 = 6701241890292,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0033,kr_rrn,노윤아 고객님의 resident identification: 560613-2285671,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0034,kr_rrn,신분확인용 주민등록번호는 861028 1524251 입니다.,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0035,kr_rrn,생년월일 기반 본인확인 값 730617 1327284,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0036,kr_rrn,"고객 정보
+이름: 임수아
+주민번호: 570403 2846337
+연락처: 010-xxxx-xxxx",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0037,kr_rrn,"resident_registration_number: ""620530-2518807""",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0038,kr_rrn,rrn=490129 1063062 처리 완료,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0039,kr_rrn,identification number 610726-1190595 confirmed,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0040,kr_rrn,주민등록번호 입력 완료 — 580527-1414607,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0041,kr_rrn,신분증 번호: 440413-1503984 (발급기관: 행정안전부),kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0042,kr_rrn,birth registration: 560510-1613794,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0043,kr_rrn,박도윤님 본인인증 완료: 470503-2882551,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0044,kr_rrn,주민번호 앞뒤 7자리 확인 881027 2478638,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0045,kr_rrn,"고객정보 수집 동의서
+주민등록번호: 521018 2542744",kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0046,kr_rrn,주민 등록 번호: 6007122033022,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0047,kr_rrn,본인확인 주민등록번호 = 5210082517325,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0048,kr_rrn,노윤아 고객님의 resident identification: 421202-2328500,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0049,kr_rrn,신분확인용 주민등록번호는 8112032375779 입니다.,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_RRN-0050,kr_rrn,생년월일 기반 본인확인 값 580302-2876351,kr_rrn,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0001,kr_phone,전화번호: 016 712 7895,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0002,kr_phone,연락처 정보 mobile=010.8299.7619,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0003,kr_phone,윤채원의 휴대폰 번호는 011-4831483,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0004,kr_phone,긴급 연락처: 019 3565 6283,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0005,kr_phone,contact: 0105867-7697,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0006,kr_phone,phone number 019-1840-6253,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0007,kr_phone,통화 요청 번호 017.7194.7854,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0008,kr_phone,담당자 핸드폰: 0108545-1031,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0009,kr_phone,모바일 번호 입력: 011 3193 4286,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0010,kr_phone,call me at 010-9110-8329,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0011,kr_phone,"연락처
+오지호: 011-2094-7162",kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0012,kr_phone,수신자 전화번호: 016-20728440,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0013,kr_phone,비상연락망 등록 01186833275,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0014,kr_phone,모바일 인증번호 발송 대상: 0117445686,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0015,kr_phone,my number is 0167044-8127,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0016,kr_phone,전화번호: 0196894-9213,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0017,kr_phone,연락처 정보 mobile=0105341-5597,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0018,kr_phone,문태양의 휴대폰 번호는 0175469431,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0019,kr_phone,긴급 연락처: 016.6489.1900,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0020,kr_phone,contact: 010-96865306,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0021,kr_phone,phone number 010-2181-5812,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0022,kr_phone,통화 요청 번호 016.441.7582,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0023,kr_phone,담당자 핸드폰: 016404-9520,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0024,kr_phone,모바일 번호 입력: 0118798540,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0025,kr_phone,call me at 011.746.5639,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0026,kr_phone,"연락처
+노윤아: 019.5236.9021",kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0027,kr_phone,수신자 전화번호: 016-880-1473,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0028,kr_phone,비상연락망 등록 010-8573-3623,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0029,kr_phone,모바일 인증번호 발송 대상: 010-32786929,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0030,kr_phone,my number is 016.2584.9712,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0031,kr_phone,전화번호: 0113370-5388,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0032,kr_phone,연락처 정보 mobile=017-66935750,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0033,kr_phone,김민준의 휴대폰 번호는 016-16933966,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0034,kr_phone,긴급 연락처: 01948962810,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0035,kr_phone,contact: 010-85525901,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0036,kr_phone,phone number 010-17978916,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0037,kr_phone,통화 요청 번호 0102537-1510,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0038,kr_phone,담당자 핸드폰: 0197993-9267,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0039,kr_phone,모바일 번호 입력: 017 760 4392,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0040,kr_phone,call me at 0198416588,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0041,kr_phone,"연락처
+임수아: 01060626266",kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0042,kr_phone,수신자 전화번호: 019.4702.5717,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0043,kr_phone,비상연락망 등록 01096024401,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0044,kr_phone,모바일 인증번호 발송 대상: 0117691-4943,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0045,kr_phone,my number is 01795137072,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0046,kr_phone,전화번호: 010-51829901,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0047,kr_phone,연락처 정보 mobile=010.8886.4182,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0048,kr_phone,이서연의 휴대폰 번호는 010.2324.1131,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0049,kr_phone,긴급 연락처: 010-66335110,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PHONE-0050,kr_phone,contact: 0199395839,kr_phone,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0001,credit_card,카드 결제 승인 번호: 5177-6749 3087-9810,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0002,credit_card,신용카드 정보 payment card = 5457 37-1461-871750,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0003,credit_card,billing card number: 4261-9468 4394-7565,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0004,credit_card,결제 카드 번호 5415-9498 8551-5102,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0005,credit_card,credit card: 6011 67-5322-766265,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0006,credit_card,카드 명세서 번호 4598-7911 4060-4905,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0007,credit_card,payment method: card 4627 38-9944-248170,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0008,credit_card,카드번호 477530-150753-4474 로 결제 요청,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0009,credit_card,"카드 결제 정보
+번호: 6011 76-3407-071569
+유효기간: 05/28",credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0010,credit_card,card_number=5470-9656-6021-4515,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0011,credit_card,신용카드 번호: 5498-3538-3210-6497 (유효기간 08/30),credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0012,credit_card,purchase authorized — card 5346-0264 3312-8342,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0013,credit_card,결제수단: 4301 71-0792-667224,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0014,credit_card,credit billing: 542108-668425-5580 expires 10/29,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0015,credit_card,카드 번호 입력 완료: 5230-3065-7604-7858,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0016,credit_card,카드 결제 승인 번호: 4244 02-2953-588094,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0017,credit_card,신용카드 정보 payment card = 5552 33-3476-728742,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0018,credit_card,billing card number: 5471 7264 7105 4428,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0019,credit_card,결제 카드 번호 513395-949599-8656,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0020,credit_card,credit card: 5284862241095677,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0021,credit_card,카드 명세서 번호 5551 3696 6839 8382,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0022,credit_card,payment method: card 5266 50-5954-880023,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0023,credit_card,카드번호 5303 60-8081-029582 로 결제 요청,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0024,credit_card,"카드 결제 정보
+번호: 5224 63-9849-374594
+유효기간: 12/28",credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0025,credit_card,card_number=547714-906002-5952,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0026,credit_card,신용카드 번호: 4312 82-2985-062431 (유효기간 08/27),credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0027,credit_card,purchase authorized — card 5397 00-3835-984000,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0028,credit_card,결제수단: 5142397645291459,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0029,credit_card,credit billing: 5251120143718659 expires 04/26,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0030,credit_card,카드 번호 입력 완료: 5480 05-1451-890462,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0031,credit_card,카드 결제 승인 번호: 5379-0810-0732-0767,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0032,credit_card,신용카드 정보 payment card = 540046-223649-8678,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0033,credit_card,billing card number: 6011-7629-2668-0009,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0034,credit_card,결제 카드 번호 5274 14-9713-327842,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0035,credit_card,credit card: 546922-790178-0595,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0036,credit_card,카드 명세서 번호 511761-369935-1804,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0037,credit_card,payment method: card 529089-768737-7058,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0038,credit_card,카드번호 601118-270071-6251 로 결제 요청,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0039,credit_card,"카드 결제 정보
+번호: 601182-861875-2347
+유효기간: 05/25",credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0040,credit_card,card_number=5403 95-4565-864659,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0041,credit_card,신용카드 번호: 5485 43-9233-938565 (유효기간 09/29),credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0042,credit_card,purchase authorized — card 5147 57-8525-893366,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0043,credit_card,결제수단: 5527 4771 8402 1650,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0044,credit_card,credit billing: 5149731678520454 expires 09/26,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0045,credit_card,카드 번호 입력 완료: 601188-991500-9732,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0046,credit_card,카드 결제 승인 번호: 6011861716456057,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0047,credit_card,신용카드 정보 payment card = 4813676752086401,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0048,credit_card,billing card number: 526080-169575-6556,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0049,credit_card,결제 카드 번호 5590-2944 4953-4399,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-CREDIT_C-0050,credit_card,credit card: 5531 10-3825-620189,credit_card,0.8,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0001,email,이메일: ODAUD651.7V0@KAKAO.COM,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0002,email,연락처 메일 주소 4291ctq7d9avi2@korea.ac.kr,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0003,email,수신자 email=otsvn8klb6xw@kr.ibm.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0004,email,담당자 이메일: p7e9kwere9r2@corp.samsung.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0005,email,send to 0oj03_q3b6@corp.samsung.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0006,email,mail recipient: tdjvhs97@nate.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0007,email,한가을의 이메일 주소는 qr9hwclkfb+noreply@snu.ac.kr 입니다,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0008,email,회신 주소: 8n0l4zy.lwzy8@outlook.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0009,email,inbox 0t78w@nate.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0010,email,이메일 주소 등록: z23mngp5e@kr.ibm.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0011,email,contact email 694wfhzancxt@corp.samsung.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0012,email,메일 보내기 → c5i1eg6l+noreply@gmail.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0013,email,고객 이메일: ck1ktf_zwxzsu+noreply@outlook.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0014,email,email address for 문태양: TWVO3NP@EXAMPLE.COM,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0015,email,수신 메일: mqk23_t9k69dy5w@daum.net,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0016,email,이메일: sk_0jl57478kso@snu.ac.kr,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0017,email,연락처 메일 주소 99iw.5o6abscb+noreply@example.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0018,email,수신자 email=0m5dh_4hw@outlook.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0019,email,담당자 이메일: tvdwkhisvlbgtx@dev.kakao.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0020,email,send to SD91D65XI@GMAIL.COM,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0021,email,mail recipient: gk6l7@daum.net,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0022,email,서준혁의 이메일 주소는 4CZ.N0U@SNU.AC.KR 입니다,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0023,email,회신 주소: 4v2c8@naver.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0024,email,inbox 2z.4omosc+work@nate.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0025,email,이메일 주소 등록: b08.0rv@daum.net,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0026,email,contact email a9dq0@nate.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0027,email,메일 보내기 → d7rilkz@kakao.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0028,email,고객 이메일: xctnv.merocgx0@corp.samsung.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0029,email,email address for 박도윤: o30ci3+work@naver.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0030,email,수신 메일: yysglravnh.j1q1@m.naver.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0031,email,이메일: INJ1X_1IRF8MD70@OUTLOOK.COM,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0032,email,연락처 메일 주소 0QL131.50PX@SNU.AC.KR,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0033,email,수신자 email=6zabakm.gur+noreply@korea.ac.kr,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0034,email,담당자 이메일: i653_x92w+noreply@hanmail.net,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0035,email,send to c5l_j8w52z@corp.samsung.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0036,email,mail recipient: 3uv7pa7@hanmail.net,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0037,email,노윤아의 이메일 주소는 AI1HMFRH.C0@SNU.AC.KR 입니다,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0038,email,회신 주소: v6xozk.4r@nate.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0039,email,inbox 95C_3Z4X@GMAIL.COM,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0040,email,이메일 주소 등록: yk_ma6xwxye@gmail.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0041,email,contact email 4jd70mpsa_ltv+work@gmail.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0042,email,메일 보내기 → fq62.dh@kr.ibm.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0043,email,고객 이메일: x4g9bj_33hm6b@nate.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0044,email,email address for 이서연: 0ag921iar+work@naver.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0045,email,수신 메일: 6v.yqg56+work@kakao.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0046,email,이메일: nkfl8+noreply@example.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0047,email,연락처 메일 주소 yrr.v71u8+noreply@kakao.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0048,email,수신자 email=j2ve_t9@hanmail.net,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0049,email,담당자 이메일: GTGJU5@GMAIL.COM,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-EMAIL-0050,email,send to bw8yi0z.cjjfum+work@example.com,email,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0001,kr_passport,여권번호: M08736982,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0002,kr_passport,passport number PM30089427,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0003,kr_passport,출국 여권 정보 M16685628,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0004,kr_passport,정시우 여권: A78454241,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0005,kr_passport,비자 신청 여권번호 PM53450623,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0006,kr_passport,입국 여권 번호 = M08557569,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0007,kr_passport,passport: PS77828026 departure confirmed,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0008,kr_passport,여권 스캔 결과 A33292367,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0009,kr_passport,airport check — passport A84672012,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0010,kr_passport,visa application passport A30194244,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0011,kr_passport,윤채원님 여권번호 M70917880 확인,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0012,kr_passport,여권번호 입력 PM32207775,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0013,kr_passport,passport id: PS06001166,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0014,kr_passport,여행서류 여권 S87287801,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0015,kr_passport,출입국 기록 여권번호: M47469867,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0016,kr_passport,여권번호: A44987436,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0017,kr_passport,passport number PS42793583,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0018,kr_passport,출국 여권 정보 S15099183,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0019,kr_passport,김민준 여권: M83009060,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0020,kr_passport,비자 신청 여권번호 S01511936,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0021,kr_passport,입국 여권 번호 = M49634024,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0022,kr_passport,passport: M77620774 departure confirmed,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0023,kr_passport,여권 스캔 결과 PM60407063,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0024,kr_passport,airport check — passport M62248780,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0025,kr_passport,visa application passport PS17831251,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0026,kr_passport,김민준님 여권번호 PM02284636 확인,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0027,kr_passport,여권번호 입력 A48098459,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0028,kr_passport,passport id: M50094963,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0029,kr_passport,여행서류 여권 R89711982,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0030,kr_passport,출입국 기록 여권번호: PS53044817,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0031,kr_passport,여권번호: PM52701736,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0032,kr_passport,passport number M38698856,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0033,kr_passport,출국 여권 정보 A29412709,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0034,kr_passport,이서연 여권: A67071795,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0035,kr_passport,비자 신청 여권번호 M64476893,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0036,kr_passport,입국 여권 번호 = M01170589,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0037,kr_passport,passport: M56123139 departure confirmed,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0038,kr_passport,여권 스캔 결과 R31312921,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0039,kr_passport,airport check — passport PS65024934,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0040,kr_passport,visa application passport PM96091388,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0041,kr_passport,박도윤님 여권번호 M20863236 확인,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0042,kr_passport,여권번호 입력 PS17382560,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0043,kr_passport,passport id: PS52110796,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0044,kr_passport,여행서류 여권 R62629879,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0045,kr_passport,출입국 기록 여권번호: PS01868795,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0046,kr_passport,여권번호: PM39307590,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0047,kr_passport,passport number PM42697502,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0048,kr_passport,출국 여권 정보 M07835964,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0049,kr_passport,박도윤 여권: M68798246,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_PASSP-0050,kr_passport,비자 신청 여권번호 A47938306,kr_passport,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0001,kr_driver_license,운전면허번호: 26-07-677298-86,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0002,kr_driver_license,driving license 13-17-293776-65,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0003,kr_driver_license,면허 발급 번호 28-93-103599-83,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0004,kr_driver_license,장예준 운전면허 20-22-860149-34,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0005,kr_driver_license,license number 26-93-133437-80 confirmed,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0006,kr_driver_license,경찰청 운전면허 조회 21-94-118760-55,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0007,kr_driver_license,면허 정보 = 19-09-485383-68,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0008,kr_driver_license,driver license id: 17-90-847638-30,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0009,kr_driver_license,운전면허 발급기관 확인 16-93-886745-42,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0010,kr_driver_license,license: 13-18-434155-56 유효,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0011,kr_driver_license,강하은의 운전면허번호 18-10-930197-51,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0012,kr_driver_license,면허번호 등록 24-19-515382-29,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0013,kr_driver_license,driving licence 15-90-235033-51 issued,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0014,kr_driver_license,도로교통법 면허 19-13-226699-97,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0015,kr_driver_license,운전면허증 번호 21-17-411596-19,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0016,kr_driver_license,운전면허번호: 21-12-385775-69,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0017,kr_driver_license,driving license 12-22-957148-56,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0018,kr_driver_license,면허 발급 번호 23-96-418312-28,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0019,kr_driver_license,문태양 운전면허 27-13-717792-57,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0020,kr_driver_license,license number 24-94-684817-73 confirmed,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0021,kr_driver_license,경찰청 운전면허 조회 24-12-184576-39,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0022,kr_driver_license,면허 정보 = 17-23-838176-26,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0023,kr_driver_license,driver license id: 25-20-220846-32,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0024,kr_driver_license,운전면허 발급기관 확인 13-93-157896-97,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0025,kr_driver_license,license: 18-13-670907-41 유효,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0026,kr_driver_license,오지호의 운전면허번호 20-24-218720-58,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0027,kr_driver_license,면허번호 등록 22-24-794079-20,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0028,kr_driver_license,driving licence 24-18-207230-10 issued,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0029,kr_driver_license,도로교통법 면허 18-93-341372-32,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0030,kr_driver_license,운전면허증 번호 26-90-939144-90,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0031,kr_driver_license,운전면허번호: 15-99-117740-62,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0032,kr_driver_license,driving license 15-20-504448-95,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0033,kr_driver_license,면허 발급 번호 21-20-311289-32,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0034,kr_driver_license,노윤아 운전면허 28-09-328600-38,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0035,kr_driver_license,license number 14-93-570312-42 confirmed,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0036,kr_driver_license,경찰청 운전면허 조회 18-02-148851-50,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0037,kr_driver_license,면허 정보 = 26-16-428880-39,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0038,kr_driver_license,driver license id: 24-95-663878-76,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0039,kr_driver_license,운전면허 발급기관 확인 21-90-812437-63,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0040,kr_driver_license,license: 20-99-797437-14 유효,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0041,kr_driver_license,임수아의 운전면허번호 28-01-652531-76,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0042,kr_driver_license,면허번호 등록 21-12-456166-59,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0043,kr_driver_license,driving licence 27-94-401312-41 issued,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0044,kr_driver_license,도로교통법 면허 26-03-496250-88,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0045,kr_driver_license,운전면허증 번호 19-16-302146-39,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0046,kr_driver_license,운전면허번호: 13-96-613511-37,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0047,kr_driver_license,driving license 11-11-191669-24,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0048,kr_driver_license,면허 발급 번호 19-00-178743-36,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0049,kr_driver_license,한가을 운전면허 15-25-749646-53,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-KR_DRIVE-0050,kr_driver_license,license number 19-95-425713-61 confirmed,kr_driver_license,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0001,aws_access_key,aws_access_key_id = ABIAS7494A9VEXAQRT2F,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0002,aws_access_key,AWS_ACCESS_KEY_ID=ASIA01RV2EW6SM7MKEUB,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0003,aws_access_key,클라우드 배포 설정 access_key: AKIA5F1Z5EJ7OEI08WLB,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0004,aws_access_key,aws access key: ACCAYCA5UPTP6E8WP46A,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0005,aws_access_key,인프라 계정 access_key_id=AKIAQD9Y0U4PRQVDFHPA,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0006,aws_access_key,"AWS 설정
+aws_access_key_id = ASIAWWV7PWA1IGEC10PR
+aws_secret_access_key = 49e26b90aafacd2adc242d91006b4dafd2982d35",aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0007,aws_access_key,cloud deploy key ABIAMJLDXUKRK2E9U43S,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0008,aws_access_key,account access: AKIA6Z5IAYVTGJNQA0EF,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0009,aws_access_key,export AWS_ACCESS_KEY_ID=ABIAM3V1XHLFJFO9JIKV,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0010,aws_access_key,terraform variable aws_key = ABIAYBU7HX8OO83KGVD9,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0011,aws_access_key,".env 파일
+AWS_ACCESS_KEY_ID=ABIA60547B549G6UI9Q2",aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0012,aws_access_key,AWS credential: ABIA6OBCAFBXO2ID0BY7,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0013,aws_access_key,액세스 키 발급 완료: ABIA1QB8NBWKDRYNPYPJ,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0014,aws_access_key,infra config access_key=AKIAFQ2VU0VO3SK102LW,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0015,aws_access_key,aws_access_key_id: AKIA5WLXSGD4SRXUDNJ2,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0016,aws_access_key,aws_access_key_id = ABIAU2HULAZUMLBZTF3K,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0017,aws_access_key,AWS_ACCESS_KEY_ID=AKIAEVAR1RCXKYADDTCQ,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0018,aws_access_key,클라우드 배포 설정 access_key: ACCA7WVDM4ZAL7HYTLLF,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0019,aws_access_key,aws access key: ABIAX1W4NDIFT2OSSLH5,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0020,aws_access_key,인프라 계정 access_key_id=ACCALMBMESS2P60UI0LF,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0021,aws_access_key,"AWS 설정
+aws_access_key_id = ABIA9OJY7T3Q745I2WUU
+aws_secret_access_key = 48b59568ec796f780f3ad6feb3eec58a8fc59c73",aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0022,aws_access_key,cloud deploy key ACCA2JJHBT09Y3NR1HUA,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0023,aws_access_key,account access: ACCAIT4AELZVEEX8UZ1R,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0024,aws_access_key,export AWS_ACCESS_KEY_ID=ACCAMV54BZGAQML0QMXT,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0025,aws_access_key,terraform variable aws_key = ABIAQ5GLB1ONHCZYSAF2,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0026,aws_access_key,".env 파일
+AWS_ACCESS_KEY_ID=ABIAJQOMYMZX8JV8EOPV",aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0027,aws_access_key,AWS credential: ABIA9JA2A31XXQ4GEI76,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0028,aws_access_key,액세스 키 발급 완료: AKIA5Z173JYYK78A4WJ3,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0029,aws_access_key,infra config access_key=ASIAOJ5A0I24VIMCNVK4,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0030,aws_access_key,aws_access_key_id: AKIAROF1TBXM34YUBOOI,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0031,aws_access_key,aws_access_key_id = AKIAG9QEMYITA7DMN163,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0032,aws_access_key,AWS_ACCESS_KEY_ID=ACCAGN77O2P8AE75XE3U,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0033,aws_access_key,클라우드 배포 설정 access_key: ABIADZ3TEVIZZ0QQ2BQ6,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0034,aws_access_key,aws access key: AKIAB5K7RW2IU68P7NFO,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0035,aws_access_key,인프라 계정 access_key_id=ACCA232L31N8HJTU4WJX,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0036,aws_access_key,"AWS 설정
+aws_access_key_id = ASIALLFFK39GO2Y467N6
+aws_secret_access_key = 561cb8f1989a60823cc713b41b260326",aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0037,aws_access_key,cloud deploy key ABIAKKJR6VK9657ZSUIV,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0038,aws_access_key,account access: ABIA2VMWC28KYC4CU7NO,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0039,aws_access_key,export AWS_ACCESS_KEY_ID=ABIAN8TKRHSJ4EBNTXOB,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0040,aws_access_key,terraform variable aws_key = ABIASZ6REY4HX0D32PUU,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0041,aws_access_key,".env 파일
+AWS_ACCESS_KEY_ID=AKIA0TKAO1AGWBHF7ZVN",aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0042,aws_access_key,AWS credential: AKIAZJ43FF1C9OTFW1TT,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0043,aws_access_key,액세스 키 발급 완료: ASIAOHW14TFCRAKGL12U,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0044,aws_access_key,infra config access_key=ASIAXCLT3ALVHWE2YG6L,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0045,aws_access_key,aws_access_key_id: ACCA25CZP0XKVUS7IGE3,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0046,aws_access_key,aws_access_key_id = AKIAWVUHS98THICXHLL1,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0047,aws_access_key,AWS_ACCESS_KEY_ID=AKIARH6WLGZ6T46P3AO5,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0048,aws_access_key,클라우드 배포 설정 access_key: ASIAISPAHKC95TPAQ46D,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0049,aws_access_key,aws access key: ABIAP173E5GJ0982EVU7,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-AWS_ACCE-0050,aws_access_key,인프라 계정 access_key_id=ASIAA0OJNWU77FZNCT9S,aws_access_key,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0001,github_pat,github_token = ghu_Wyh0utjQoasfWASx5n5XcHk8LONEwK1eZxMOR7A,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0002,github_pat,GITHUB_TOKEN=gho_Pk06mxBmxqs6QhGicZgTSgBiWsKeVg0K15vHAPC9,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0003,github_pat,깃헙 personal access token: ghs_IHqRnFX0MhCvTxJo8DQdDNGjyJCYgKFRtA6u21,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0004,github_pat,repo 접근용 토큰 gho_1aYbm8KwacexRLpxkx3ByQ8wI33ddXRhzJOtTiJ,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0005,github_pat,git remote auth token ghu_RKPE1MIfttw7udFKyCPMUTUafTdOjXn0p8SJ55O,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0006,github_pat,commit push token=gho_Ff0VrGxlLLpOe5SXYh1IlC1uSnNIJqstPT4YTPrY,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0007,github_pat,github pat: ghs_bl4NhvJdsel3OKs9ZjcMMIw9boofpPz8LVsBwY,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0008,github_pat,"GitHub PAT
+gho_W5TVmVtfOnIOtBv79HnaQMjw5beUJjO9ECmSj6K",github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0009,github_pat,export GITHUB_TOKEN=ghr_3mZP9yxBQDwnzOTY3oyXPo0IRHkzWRpk3IwXoH,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0010,github_pat,CI 토큰 설정 github_token=ghu_8nlkS5yNBSOj2JesLWWHsA7LDbG4JaMhD5YEmA,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0011,github_pat,깃허브 API 인증: ghp_BMT9RYBLsKbTHsME7D8M8MGxNe3du2wDGf3Aw,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0012,github_pat,personal access token ghr_t3GmNxydYmHimbZ2FpMigzToX1jgZoCZXKmMRy generated,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0013,github_pat,repo token: ghu_ALngarOmtLWOelQc2DDQmZ5El1xFIT4t80Rd0R1H,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0014,github_pat,GitHub Actions secret GITHUB_TOKEN=ghu_9nk9067Y7r9rCv9u6p0fMTlOOl2sDJ0ctyTy,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0015,github_pat,token for github: ghp_W7tXVLk5VeHcvL19m9fzIExWp75z6iv7NdTDyxK,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0016,github_pat,github_token = gho_EotHbKYiRmN83xdujHCmQWJ6OEiOgwnmTZILFo,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0017,github_pat,GITHUB_TOKEN=ghr_qdfSWMQjoMIM3ObVH70qE3lGlPi677Wj4NMgwbeL,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0018,github_pat,깃헙 personal access token: ghs_vUUpF5KKYbECGMbHmCoYfhBxklZlzGFT75Lc,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0019,github_pat,repo 접근용 토큰 ghs_4zaow9TyRL4CL4q3mYIKjulJYrmheaBwa9JB4RZX,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0020,github_pat,git remote auth token ghp_BkkdtrY6yFi8OQVeY0B0YL3ZLIHFM1FMIFhllcC,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0021,github_pat,commit push token=ghs_4JGGN1IfzGylP8LVCVB8zk05YUb5vNnKug3VkCpY,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0022,github_pat,github pat: ghu_84zU5jAH31eJwIlaewtzwtQ8gmXJ9A8IIVvyuYl,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0023,github_pat,"GitHub PAT
+gho_MOAgmkB1Ap4meVMXHaNDFkiX0aMoxRPIrSiBiWzF",github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0024,github_pat,export GITHUB_TOKEN=ghs_cvTkgUbTYpF9bembiywfcx0QI4Q7KjrQrthm,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0025,github_pat,CI 토큰 설정 github_token=ghs_xUEfhhh0fvkWDcgaLmSha0zKZy4rngBBXHhclbz,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0026,github_pat,깃허브 API 인증: ghs_Sig7zZWDJrwYxaLt7uMqylGYPcYD7fbmZAi5bns,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0027,github_pat,personal access token ghs_wFUrvTf0tCIFsO5hhEmn8rRhOv3K8FUkygySQyz generated,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0028,github_pat,repo token: ghr_b5Sr7sGycHb3YvcJkUQUFJZQB4Lvmz5D3tsZ820l,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0029,github_pat,GitHub Actions secret GITHUB_TOKEN=ghp_3NAsDgJgJltTfZWmADC6OrjzgAhlKBEDI4RACrl,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0030,github_pat,token for github: ghu_PBsJtahaZNcJyeS0njmbHxEsJAvGXZP1B6HRry,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0031,github_pat,github_token = gho_hKzknqut8SVsCEAEsuMJyJqQfrq8QUlw7Dl09u47,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0032,github_pat,GITHUB_TOKEN=gho_1abKyUZD8zlZeqx0hsBKCBJObvp8oBcBxBtu,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0033,github_pat,깃헙 personal access token: ghr_6CMu35ibsQ5O4qJiGESdpUvNT7fdfsVEZ1uJuFZE,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0034,github_pat,repo 접근용 토큰 ghp_Y5qYL2SnFk67eRd7azezHXhfG5mT0EGIcUt6I,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0035,github_pat,git remote auth token ghu_2jRFOEFUU541ueast2NwCz76xWTPy6ufY7iQ,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0036,github_pat,commit push token=ghs_tNnnrDpagkplYMvj9MaakJ9ko2WuPchtTXhqh,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0037,github_pat,github pat: gho_99RA1qkAzXHI88s0hQcfISoo26SihanrxsXX,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0038,github_pat,"GitHub PAT
+ghs_8f1eB3iWTTiP2MzihJ0VubbE1VfD6veF2PSZ",github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0039,github_pat,export GITHUB_TOKEN=ghp_FmrpFqx3j29ujhY67FKaMaoNLpMX7ZJsIZ3S3,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0040,github_pat,CI 토큰 설정 github_token=ghs_fuKFXVZHopT27W5M2q4hykau9rG8Gmru10Xvx,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0041,github_pat,깃허브 API 인증: ghu_LK8wHE4YLPAmGVZOfQ3BXp8dJ7MjLubgqwAD,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0042,github_pat,personal access token ghu_MOG2y5vOH2K5YSQqLsbweFrNPj8EUP1YrxGju generated,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0043,github_pat,repo token: gho_3ziRFP76ndbVuuuVHJj3XpwzCSfqmRKKhWAHv47,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0044,github_pat,GitHub Actions secret GITHUB_TOKEN=ghr_msceYihJ13Co7FkALnKcIy8LrzhhS5ib6M4YGFN,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0045,github_pat,token for github: gho_x34BwSy1NCesIYpjeHSonIZGpH9bH28Ht7sj3,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0046,github_pat,github_token = ghu_P7Bo7eNbOLMr8XApFBWxe0TWeixHaqRkakOCbw,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0047,github_pat,GITHUB_TOKEN=ghs_KPXqKJxVDhgJBIKmqlUV8NMkwKRMYEiwuuCYHqh,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0048,github_pat,깃헙 personal access token: ghu_2vIpS01ncGpqtUotQCOT0JZmFZpoToJphrgM,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0049,github_pat,repo 접근용 토큰 ghr_HI7l5DdIvYIxmUNM8Yoz1BBP77umPrlPhCzg6sOM,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-GITHUB_P-0050,github_pat,git remote auth token ghr_bedSRDoZB7aczopWQL4QQwEdF3faTzGjN2ZH,github_pat,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0001,jwt_token,Authorization: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTI4MTU2MSIsICJuYW1lIjogImNob2kyNCIsICJpYXQiOiAxNzc4MjQ3NzQxLCAiZXhwIjogMTc3ODM4ODU1OX0.E6Gmaol5DCXF50EwLCHSYfCyH1VxoKxnGDu4NbZ7XTg,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0002,jwt_token,bearer token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTI2NzAzOCIsICJuYW1lIjogImNob2k1OSIsICJpYXQiOiAxNzc4MjcwNzI0LCAiZXhwIjogMTc3ODMzNTM3N30.sDF7wtlkDpX-09tmN1PGsVAR9Drat_8mFs_dqzUdVEQ,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0003,jwt_token,세션 JWT: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDc0MDYyOCIsICJuYW1lIjogImxlZTQ0IiwgImlhdCI6IDE3NzgyNjI5MTEsICJleHAiOiAxNzc4MzM1MjU5fQ.05PI9FKUu-G1qanpati7WCHnK1G34qL0JH6sSKsKgyw,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0004,jwt_token,로그인 토큰 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODAxOTg1OSIsICJuYW1lIjogImNob2kyIiwgImlhdCI6IDE3NzgzMTk1MDEsICJleHAiOiAxNzc4MzQ2MTg0fQ.OU5b69EHztp1B5J-Gh6bTa-ATvUJtu0jpYxn1BL5sLM,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0005,jwt_token,auth_token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDExNjc0IiwgIm5hbWUiOiAia2ltMzkiLCAiaWF0IjogMTc3ODMwMDE2MCwgImV4cCI6IDE3NzgzMzMyODF9.BKLEv5XWmXv9PEZ5weFyGG3PXHfhHOVWCCppwEUAaFU,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0006,jwt_token,access token (JWT): eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODIyMzQ0IiwgIm5hbWUiOiAiY2hvaTk1IiwgImlhdCI6IDE3NzgzMDk2OTksICJleHAiOiAxNzc4MzYxNDI2fQ.gz455jji4rN0jPbToK73jmqwpTk2TiUVp7ZBcfVpaqY,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0007,jwt_token,decode jwt: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjM1NDk2IiwgIm5hbWUiOiAiY2hvaTI2IiwgImlhdCI6IDE3NzgyOTc2NTYsICJleHAiOiAxNzc4MzQwNzQyfQ.L6uz4AXM995lVhvdC7-WDhYml59VciYPtFgeG1mO6hg,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0008,jwt_token,토큰 검증 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDAxNzY1IiwgIm5hbWUiOiAia2ltODIiLCAiaWF0IjogMTc3ODI1MzkwNCwgImV4cCI6IDE3NzgzNzg4MTN9.pTZDAZ_CTHM_Wg4xeXWNoeuN2rDBjZjorarhpTNsaXU,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0009,jwt_token,session token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzQ2NTE3OSIsICJuYW1lIjogImxlZTc3IiwgImlhdCI6IDE3NzgzMDk4MTgsICJleHAiOiAxNzc4MzQ4MTM0fQ.nyj0HLwbKQ9cjkIvBxpWqVMWHQoAyN6aHpHogApFtv0,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0010,jwt_token,login jwt eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzEzNTE3OCIsICJuYW1lIjogImNob2k1MiIsICJpYXQiOiAxNzc4MjU4NDEwLCAiZXhwIjogMTc3ODM3MTk0OH0.ftwiSTrvFH_y0nsT9B4r6-OekSDgjdTwYkTbnzqEVKQ,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0011,jwt_token,인가 토큰 Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzE3MjM4MSIsICJuYW1lIjogImxlZTUzIiwgImlhdCI6IDE3NzgyODYwMTUsICJleHAiOiAxNzc4NDA5MzgyfQ.7Pr4nod-qTErkOoSgmhXPhzSU_sKizg5O91Qmne0DaA,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0012,jwt_token,JWT 발급 완료 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjk5NjEyMCIsICJuYW1lIjogInBhcms2MiIsICJpYXQiOiAxNzc4MzE3NDMzLCAiZXhwIjogMTc3ODQxMzM2MX0.2Olo-Pr-Co280gG_jA290cJ5H-HR7DOFP36Byf5ANSg,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0013,jwt_token,token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTI4MDc4MiIsICJuYW1lIjogInBhcms2MCIsICJpYXQiOiAxNzc4Mjk1MTgzLCAiZXhwIjogMTc3ODM0MDg3NX0.vcjcZejsTKHDAeev0hj8J6hyXqyUm1-X2iGp3ZrKfIE,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0014,jwt_token,auth header: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjM5OTM2NSIsICJuYW1lIjogImxlZTI5IiwgImlhdCI6IDE3NzgzMTMxOTEsICJleHAiOiAxNzc4MzkzODY0fQ.uI3-1JewWKJBF2cCmk8lI_XpjJm0jY_RrIATcACmLlM,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0015,jwt_token,서비스 jwt token eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzE5Mjg1MyIsICJuYW1lIjogInBhcms2OSIsICJpYXQiOiAxNzc4MzAzNDIzLCAiZXhwIjogMTc3ODM5MzY1Mn0.jCJA0imB1DouF6ZwCNkN43imH4af1o4HADXW1As-0Y8,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0016,jwt_token,Authorization: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzA2NTE3OCIsICJuYW1lIjogImNob2k3NiIsICJpYXQiOiAxNzc4MzE3MDQwLCAiZXhwIjogMTc3ODMzMzUxMn0.YZGnffMhK9WhKSJk_CvWnoa76qZJVpNcYDiVqfd8wUc,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0017,jwt_token,bearer token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNjgzMzgwMCIsICJuYW1lIjogImxlZTc4IiwgImlhdCI6IDE3NzgyNDc1NjIsICJleHAiOiAxNzc4NDAwNzczfQ.zW20FJBQN0vk729EkcJWnTrJ31h64qWnCsB0kYNlHBY,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0018,jwt_token,세션 JWT: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTMxMzg2MiIsICJuYW1lIjogImxlZTYzIiwgImlhdCI6IDE3NzgyNDg5MDUsICJleHAiOiAxNzc4MzU4NDE3fQ.8xxu36bVJ4cGVwDfYyh1eKbu41J22f4p6x--UZg0dwg,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0019,jwt_token,로그인 토큰 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNjQ2NTE2IiwgIm5hbWUiOiAicGFyazMwIiwgImlhdCI6IDE3NzgyNTg4NzAsICJleHAiOiAxNzc4MzY4NTkzfQ.e41cBGBSxBMH7ygNH8Gh6n0cuIRpndNHu9mr9SvNOcU,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0020,jwt_token,auth_token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDcxMzA4NCIsICJuYW1lIjogImtpbTgwIiwgImlhdCI6IDE3NzgyODM4MzQsICJleHAiOiAxNzc4MzM0NTU2fQ.I5QAkd7HVwDY8iD8qYO-dFpnb6fB5WQdh53rDD3XnW4,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0021,jwt_token,access token (JWT): eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjE0ODY1MiIsICJuYW1lIjogImtpbTI4IiwgImlhdCI6IDE3NzgzMDk3ODAsICJleHAiOiAxNzc4Mzg0OTczfQ.Tb8MtOVbnj5D6af-eA_OOYN1dDtIfuQgBsDjb2f2Qdo,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0022,jwt_token,decode jwt: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTU4MjQ2NCIsICJuYW1lIjogInBhcmszOCIsICJpYXQiOiAxNzc4MjU5Mjc3LCAiZXhwIjogMTc3ODM5MzEwOH0.gqhjXc-xqZ4NRtM7XDBFG4exqEll9PaB27yAGqe0-_g,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0023,jwt_token,토큰 검증 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjQxMjg1MSIsICJuYW1lIjogInBhcms5MyIsICJpYXQiOiAxNzc4MjY2NTIzLCAiZXhwIjogMTc3ODM3NTUyOH0.iWPB8DUYD0aWbeVCeV1Cg7ur_FTiCpvi5oC54TPp93w,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0024,jwt_token,session token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzg3NjA0MyIsICJuYW1lIjogImtpbTU1IiwgImlhdCI6IDE3NzgzMDY0NjQsICJleHAiOiAxNzc4NDA4NjY4fQ.3WZpYF-B3gv0R-VBlYouSuhkYrJVfaewHgvv8Gz3jAU,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0025,jwt_token,login jwt eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjE1Mjc1IiwgIm5hbWUiOiAia2ltMzgiLCAiaWF0IjogMTc3ODMwMjc3MSwgImV4cCI6IDE3NzgzOTY0NjB9.NAeQrVsClaPCZzlBLRcDF4hiwb6-89wQ0T5vcGflZqM,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0026,jwt_token,인가 토큰 Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTc4OTgyMSIsICJuYW1lIjogImNob2kzMCIsICJpYXQiOiAxNzc4MjgyNzQ3LCAiZXhwIjogMTc3ODM1MDc2OX0.MR83sAJjcSRgF15MdclJw5H_AAXSyCW91cnL4qBS3z4,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0027,jwt_token,JWT 발급 완료 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODk0NjU5MCIsICJuYW1lIjogImtpbTkyIiwgImlhdCI6IDE3NzgzMDAzNzMsICJleHAiOiAxNzc4MzYyOTk5fQ.FEQAdm78ySlOdEEcGNhrhMltDG4kl6THMH_EKIKP-RE,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0028,jwt_token,token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzAzNDg2MSIsICJuYW1lIjogImxlZTEzIiwgImlhdCI6IDE3NzgyODg1MjksICJleHAiOiAxNzc4MzQzNTY2fQ.wc0okS2sgryNkGM89s_mUtoij8a_GoMyReDwxd9r8bY,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0029,jwt_token,auth header: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzM2MjgzOCIsICJuYW1lIjogImtpbTQiLCAiaWF0IjogMTc3ODMyNDQ4NSwgImV4cCI6IDE3NzgzMzg2NTd9.2jlzFsBkRwVSrGYJ51e7puUxgg5N5LMmW6pyNWx1NNs,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0030,jwt_token,서비스 jwt token eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDMzMjQ4MSIsICJuYW1lIjogImtpbTY2IiwgImlhdCI6IDE3NzgyODM1ODYsICJleHAiOiAxNzc4Mzk1NTY2fQ.Kn6iPc9aqutUSTuUfh7JqdIAf5Vgk6J6oy8ecQTOuYE,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0031,jwt_token,Authorization: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTc4ODU0OCIsICJuYW1lIjogInBhcmsyMiIsICJpYXQiOiAxNzc4MzEyMDg5LCAiZXhwIjogMTc3ODM5MDI3Nn0.DRQ4l1rQOdvO1a7pJBCW6YNvY9S8ax3dYbOAT4FsHPw,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0032,jwt_token,bearer token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTY2MDY1MSIsICJuYW1lIjogImNob2kxNyIsICJpYXQiOiAxNzc4MjYyODc5LCAiZXhwIjogMTc3ODM5ODg4MX0.hSIdMAQTO5lKI1pH361MfI6fU6KY8imyFV0bkWdXT8k,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0033,jwt_token,세션 JWT: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjU4MzMyOSIsICJuYW1lIjogImtpbTQ1IiwgImlhdCI6IDE3NzgyNDc2MjQsICJleHAiOiAxNzc4Mzg4MTg5fQ.jZiuYDUCjV8x2POd5JUHrdlgX24CwoGGsRkRtD1ulIQ,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0034,jwt_token,로그인 토큰 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTc2MzA0NCIsICJuYW1lIjogInBhcms3NyIsICJpYXQiOiAxNzc4Mjc2MjA5LCAiZXhwIjogMTc3ODM3MjQ4N30.UO5OvKUUgaHIsZCRmzhB41KPWcmeZpgAflRD8Kb_GMo,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0035,jwt_token,auth_token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzQ5NDU0NSIsICJuYW1lIjogImtpbTI5IiwgImlhdCI6IDE3NzgyNTc2OTIsICJleHAiOiAxNzc4Mzc1MDQ2fQ.il1JQdZ-KNOu36BlQFjt8KTb8NJfVZV31TMx1jJX9-Y,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0036,jwt_token,access token (JWT): eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODU0MzU5OCIsICJuYW1lIjogInBhcms4NSIsICJpYXQiOiAxNzc4MjY5NDQ3LCAiZXhwIjogMTc3ODM1NzU2OX0.vCDOmjl-_I1zkDUu-nshEjc8tg_89Ggjs9PgwlktQuI,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0037,jwt_token,decode jwt: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzQyODQ1OSIsICJuYW1lIjogImxlZTciLCAiaWF0IjogMTc3ODI0OTk5NSwgImV4cCI6IDE3Nzg0MDU2MDZ9.8-hEuH0AyXki0nB_Oy0iWXLJd_yBXKTk-Z2d-h0vbTk,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0038,jwt_token,토큰 검증 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDg5ODI0NSIsICJuYW1lIjogImtpbTMzIiwgImlhdCI6IDE3NzgzMDgyNTAsICJleHAiOiAxNzc4MzczODE4fQ.BgK34sx6sqvxOM0kvGmozbaGieeQPEQxsv9djwkBJm4,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0039,jwt_token,session token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjgxMzgyNyIsICJuYW1lIjogImtpbTc5IiwgImlhdCI6IDE3NzgyNTQyOTQsICJleHAiOiAxNzc4MzkyNTMyfQ.SfWaFM6cMwuacInkSs0gS1g7X0lnIWSk-SXVr5ZjJzw,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0040,jwt_token,login jwt eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjc2OTIyMiIsICJuYW1lIjogImxlZTgxIiwgImlhdCI6IDE3NzgyNTg4MDQsICJleHAiOiAxNzc4MzU4OTM1fQ.VmJtiIFx_WCK_AcMIe0afa7umXStJ3_rJgfKjeSnkI4,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0041,jwt_token,인가 토큰 Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTAyMjM2MyIsICJuYW1lIjogImxlZTU3IiwgImlhdCI6IDE3NzgyNTQ2NjUsICJleHAiOiAxNzc4Mzg2NTcxfQ.vzxqG0pn_8eF3dm3u3JEGl2xqGqixJ8xZBOCzAATv3U,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0042,jwt_token,JWT 발급 완료 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDg2MDc3OCIsICJuYW1lIjogImxlZTI2IiwgImlhdCI6IDE3NzgyNDcyOTQsICJleHAiOiAxNzc4NDEyNjgxfQ.mPIBo9sYGi3awP6aQ6lZoMur4aBPlfjDQiyWW6JmAr0,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0043,jwt_token,token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNjgwNTk3NiIsICJuYW1lIjogImxlZTUzIiwgImlhdCI6IDE3NzgyOTMyMDEsICJleHAiOiAxNzc4Mzg5NTkzfQ.9mFVBV9Kfo6OdGeEEu2HPoDkcvwjdEVMJryctRgrqcQ,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0044,jwt_token,auth header: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDE2NTExMiIsICJuYW1lIjogInBhcms3NCIsICJpYXQiOiAxNzc4MjUxNDEwLCAiZXhwIjogMTc3ODM1MTk2MX0.HPJ3FHx7TuANr-K2SmbxyErLkGMIiR07EE16M-Td_dU,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0045,jwt_token,서비스 jwt token eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODczNzY3NyIsICJuYW1lIjogImxlZTMyIiwgImlhdCI6IDE3NzgyNTI5NjYsICJleHAiOiAxNzc4MzQ3NTc2fQ.RnQI6Mc9m2KaFdt2WoWJcUE6DOiYgO_fv6XpjS1eArc,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0046,jwt_token,Authorization: Bearer eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTc0ODU1OSIsICJuYW1lIjogInBhcms1NyIsICJpYXQiOiAxNzc4MjcyNTU4LCAiZXhwIjogMTc3ODM4MjY1NH0.-s4aY2CoicGe5lmgxPE2diDLCwRwmPVszKxixnjoAmo,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0047,jwt_token,bearer token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzAwMjQ3OCIsICJuYW1lIjogInBhcms3OSIsICJpYXQiOiAxNzc4MjYxNTYxLCAiZXhwIjogMTc3ODMzNjYyMn0.NgSK8q_9c0krgVEbYy5FqCOFulo-RpzIZZ9rwDmi5Uk,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0048,jwt_token,세션 JWT: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjM1MDU5MiIsICJuYW1lIjogImNob2k2MyIsICJpYXQiOiAxNzc4MjkyNDU5LCAiZXhwIjogMTc3ODM4MzQwMn0.fOiH2mZ7TFUSwZDj4QrTYvxgcH2vfXEGcd5RlcZflkE,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0049,jwt_token,로그인 토큰 eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTA0NTM4MyIsICJuYW1lIjogImtpbTkwIiwgImlhdCI6IDE3NzgyOTgyODgsICJleHAiOiAxNzc4MzgyMzc5fQ.37-OQub1uNCTrRYrbATdp9WICuVijO_byhPUrChdALE,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-JWT_TOKE-0050,jwt_token,auth_token=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjk0MjYxNyIsICJuYW1lIjogInBhcmsyNyIsICJpYXQiOiAxNzc4MzI2MzUwLCAiZXhwIjogMTc3ODM3NTgzMX0.W4dmoCcpqUoIx6x4edvdtzccvUDcTTRt4UqTZUfE5hg,jwt_token,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0001,api_key_assignment,"api_key = ""97c2891cb5daec372a83b114643985e3""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0002,api_key_assignment,API_KEY=7a9b3cd2582984821f63aa44f4757309,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0003,api_key_assignment,secret_key: bac76a97b9d909cd26c6c9a569bfbca9,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0004,api_key_assignment,"access_token=""sk-uQ5u5Np17C0B5h4BXpA9pWViboh28wma4M9sPfsQG96IJWPr""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0005,api_key_assignment,api-key: 49c2d4eb5101c279f5aaf6b7faae3153,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0006,api_key_assignment,auth_token=3cf613c026384f1dc3a3cb48068e71f2,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0007,api_key_assignment,"private_key=""a5cc25b09257c12440fb9a8715115079890077c5""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0008,api_key_assignment,api_key=sk-g5xIKQTBmnMWZxi4xnPIgHPdCAsp871sMisn3K1c815l81oZ,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0009,api_key_assignment,secret-key=NSNxw4GoCEl3so5oyqYvoYpgrZj5OVto,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0010,api_key_assignment,access-token: a86ad7ed-e307-6ce6-a41d-47b6584b7dd3,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0011,api_key_assignment,API_KEY설정: api_key=sk-6fueAUOoYOD5htquX4lOTBGaJBQpOIrpDdQccqEpYlheuWxm,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0012,api_key_assignment,external api_key: e091fd46-78c1-5eb9-d6ff-9fd532315c18,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0013,api_key_assignment,secret_key = 924c5b10-8b29-12ab-ab25-b8d2c3482090,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0014,api_key_assignment,access_token: 6fb62fc2acde1efc0314e6d766f680c9,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0015,api_key_assignment,auth-token=a9e5e712e5937e478191b43101e5c5a7c978d2ac,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0016,api_key_assignment,"api_key = ""U9pkOFQnfuwVyGfM7SemNNwbE9tZrZmq""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0017,api_key_assignment,API_KEY=e54c88d0280b26e0f2187341a5a4d4e7de352c73,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0018,api_key_assignment,secret_key: sk-4IMQ7qlIIUtljw0PE6Levp97Vj08rZpne6QcrK3j3pysQMy2,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0019,api_key_assignment,"access_token=""a95bdd69696a7d938ea8838f74aa94e21ab7ea3b""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0020,api_key_assignment,api-key: c30d72aefd3a27d497d263c6b86df8bf,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0021,api_key_assignment,auth_token=2k3nWodb4mpKL0BqMJVJNG4OOUMR5ulV,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0022,api_key_assignment,"private_key=""312dcff19d17d5f13fb5b562fbfab7b9""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0023,api_key_assignment,api_key=39a64266-4c33-771e-9c04-640ae583caa3,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0024,api_key_assignment,secret-key=ba29f3e191a27b6d09e410e0e1478f74b8f7fb33,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0025,api_key_assignment,access-token: d834220709434e66a1cf815a750b9a89ce1efb93,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0026,api_key_assignment,API_KEY설정: api_key=Wg8n0bb9EIl8LMmJzVzHefqfLXjV0acr,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0027,api_key_assignment,external api_key: PK19AMj029dw63Jk6WTxeUn0B5gH9xaJ,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0028,api_key_assignment,secret_key = 6685b5ac-19d5-5b42-7bdb-d8fbd3833d01,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0029,api_key_assignment,access_token: LGMaVf25plc3bshvMUVwfMesbsgKPKig,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0030,api_key_assignment,auth-token=c2b3b70e44bdda70e2da5604ff5c9ec3,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0031,api_key_assignment,"api_key = ""2b05d7b1-660e-c3fd-dfd4-b43702f5b55d""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0032,api_key_assignment,API_KEY=0KSeiBVuNffmXvBycS969mukj7QgvJi1,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0033,api_key_assignment,secret_key: sk-vU2D6wzhTGWRRcVmljfRv03IMmzv7Lg6w6bzgrqoFrmvrI7t,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0034,api_key_assignment,"access_token=""441f584f66a9e882844415d419866711""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0035,api_key_assignment,api-key: rXdPDovp3rHj5EDMrTkw7flNO6rwEvay,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0036,api_key_assignment,auth_token=sk-YRj3zpRHZVjiwVXAUwhVg7az8gcokyErNoIPlynhNcFWksQC,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0037,api_key_assignment,"private_key=""sk-PbjGqpl5Sfgiz3jZ49k5SILs1tZi0meZIt4WFvIME9Ey0tcM""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0038,api_key_assignment,api_key=cea45e3bb2cc86910c76ce34633e904bfa02bfda,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0039,api_key_assignment,secret-key=824b1383630abbf4237a80557f3a6805236fb23d,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0040,api_key_assignment,access-token: 16b2c763ebe806db851498748afc91cacf8d9388,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0041,api_key_assignment,API_KEY설정: api_key=17fdffb1-2e04-1dd6-4621-a482370f4c9b,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0042,api_key_assignment,external api_key: 6d11dc884d9c5870f2c380ff3356ad08321ee70b,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0043,api_key_assignment,secret_key = e1a91dbd0d73b7de33c52abd807b9a5f4ef8e9a3,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0044,api_key_assignment,access_token: 6aad86d51d0de40476dbbf1876e96899,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0045,api_key_assignment,auth-token=ea3e8be874089abfa569839c035f5128,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0046,api_key_assignment,"api_key = ""dff74905-cbff-5efb-63e4-16876c39ea5a""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0047,api_key_assignment,API_KEY=cba055e3c6f1fda8dd1f7eff26b02852,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0048,api_key_assignment,secret_key: nhwaJtoQuwrwTCJ7ueylYT8UXJOyrTXg,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0049,api_key_assignment,"access_token=""xwZCoUihJ1D3NwCQcqKOs5YJohiI5DVQ""",api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754
+SYN-TP-API_KEY_-0050,api_key_assignment,api-key: d4d48d02-fc09-3e5e-6601-6c66cb8721ac,api_key_assignment,0.5,mask,합성 TP — 규격+포맷변형 seed=1778327754

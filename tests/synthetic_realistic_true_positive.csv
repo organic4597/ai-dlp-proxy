@@ -1,0 +1,1081 @@
+case_id,category,input_text,expected_rule,min_confidence,expected_action,notes
+SYN-RTP-KR_RRN-0001,kr_rrn,"{
+  ""user_id"": ""80488"",
+  ""kr_rrn"": ""8412191575687"",
+  ""verified"": true
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0002,kr_rrn,"user_profile:
+  name: 서준혁
+  kr_rrn: 650608 1322694
+  role: user",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0003,kr_rrn,박도윤 고객이 kr rrn 정보를 제출했습니다: 501109 2734424,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0004,kr_rrn,"## 고객 정보
+- **kr_rrn**: `6404292019316`
+- **회사**: 카카오",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0005,kr_rrn,"customer = {
+    'kr_rrn': '9207102134851',
+    'status': 'active'
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0006,kr_rrn,[LG전자] 정시우 님이 kr_rrn 공유: 990202 1310894,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0007,kr_rrn,"강하은,8405302532447,카카오,active",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0008,kr_rrn,"INSERT INTO users (kr_rrn, name) VALUES ('9910152556515', '문태양');",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0009,kr_rrn,"안녕하세요,
+
+오지호 님의 kr_rrn 정보를 안내드립니다.
+값: 820728-1920504
+
+감사합니다.",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0010,kr_rrn,[INFO] user=한가을 action=submit field=kr_rrn value=950307 1482413 ts=1778327754,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0011,kr_rrn,"{
+  ""user_id"": ""74639"",
+  ""kr_rrn"": ""890204 1341213"",
+  ""verified"": true
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0012,kr_rrn,"user_profile:
+  name: 최지우
+  kr_rrn: 6007161027436
+  role: user",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0013,kr_rrn,박도윤 고객이 kr rrn 정보를 제출했습니다: 951216 2918481,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0014,kr_rrn,"## 고객 정보
+- **kr_rrn**: `7108132098551`
+- **회사**: 카카오",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0015,kr_rrn,"customer = {
+    'kr_rrn': '8110271896152',
+    'status': 'active'
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0016,kr_rrn,[KB금융] 임수아 님이 kr_rrn 공유: 990802-2232681,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0017,kr_rrn,"윤채원,851116-1148305,신한은행,active",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0018,kr_rrn,"INSERT INTO users (kr_rrn, name) VALUES ('760120-1741481', '박도윤');",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0019,kr_rrn,"안녕하세요,
+
+윤채원 님의 kr_rrn 정보를 안내드립니다.
+값: 7207151046226
+
+감사합니다.",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0020,kr_rrn,[INFO] user=임수아 action=submit field=kr_rrn value=7704242163546 ts=1778327754,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0021,kr_rrn,"{
+  ""user_id"": ""66051"",
+  ""kr_rrn"": ""800623 2245743"",
+  ""verified"": true
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0022,kr_rrn,"user_profile:
+  name: 박도윤
+  kr_rrn: 930720 1258126
+  role: user",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0023,kr_rrn,서준혁 고객이 kr rrn 정보를 제출했습니다: 6707171969531,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0024,kr_rrn,"## 고객 정보
+- **kr_rrn**: `451119 1629686`
+- **회사**: 포스코",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0025,kr_rrn,"customer = {
+    'kr_rrn': '450203 2806528',
+    'status': 'active'
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0026,kr_rrn,[카카오] 서준혁 님이 kr_rrn 공유: 441106-2206911,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0027,kr_rrn,"노윤아,420704 1285800,카카오,active",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0028,kr_rrn,"INSERT INTO users (kr_rrn, name) VALUES ('811004 1236194', '한가을');",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0029,kr_rrn,"안녕하세요,
+
+한가을 님의 kr_rrn 정보를 안내드립니다.
+값: 8503082922518
+
+감사합니다.",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0030,kr_rrn,[INFO] user=임수아 action=submit field=kr_rrn value=830429 2378188 ts=1778327754,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0031,kr_rrn,"{
+  ""user_id"": ""38158"",
+  ""kr_rrn"": ""5105061233251"",
+  ""verified"": true
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0032,kr_rrn,"user_profile:
+  name: 오지호
+  kr_rrn: 681105-1063358
+  role: user",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0033,kr_rrn,조민서 고객이 kr rrn 정보를 제출했습니다: 7409291158886,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0034,kr_rrn,"## 고객 정보
+- **kr_rrn**: `690412 1769308`
+- **회사**: 현대자동차",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0035,kr_rrn,"customer = {
+    'kr_rrn': '6501302753646',
+    'status': 'active'
+}",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0036,kr_rrn,[SK하이닉스] 임수아 님이 kr_rrn 공유: 7910152313030,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0037,kr_rrn,"노윤아,460912 2490163,삼성전자,active",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0038,kr_rrn,"INSERT INTO users (kr_rrn, name) VALUES ('480916 1555331', '김민준');",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0039,kr_rrn,"안녕하세요,
+
+조민서 님의 kr_rrn 정보를 안내드립니다.
+값: 860614-2533385
+
+감사합니다.",kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_RRN-0040,kr_rrn,[INFO] user=서준혁 action=submit field=kr_rrn value=8209251792357 ts=1778327754,kr_rrn,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0001,kr_phone,"{
+  ""user_id"": ""52553"",
+  ""kr_phone"": ""019 565 6894"",
+  ""verified"": true
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0002,kr_phone,"user_profile:
+  name: 노윤아
+  kr_phone: 0117617-4224
+  role: user",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0003,kr_phone,서준혁 고객이 kr phone 정보를 제출했습니다: 010 2034 2665,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0004,kr_phone,"## 고객 정보
+- **kr_phone**: `011.387.7329`
+- **회사**: 현대자동차",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0005,kr_phone,"customer = {
+    'kr_phone': '016 109 9183',
+    'status': 'active'
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0006,kr_phone,[포스코] 이서연 님이 kr_phone 공유: 016-8439011,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0007,kr_phone,"정시우,011-440-4416,네이버,active",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0008,kr_phone,"INSERT INTO users (kr_phone, name) VALUES ('0172272-8729', '강하은');",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0009,kr_phone,"안녕하세요,
+
+김민준 님의 kr_phone 정보를 안내드립니다.
+값: 017-7822655
+
+감사합니다.",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0010,kr_phone,[INFO] user=정시우 action=submit field=kr_phone value=017.1137.1522 ts=1778327754,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0011,kr_phone,"{
+  ""user_id"": ""28400"",
+  ""kr_phone"": ""0161512522"",
+  ""verified"": true
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0012,kr_phone,"user_profile:
+  name: 한가을
+  kr_phone: 017-1667981
+  role: user",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0013,kr_phone,임수아 고객이 kr phone 정보를 제출했습니다: 017-7603-7219,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0014,kr_phone,"## 고객 정보
+- **kr_phone**: `010.2044.9517`
+- **회사**: 신한은행",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0015,kr_phone,"customer = {
+    'kr_phone': '016.293.3369',
+    'status': 'active'
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0016,kr_phone,[삼성전자] 오지호 님이 kr_phone 공유: 010-61905930,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0017,kr_phone,"문태양,016 4086 4955,삼성전자,active",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0018,kr_phone,"INSERT INTO users (kr_phone, name) VALUES ('0169510-9231', '임수아');",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0019,kr_phone,"안녕하세요,
+
+박도윤 님의 kr_phone 정보를 안내드립니다.
+값: 019-77635668
+
+감사합니다.",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0020,kr_phone,[INFO] user=윤채원 action=submit field=kr_phone value=01013618340 ts=1778327754,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0021,kr_phone,"{
+  ""user_id"": ""22171"",
+  ""kr_phone"": ""016-8072-2521"",
+  ""verified"": true
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0022,kr_phone,"user_profile:
+  name: 장예준
+  kr_phone: 017-1786-7252
+  role: user",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0023,kr_phone,이서연 고객이 kr phone 정보를 제출했습니다: 010-51467869,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0024,kr_phone,"## 고객 정보
+- **kr_phone**: `01073803292`
+- **회사**: 포스코",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0025,kr_phone,"customer = {
+    'kr_phone': '010-51342272',
+    'status': 'active'
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0026,kr_phone,[카카오] 최지우 님이 kr_phone 공유: 01949527333,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0027,kr_phone,"서준혁,010-33778652,롯데쇼핑,active",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0028,kr_phone,"INSERT INTO users (kr_phone, name) VALUES ('0163921216', '강하은');",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0029,kr_phone,"안녕하세요,
+
+윤채원 님의 kr_phone 정보를 안내드립니다.
+값: 011-166-1770
+
+감사합니다.",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0030,kr_phone,[INFO] user=임수아 action=submit field=kr_phone value=016.358.7628 ts=1778327754,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0031,kr_phone,"{
+  ""user_id"": ""46250"",
+  ""kr_phone"": ""019.7215.8232"",
+  ""verified"": true
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0032,kr_phone,"user_profile:
+  name: 이서연
+  kr_phone: 0103009-6869
+  role: user",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0033,kr_phone,서준혁 고객이 kr phone 정보를 제출했습니다: 01051393244,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0034,kr_phone,"## 고객 정보
+- **kr_phone**: `010-78303190`
+- **회사**: 카카오",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0035,kr_phone,"customer = {
+    'kr_phone': '017-6413-8138',
+    'status': 'active'
+}",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0036,kr_phone,[SK하이닉스] 박도윤 님이 kr_phone 공유: 010.5744.4458,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0037,kr_phone,"조민서,010 3780 2246,신한은행,active",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0038,kr_phone,"INSERT INTO users (kr_phone, name) VALUES ('010-56195524', '오지호');",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0039,kr_phone,"안녕하세요,
+
+서준혁 님의 kr_phone 정보를 안내드립니다.
+값: 0116669271
+
+감사합니다.",kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PHONE-0040,kr_phone,[INFO] user=정시우 action=submit field=kr_phone value=01041282325 ts=1778327754,kr_phone,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0001,credit_card,"{
+  ""user_id"": ""20327"",
+  ""credit_card"": ""5581264033693548"",
+  ""verified"": true
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0002,credit_card,"user_profile:
+  name: 이서연
+  credit_card: 5435-3479 2730-8923
+  role: user",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0003,credit_card,조민서 고객이 credit card 정보를 제출했습니다: 5498-7640-4303-7802,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0004,credit_card,"## 고객 정보
+- **credit_card**: `5533 8231 8349 5365`
+- **회사**: 네이버",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0005,credit_card,"customer = {
+    'credit_card': '551200-115214-6591',
+    'status': 'active'
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0006,credit_card,[네이버] 정시우 님이 credit_card 공유: 5557 98-2328-061226,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0007,credit_card,"김민준,5221 9637 1495 7355,카카오,active",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0008,credit_card,"INSERT INTO users (credit_card, name) VALUES ('5120 75-1042-076838', '장예준');",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0009,credit_card,"안녕하세요,
+
+한가을 님의 credit_card 정보를 안내드립니다.
+값: 4581951469359643
+
+감사합니다.",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0010,credit_card,[INFO] user=이서연 action=submit field=credit_card value=5220 38-2177-913915 ts=1778327754,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0011,credit_card,"{
+  ""user_id"": ""25753"",
+  ""credit_card"": ""556523-416829-0998"",
+  ""verified"": true
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0012,credit_card,"user_profile:
+  name: 박도윤
+  credit_card: 5418-8591-2167-7508
+  role: user",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0013,credit_card,오지호 고객이 credit card 정보를 제출했습니다: 5443-7335-6436-9288,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0014,credit_card,"## 고객 정보
+- **credit_card**: `5587304710924719`
+- **회사**: 현대자동차",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0015,credit_card,"customer = {
+    'credit_card': '5456 4335 0068 5723',
+    'status': 'active'
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0016,credit_card,[KB금융] 임수아 님이 credit_card 공유: 5228 2205 3877 4463,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0017,credit_card,"오지호,4196 5588 4357 9536,네이버,active",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0018,credit_card,"INSERT INTO users (credit_card, name) VALUES ('6011-2758 4255-7524', '임수아');",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0019,credit_card,"안녕하세요,
+
+장예준 님의 credit_card 정보를 안내드립니다.
+값: 526454-116819-3087
+
+감사합니다.",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0020,credit_card,[INFO] user=임수아 action=submit field=credit_card value=6011-4120-4736-8981 ts=1778327754,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0021,credit_card,"{
+  ""user_id"": ""17707"",
+  ""credit_card"": ""5168 44-4074-101137"",
+  ""verified"": true
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0022,credit_card,"user_profile:
+  name: 서준혁
+  credit_card: 6011-6426 9859-5447
+  role: user",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0023,credit_card,노윤아 고객이 credit card 정보를 제출했습니다: 5208096308633814,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0024,credit_card,"## 고객 정보
+- **credit_card**: `4782320765858327`
+- **회사**: 롯데쇼핑",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0025,credit_card,"customer = {
+    'credit_card': '5523 26-9765-984024',
+    'status': 'active'
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0026,credit_card,[카카오] 최지우 님이 credit_card 공유: 525018-250853-9931,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0027,credit_card,"문태양,533504-236958-7412,카카오,active",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0028,credit_card,"INSERT INTO users (credit_card, name) VALUES ('5206857030980308', '윤채원');",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0029,credit_card,"안녕하세요,
+
+윤채원 님의 credit_card 정보를 안내드립니다.
+값: 5599-0484 0549-3516
+
+감사합니다.",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0030,credit_card,[INFO] user=이서연 action=submit field=credit_card value=5292-5712 7449-9363 ts=1778327754,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0031,credit_card,"{
+  ""user_id"": ""26932"",
+  ""credit_card"": ""5598 90-8773-273660"",
+  ""verified"": true
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0032,credit_card,"user_profile:
+  name: 오지호
+  credit_card: 545332-325875-5955
+  role: user",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0033,credit_card,서준혁 고객이 credit card 정보를 제출했습니다: 5521 41-0910-096882,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0034,credit_card,"## 고객 정보
+- **credit_card**: `5122-1842-5880-2606`
+- **회사**: 포스코",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0035,credit_card,"customer = {
+    'credit_card': '5295 63-6159-892615',
+    'status': 'active'
+}",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0036,credit_card,[LG전자] 윤채원 님이 credit_card 공유: 5171 1909 5510 4808,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0037,credit_card,"임수아,4918 50-2044-847760,롯데쇼핑,active",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0038,credit_card,"INSERT INTO users (credit_card, name) VALUES ('6011-5768-2494-3057', '조민서');",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0039,credit_card,"안녕하세요,
+
+이서연 님의 credit_card 정보를 안내드립니다.
+값: 5355-6138-5252-5518
+
+감사합니다.",credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-CREDIT_C-0040,credit_card,[INFO] user=조민서 action=submit field=credit_card value=5559 90-1738-802969 ts=1778327754,credit_card,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0001,email,"{
+  ""user_id"": ""11356"",
+  ""email"": ""E3ITL05C9KY12@NAVER.COM"",
+  ""verified"": true
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0002,email,"user_profile:
+  name: 박도윤
+  email: 527_wg0@korea.ac.kr
+  role: user",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0003,email,김민준 고객이 email 정보를 제출했습니다: fcow756yh6p+noreply@korea.ac.kr,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0004,email,"## 고객 정보
+- **email**: `apcs3ec7_y3tp@dev.kakao.com`
+- **회사**: 삼성전자",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0005,email,"customer = {
+    'email': 'oa7jc@corp.samsung.com',
+    'status': 'active'
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0006,email,[카카오] 임수아 님이 email 공유: 9QY_B2X@NATE.COM,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0007,email,"강하은,pxhrkn0@korea.ac.kr,카카오,active",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0008,email,"INSERT INTO users (email, name) VALUES ('dh61k9jb0awge@kakao.com', '임수아');",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0009,email,"안녕하세요,
+
+윤채원 님의 email 정보를 안내드립니다.
+값: xsqo8@example.com
+
+감사합니다.",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0010,email,[INFO] user=한가을 action=submit field=email value=o74l834pft3@m.naver.com ts=1778327754,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0011,email,"{
+  ""user_id"": ""96043"",
+  ""email"": ""5r5tn@company.co.kr"",
+  ""verified"": true
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0012,email,"user_profile:
+  name: 김민준
+  email: 83i.g6uk@outlook.com
+  role: user",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0013,email,윤채원 고객이 email 정보를 제출했습니다: qcnkfmys3qqsf@company.co.kr,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0014,email,"## 고객 정보
+- **email**: `tol_jdgg+work@example.com`
+- **회사**: LG전자",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0015,email,"customer = {
+    'email': 'quv6_hvmd0dfe+noreply@snu.ac.kr',
+    'status': 'active'
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0016,email,[신한은행] 정시우 님이 email 공유: HA7TTYOWM6L4A@KOREA.AC.KR,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0017,email,"강하은,ok5wkz.e1s603@korea.ac.kr,현대자동차,active",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0018,email,"INSERT INTO users (email, name) VALUES ('rs7f5+noreply@daum.net', '강하은');",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0019,email,"안녕하세요,
+
+서준혁 님의 email 정보를 안내드립니다.
+값: OM19E7@NATE.COM
+
+감사합니다.",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0020,email,[INFO] user=조민서 action=submit field=email value=xl5cu@company.co.kr ts=1778327754,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0021,email,"{
+  ""user_id"": ""14946"",
+  ""email"": ""c6k6hya334uy@daum.net"",
+  ""verified"": true
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0022,email,"user_profile:
+  name: 조민서
+  email: 4hzao44zx+noreply@company.co.kr
+  role: user",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0023,email,문태양 고객이 email 정보를 제출했습니다: 07OWYI0NV@KAKAO.COM,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0024,email,"## 고객 정보
+- **email**: `QULMN1RBAJ1@HANMAIL.NET`
+- **회사**: KB금융",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0025,email,"customer = {
+    'email': '5zvl5gwx5imr@daum.net',
+    'status': 'active'
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0026,email,[SK하이닉스] 임수아 님이 email 공유: m6zcby@company.co.kr,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0027,email,"서준혁,ywlfh+noreply@hanmail.net,포스코,active",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0028,email,"INSERT INTO users (email, name) VALUES ('2j5gz57+work@nate.com', '윤채원');",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0029,email,"안녕하세요,
+
+윤채원 님의 email 정보를 안내드립니다.
+값: b9xj2uas_d50+work@hanmail.net
+
+감사합니다.",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0030,email,[INFO] user=최지우 action=submit field=email value=dg_teu6psh9h@hanmail.net ts=1778327754,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0031,email,"{
+  ""user_id"": ""14248"",
+  ""email"": ""ffqpbg0m@dev.kakao.com"",
+  ""verified"": true
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0032,email,"user_profile:
+  name: 문태양
+  email: ik.zxzjj3@dev.kakao.com
+  role: user",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0033,email,문태양 고객이 email 정보를 제출했습니다: 4WC.SOXQGJSS@KAKAO.COM,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0034,email,"## 고객 정보
+- **email**: `8ucedar7wsgi+noreply@outlook.com`
+- **회사**: 삼성전자",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0035,email,"customer = {
+    'email': 'uujq3nqka@korea.ac.kr',
+    'status': 'active'
+}",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0036,email,[KB금융] 강하은 님이 email 공유: eqd_2r5@outlook.com,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0037,email,"문태양,512bzu3fkhh@company.co.kr,삼성전자,active",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0038,email,"INSERT INTO users (email, name) VALUES ('65y_z18+noreply@snu.ac.kr', '임수아');",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0039,email,"안녕하세요,
+
+한가을 님의 email 정보를 안내드립니다.
+값: ng9f.gd@corp.samsung.com
+
+감사합니다.",email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-EMAIL-0040,email,[INFO] user=서준혁 action=submit field=email value=HAL5S@KAKAO.COM ts=1778327754,email,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0001,kr_passport,"{
+  ""user_id"": ""97538"",
+  ""kr_passport"": ""A09829050"",
+  ""verified"": true
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0002,kr_passport,"user_profile:
+  name: 노윤아
+  kr_passport: A55770796
+  role: user",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0003,kr_passport,서준혁 고객이 kr passport 정보를 제출했습니다: PM42151244,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0004,kr_passport,"## 고객 정보
+- **kr_passport**: `S01923028`
+- **회사**: SK하이닉스",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0005,kr_passport,"customer = {
+    'kr_passport': 'A67220074',
+    'status': 'active'
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0006,kr_passport,[KB금융] 이서연 님이 kr_passport 공유: PM90714655,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0007,kr_passport,"박도윤,S41304716,SK하이닉스,active",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0008,kr_passport,"INSERT INTO users (kr_passport, name) VALUES ('PM44884020', '최지우');",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0009,kr_passport,"안녕하세요,
+
+정시우 님의 kr_passport 정보를 안내드립니다.
+값: PS65776608
+
+감사합니다.",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0010,kr_passport,[INFO] user=한가을 action=submit field=kr_passport value=R76723912 ts=1778327754,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0011,kr_passport,"{
+  ""user_id"": ""20723"",
+  ""kr_passport"": ""R09148389"",
+  ""verified"": true
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0012,kr_passport,"user_profile:
+  name: 장예준
+  kr_passport: R95171160
+  role: user",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0013,kr_passport,오지호 고객이 kr passport 정보를 제출했습니다: R08147682,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0014,kr_passport,"## 고객 정보
+- **kr_passport**: `PS09013421`
+- **회사**: 현대자동차",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0015,kr_passport,"customer = {
+    'kr_passport': 'PM24664317',
+    'status': 'active'
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0016,kr_passport,[카카오] 박도윤 님이 kr_passport 공유: PM31833119,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0017,kr_passport,"박도윤,PS82013005,신한은행,active",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0018,kr_passport,"INSERT INTO users (kr_passport, name) VALUES ('M07227035', '임수아');",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0019,kr_passport,"안녕하세요,
+
+김민준 님의 kr_passport 정보를 안내드립니다.
+값: S75197769
+
+감사합니다.",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0020,kr_passport,[INFO] user=문태양 action=submit field=kr_passport value=S98771193 ts=1778327754,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0021,kr_passport,"{
+  ""user_id"": ""50119"",
+  ""kr_passport"": ""PS45094496"",
+  ""verified"": true
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0022,kr_passport,"user_profile:
+  name: 임수아
+  kr_passport: S85836172
+  role: user",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0023,kr_passport,문태양 고객이 kr passport 정보를 제출했습니다: PM62458964,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0024,kr_passport,"## 고객 정보
+- **kr_passport**: `M76129275`
+- **회사**: 네이버",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0025,kr_passport,"customer = {
+    'kr_passport': 'S42423224',
+    'status': 'active'
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0026,kr_passport,[KB금융] 장예준 님이 kr_passport 공유: A46619810,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0027,kr_passport,"서준혁,M74686366,신한은행,active",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0028,kr_passport,"INSERT INTO users (kr_passport, name) VALUES ('S39308122', '조민서');",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0029,kr_passport,"안녕하세요,
+
+노윤아 님의 kr_passport 정보를 안내드립니다.
+값: S79599645
+
+감사합니다.",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0030,kr_passport,[INFO] user=노윤아 action=submit field=kr_passport value=PM88255641 ts=1778327754,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0031,kr_passport,"{
+  ""user_id"": ""58559"",
+  ""kr_passport"": ""PM86748678"",
+  ""verified"": true
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0032,kr_passport,"user_profile:
+  name: 서준혁
+  kr_passport: PM88330141
+  role: user",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0033,kr_passport,노윤아 고객이 kr passport 정보를 제출했습니다: PS19907334,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0034,kr_passport,"## 고객 정보
+- **kr_passport**: `M89375512`
+- **회사**: 현대자동차",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0035,kr_passport,"customer = {
+    'kr_passport': 'R34591654',
+    'status': 'active'
+}",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0036,kr_passport,[현대자동차] 서준혁 님이 kr_passport 공유: M43378910,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0037,kr_passport,"김민준,M64835665,포스코,active",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0038,kr_passport,"INSERT INTO users (kr_passport, name) VALUES ('R96423791', '박도윤');",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0039,kr_passport,"안녕하세요,
+
+강하은 님의 kr_passport 정보를 안내드립니다.
+값: PS00270700
+
+감사합니다.",kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_PASSP-0040,kr_passport,[INFO] user=장예준 action=submit field=kr_passport value=PM19655693 ts=1778327754,kr_passport,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0001,kr_driver_license,"{
+  ""user_id"": ""70422"",
+  ""kr_driver_license"": ""23-95-646271-17"",
+  ""verified"": true
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0002,kr_driver_license,"user_profile:
+  name: 한가을
+  kr_driver_license: 19-06-485054-87
+  role: user",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0003,kr_driver_license,오지호 고객이 kr driver license 정보를 제출했습니다: 16-22-260023-90,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0004,kr_driver_license,"## 고객 정보
+- **kr_driver_license**: `25-18-326966-91`
+- **회사**: SK하이닉스",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0005,kr_driver_license,"customer = {
+    'kr_driver_license': '28-03-214009-95',
+    'status': 'active'
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0006,kr_driver_license,[LG전자] 장예준 님이 kr_driver_license 공유: 16-19-160973-18,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0007,kr_driver_license,"최지우,25-22-166070-27,카카오,active",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0008,kr_driver_license,"INSERT INTO users (kr_driver_license, name) VALUES ('15-03-617982-93', '장예준');",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0009,kr_driver_license,"안녕하세요,
+
+김민준 님의 kr_driver_license 정보를 안내드립니다.
+값: 17-91-168952-46
+
+감사합니다.",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0010,kr_driver_license,[INFO] user=강하은 action=submit field=kr_driver_license value=27-06-514631-18 ts=1778327754,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0011,kr_driver_license,"{
+  ""user_id"": ""18901"",
+  ""kr_driver_license"": ""20-13-483216-88"",
+  ""verified"": true
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0012,kr_driver_license,"user_profile:
+  name: 최지우
+  kr_driver_license: 22-16-241551-98
+  role: user",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0013,kr_driver_license,오지호 고객이 kr driver license 정보를 제출했습니다: 23-25-508561-12,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0014,kr_driver_license,"## 고객 정보
+- **kr_driver_license**: `18-20-329558-67`
+- **회사**: 네이버",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0015,kr_driver_license,"customer = {
+    'kr_driver_license': '13-12-778745-60',
+    'status': 'active'
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0016,kr_driver_license,[네이버] 이서연 님이 kr_driver_license 공유: 12-92-619035-36,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0017,kr_driver_license,"최지우,23-04-890449-28,현대자동차,active",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0018,kr_driver_license,"INSERT INTO users (kr_driver_license, name) VALUES ('26-23-188923-64', '정시우');",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0019,kr_driver_license,"안녕하세요,
+
+이서연 님의 kr_driver_license 정보를 안내드립니다.
+값: 16-91-541900-52
+
+감사합니다.",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0020,kr_driver_license,[INFO] user=오지호 action=submit field=kr_driver_license value=26-94-233624-92 ts=1778327754,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0021,kr_driver_license,"{
+  ""user_id"": ""80551"",
+  ""kr_driver_license"": ""23-97-993572-20"",
+  ""verified"": true
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0022,kr_driver_license,"user_profile:
+  name: 이서연
+  kr_driver_license: 18-04-980389-78
+  role: user",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0023,kr_driver_license,김민준 고객이 kr driver license 정보를 제출했습니다: 24-20-210008-65,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0024,kr_driver_license,"## 고객 정보
+- **kr_driver_license**: `23-05-218758-34`
+- **회사**: 포스코",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0025,kr_driver_license,"customer = {
+    'kr_driver_license': '14-90-961409-99',
+    'status': 'active'
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0026,kr_driver_license,[현대자동차] 정시우 님이 kr_driver_license 공유: 28-11-353865-45,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0027,kr_driver_license,"오지호,23-05-197979-31,KB금융,active",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0028,kr_driver_license,"INSERT INTO users (kr_driver_license, name) VALUES ('13-00-512045-42', '노윤아');",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0029,kr_driver_license,"안녕하세요,
+
+조민서 님의 kr_driver_license 정보를 안내드립니다.
+값: 18-09-248350-32
+
+감사합니다.",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0030,kr_driver_license,[INFO] user=노윤아 action=submit field=kr_driver_license value=20-05-391367-35 ts=1778327754,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0031,kr_driver_license,"{
+  ""user_id"": ""56291"",
+  ""kr_driver_license"": ""11-21-838979-74"",
+  ""verified"": true
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0032,kr_driver_license,"user_profile:
+  name: 문태양
+  kr_driver_license: 22-17-548298-34
+  role: user",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0033,kr_driver_license,서준혁 고객이 kr driver license 정보를 제출했습니다: 18-92-137193-26,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0034,kr_driver_license,"## 고객 정보
+- **kr_driver_license**: `24-91-712990-28`
+- **회사**: 카카오",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0035,kr_driver_license,"customer = {
+    'kr_driver_license': '25-16-563526-81',
+    'status': 'active'
+}",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0036,kr_driver_license,[카카오] 임수아 님이 kr_driver_license 공유: 20-15-761960-44,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0037,kr_driver_license,"임수아,25-10-601254-14,롯데쇼핑,active",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0038,kr_driver_license,"INSERT INTO users (kr_driver_license, name) VALUES ('22-04-942385-29', '강하은');",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0039,kr_driver_license,"안녕하세요,
+
+최지우 님의 kr_driver_license 정보를 안내드립니다.
+값: 28-16-588559-77
+
+감사합니다.",kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-KR_DRIVE-0040,kr_driver_license,[INFO] user=윤채원 action=submit field=kr_driver_license value=23-18-445450-95 ts=1778327754,kr_driver_license,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0001,aws_access_key,"{
+  ""user_id"": ""72920"",
+  ""aws_access_key"": ""ACCAF2UMSAGFK1YGPACS"",
+  ""verified"": true
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0002,aws_access_key,"user_profile:
+  name: 문태양
+  aws_access_key: ACCA6N59136L5TZRCKXS
+  role: user",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0003,aws_access_key,오지호 고객이 aws access key 정보를 제출했습니다: ABIA4Q2YHPEIY5LGWVEL,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0004,aws_access_key,"## 고객 정보
+- **aws_access_key**: `ABIAOGYSN27VD4U2GS40`
+- **회사**: 포스코",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0005,aws_access_key,"customer = {
+    'aws_access_key': 'ABIAOMSDTLYIZKQ4NQXP',
+    'status': 'active'
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0006,aws_access_key,[카카오] 노윤아 님이 aws_access_key 공유: ACCAYWQO9E0S2SMWUN3P,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0007,aws_access_key,"윤채원,AKIAJ7G74B8W49D35GRQ,신한은행,active",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0008,aws_access_key,"INSERT INTO users (aws_access_key, name) VALUES ('ACCAZN9H89HZ22HVQCEP', '노윤아');",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0009,aws_access_key,"안녕하세요,
+
+노윤아 님의 aws_access_key 정보를 안내드립니다.
+값: ABIAPITJCE0MSN3F4T1P
+
+감사합니다.",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0010,aws_access_key,[INFO] user=조민서 action=submit field=aws_access_key value=ACCARK58KMT7T2W389UD ts=1778327754,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0011,aws_access_key,"{
+  ""user_id"": ""80313"",
+  ""aws_access_key"": ""ACCA2UA579YTI6D4691H"",
+  ""verified"": true
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0012,aws_access_key,"user_profile:
+  name: 한가을
+  aws_access_key: AKIA8BOCH4A34J9U7IHJ
+  role: user",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0013,aws_access_key,강하은 고객이 aws access key 정보를 제출했습니다: ABIA8LJVP7T45QDWIWUB,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0014,aws_access_key,"## 고객 정보
+- **aws_access_key**: `AKIAG0W81PQ1SFKFLQSW`
+- **회사**: 신한은행",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0015,aws_access_key,"customer = {
+    'aws_access_key': 'ACCAMKT6CTD3LC4I6XS3',
+    'status': 'active'
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0016,aws_access_key,[LG전자] 윤채원 님이 aws_access_key 공유: ASIAQ3KR47061PSC4O0V,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0017,aws_access_key,"윤채원,ABIA04ZXFHWZAYB7W0O6,KB금융,active",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0018,aws_access_key,"INSERT INTO users (aws_access_key, name) VALUES ('AKIAYX95PWKBJYKM35UY', '한가을');",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0019,aws_access_key,"안녕하세요,
+
+박도윤 님의 aws_access_key 정보를 안내드립니다.
+값: ASIA8VXRCRP8DNS28YVQ
+
+감사합니다.",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0020,aws_access_key,[INFO] user=노윤아 action=submit field=aws_access_key value=ASIAKRX0FQ9ALVYKU72I ts=1778327754,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0021,aws_access_key,"{
+  ""user_id"": ""63184"",
+  ""aws_access_key"": ""ACCAXJJDK7TA41NNMVX8"",
+  ""verified"": true
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0022,aws_access_key,"user_profile:
+  name: 윤채원
+  aws_access_key: ASIAQHMW6JY3561GUGXV
+  role: user",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0023,aws_access_key,강하은 고객이 aws access key 정보를 제출했습니다: ASIASI4RB6PSZ9I6DG8W,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0024,aws_access_key,"## 고객 정보
+- **aws_access_key**: `ACCA6E32XIVJKXZZRE9N`
+- **회사**: 롯데쇼핑",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0025,aws_access_key,"customer = {
+    'aws_access_key': 'AKIAIWLM5FILXC15ILBR',
+    'status': 'active'
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0026,aws_access_key,[카카오] 박도윤 님이 aws_access_key 공유: AKIAB9P2YFDSZFK5EMFK,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0027,aws_access_key,"장예준,ABIAFPZ8NUBAQQBWNMOJ,네이버,active",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0028,aws_access_key,"INSERT INTO users (aws_access_key, name) VALUES ('AKIAMSAPJ9X9E3UUZGOD', '윤채원');",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0029,aws_access_key,"안녕하세요,
+
+윤채원 님의 aws_access_key 정보를 안내드립니다.
+값: ASIA98U15EMU3NI4T7F1
+
+감사합니다.",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0030,aws_access_key,[INFO] user=노윤아 action=submit field=aws_access_key value=ASIAG9E42P954EFGDFFC ts=1778327754,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0031,aws_access_key,"{
+  ""user_id"": ""25820"",
+  ""aws_access_key"": ""ABIA53HP51C92CG3VGRT"",
+  ""verified"": true
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0032,aws_access_key,"user_profile:
+  name: 조민서
+  aws_access_key: AKIA4HKYX1QFPL5O33EW
+  role: user",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0033,aws_access_key,오지호 고객이 aws access key 정보를 제출했습니다: ACCA4H6WE08I90OMXO40,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0034,aws_access_key,"## 고객 정보
+- **aws_access_key**: `ASIAL1P2EJSA58NSK3OB`
+- **회사**: 신한은행",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0035,aws_access_key,"customer = {
+    'aws_access_key': 'ACCAO022E0AJCAVWQAQA',
+    'status': 'active'
+}",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0036,aws_access_key,[신한은행] 조민서 님이 aws_access_key 공유: ASIAHKL20TP8JO4KKC23,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0037,aws_access_key,"노윤아,AKIALWGAUVHPJK4GDSCG,롯데쇼핑,active",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0038,aws_access_key,"INSERT INTO users (aws_access_key, name) VALUES ('AKIA6LHHAJDNVQZXXALD', '노윤아');",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0039,aws_access_key,"안녕하세요,
+
+오지호 님의 aws_access_key 정보를 안내드립니다.
+값: ACCA3Y9OD9FEQKY6914U
+
+감사합니다.",aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-AWS_ACCE-0040,aws_access_key,[INFO] user=정시우 action=submit field=aws_access_key value=AKIAM113MTKV0KI5TBKZ ts=1778327754,aws_access_key,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0001,github_pat,"{
+  ""user_id"": ""73289"",
+  ""github_pat"": ""ghu_jnilNMQq0bQfdodQK2QPYSv7AAtY6FFII1TO"",
+  ""verified"": true
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0002,github_pat,"user_profile:
+  name: 정시우
+  github_pat: ghs_kTLvfS5gNUx1nvTOW349u4iCTkQzKl1DFaSz
+  role: user",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0003,github_pat,최지우 고객이 github pat 정보를 제출했습니다: gho_ejvjEJ5Y3CyQMEvwoBaTsjLT0cQ6B9pJ2rCpvIf4,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0004,github_pat,"## 고객 정보
+- **github_pat**: `ghp_yHrAqcSmXZXIEJejD2tg8tGANVjy8g6XxKf4cUrD`
+- **회사**: 카카오",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0005,github_pat,"customer = {
+    'github_pat': 'ghs_flcCm8MKlaTn6x0ljZvKkAWZVAVsU8t6ENWUo',
+    'status': 'active'
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0006,github_pat,[신한은행] 임수아 님이 github_pat 공유: ghu_as4KBB66QeR3OjSyvXFf6aTLDvSPSK9qgkFpJV,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0007,github_pat,"김민준,gho_vABKbHPM02o0tmbsMfmQyblwW8h617LUD3ox18,카카오,active",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0008,github_pat,"INSERT INTO users (github_pat, name) VALUES ('ghu_uUs44Xo7hMW70TLPdeU1SGOJm2YwVW1ZiN70t9Ys', '이서연');",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0009,github_pat,"안녕하세요,
+
+서준혁 님의 github_pat 정보를 안내드립니다.
+값: ghs_6PMerhoyTfXACgqRrISjLDXUtpn9EyRpYyva
+
+감사합니다.",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0010,github_pat,[INFO] user=김민준 action=submit field=github_pat value=ghr_3TyWyQbnvK8FBY7CmGNB6zwpyKOlMGB3tcE8y ts=1778327754,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0011,github_pat,"{
+  ""user_id"": ""50212"",
+  ""github_pat"": ""ghp_aGUjvbtAV51WUnQANuqsFBcFSs1WcbNu39wAYxI"",
+  ""verified"": true
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0012,github_pat,"user_profile:
+  name: 박도윤
+  github_pat: ghs_DSiFTfUhs9IJssykEwFR4bL096bot5ePmt4arJe
+  role: user",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0013,github_pat,임수아 고객이 github pat 정보를 제출했습니다: ghs_fABioLS8cRMjT6VTZpcnzl4p00Nn44dQMGZD,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0014,github_pat,"## 고객 정보
+- **github_pat**: `gho_4VCdjWbafS4n0FgxG2iSKDP44luWIUn2v0XQ`
+- **회사**: 삼성전자",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0015,github_pat,"customer = {
+    'github_pat': 'ghs_K5y8EEzQisQIFg9BxD9EDDd58zxECIe21x8a6',
+    'status': 'active'
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0016,github_pat,[삼성전자] 문태양 님이 github_pat 공유: ghs_CkBhshch6jvGvDFdZBab9GGjsFyTuY6JY5yKmj,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0017,github_pat,"한가을,ghp_s8P0koKyDCA7fGdHgw88KHu38IdI7ZspCZ7oCUk0,현대자동차,active",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0018,github_pat,"INSERT INTO users (github_pat, name) VALUES ('ghs_hu7SvViRyH6goOKc0wN1w9vodO3FElyJ7SOJe', '강하은');",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0019,github_pat,"안녕하세요,
+
+임수아 님의 github_pat 정보를 안내드립니다.
+값: ghr_d7Pw9xXFoES7En4EL7mWDaxMRAJ5oMCeXqjgphHx
+
+감사합니다.",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0020,github_pat,[INFO] user=최지우 action=submit field=github_pat value=ghs_V0q6wf1yFf9NMaDowBxR3H0NMUrCl0Nzy7wwzT8 ts=1778327754,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0021,github_pat,"{
+  ""user_id"": ""65313"",
+  ""github_pat"": ""ghs_QtRppryIkWOZAMvNrGS6lwx8JFA79mXMcGQvZol"",
+  ""verified"": true
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0022,github_pat,"user_profile:
+  name: 박도윤
+  github_pat: ghu_towdJlzqR6CPp5juHhP9CFh2WclALagmJzn6WW8h
+  role: user",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0023,github_pat,이서연 고객이 github pat 정보를 제출했습니다: ghr_50SsgyYHk5uZSmqPPYM1q2t7rtnfRZ7DkkfOCY,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0024,github_pat,"## 고객 정보
+- **github_pat**: `gho_ypJCgEdYz2CtkQ8Gkk0d1J8B3wLG24XFLdkfuA`
+- **회사**: 포스코",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0025,github_pat,"customer = {
+    'github_pat': 'ghs_nCIQu0GtgfSD8VghUbIw97xipStfQPYOK0rmKOQ',
+    'status': 'active'
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0026,github_pat,[롯데쇼핑] 최지우 님이 github_pat 공유: ghs_Iun7OVMEigLcjLmm7MVRb2jorqLbulT1vgcQT,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0027,github_pat,"이서연,ghu_10qCangHSqkpfexdHE5Z7jI2bmpkrRQkr8Z33b,현대자동차,active",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0028,github_pat,"INSERT INTO users (github_pat, name) VALUES ('ghu_sdkhGdgJDtZYMuaQi2BJ0DxOIXrWPO6qommzI', '임수아');",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0029,github_pat,"안녕하세요,
+
+윤채원 님의 github_pat 정보를 안내드립니다.
+값: gho_XAwuhY9Xnbb0hWwulCe3QlnWEbE9lxp6WbLcmMc
+
+감사합니다.",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0030,github_pat,[INFO] user=오지호 action=submit field=github_pat value=ghs_TjAoRtLIwIo0W43HZ6tr5JWm1mTQcrAvRPxQX0qM ts=1778327754,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0031,github_pat,"{
+  ""user_id"": ""22088"",
+  ""github_pat"": ""ghp_7nsi2wUKb0rL13q8e7qQiFwogebIYt49wte0TLe"",
+  ""verified"": true
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0032,github_pat,"user_profile:
+  name: 김민준
+  github_pat: ghs_MBkuCdepgB4SGaIdPtpcTr5nPm1WBNb2DdDOA2F
+  role: user",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0033,github_pat,이서연 고객이 github pat 정보를 제출했습니다: ghs_jrHIChRBndyXDj0WYzPfqHCmrCEqSUUKhSIywd,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0034,github_pat,"## 고객 정보
+- **github_pat**: `gho_mQHw3gREDnOYfiCTw5lUFoXFCUfGTOW6BSGo9q`
+- **회사**: SK하이닉스",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0035,github_pat,"customer = {
+    'github_pat': 'ghr_NO9Ev3EViIF8gXYYUuO2rob7uWfkswCRFzmz59b',
+    'status': 'active'
+}",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0036,github_pat,[포스코] 강하은 님이 github_pat 공유: ghu_u2WBd95nYJjupahbxeDSnRbNRgkMnalxtyCAi5,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0037,github_pat,"박도윤,gho_otJZuvQGD8RZSntqIwcFPnHMihQd54Tckra4eAFj,LG전자,active",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0038,github_pat,"INSERT INTO users (github_pat, name) VALUES ('ghp_HDXa0u85WxsxC4kLAbkSWhwhRAvOmGibqt1STTv', '오지호');",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0039,github_pat,"안녕하세요,
+
+서준혁 님의 github_pat 정보를 안내드립니다.
+값: ghr_nO9H1QjxEvIpUbgVwd5O4D1unHLXw6TCidlRk
+
+감사합니다.",github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-GITHUB_P-0040,github_pat,[INFO] user=오지호 action=submit field=github_pat value=gho_q8thC07cyzVRpaWF14dtudLfJAfgu2XZSXHJQNkf ts=1778327754,github_pat,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0001,jwt_token,"{
+  ""user_id"": ""11890"",
+  ""jwt_token"": ""eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjUzMzM4NyIsICJuYW1lIjogImtpbTM0IiwgImlhdCI6IDE3NzgyNzk5ODMsICJleHAiOiAxNzc4MzkxMzI1fQ.NZmlOX7iQLSrfCOHWfKUYwn_HYVj2O9t0TUDd8W20UE"",
+  ""verified"": true
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0002,jwt_token,"user_profile:
+  name: 윤채원
+  jwt_token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTgyODk1MCIsICJuYW1lIjogImxlZTc3IiwgImlhdCI6IDE3NzgyNTg0ODEsICJleHAiOiAxNzc4MzYxNTU3fQ._n663NBE8WQhAZ12zASUvhr8VnFV3jh2j1c48AagMsE
+  role: user",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0003,jwt_token,조민서 고객이 jwt token 정보를 제출했습니다: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzI1OTMzNSIsICJuYW1lIjogImNob2k1IiwgImlhdCI6IDE3NzgyOTI5NDIsICJleHAiOiAxNzc4Mzg1NDgyfQ.bxuJWz4MrVF1X_TrkpmJlY_qRfB69jE_BFyudPNvIH8,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0004,jwt_token,"## 고객 정보
+- **jwt_token**: `eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTAxMTEzOCIsICJuYW1lIjogImxlZTEwIiwgImlhdCI6IDE3NzgzMTY1NjEsICJleHAiOiAxNzc4MzUxNjI2fQ.-RqmJAtqda1Ci7HM6bGK_AhC2iA7jpDPJK25Fnufnik`
+- **회사**: 카카오",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0005,jwt_token,"customer = {
+    'jwt_token': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDYxODQzMiIsICJuYW1lIjogInBhcms2NyIsICJpYXQiOiAxNzc4MzEyNTQ5LCAiZXhwIjogMTc3ODQxMzQ5OH0.-e-ZxKmShrNe-WHW-us1RYVckr5NOa7kaVAbN_otY70',
+    'status': 'active'
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0006,jwt_token,[롯데쇼핑] 정시우 님이 jwt_token 공유: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjkwMTQwMSIsICJuYW1lIjogInBhcmsxOSIsICJpYXQiOiAxNzc4MzEwMDY3LCAiZXhwIjogMTc3ODM5NjgwOX0.i8-DPlEpRwTNtV9ux-adyZmgvR0yAD9s49bnRuKsj_I,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0007,jwt_token,"장예준,eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzI4MTQyMSIsICJuYW1lIjogImNob2k2MSIsICJpYXQiOiAxNzc4MzE0NTU4LCAiZXhwIjogMTc3ODM1NDYyNX0.wME4iX7UdWANC4IugUScLlDqP1kHN3cPscAGVb8M1nM,KB금융,active",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0008,jwt_token,"INSERT INTO users (jwt_token, name) VALUES ('eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzEwOTQ1IiwgIm5hbWUiOiAicGFyazY0IiwgImlhdCI6IDE3NzgzMjE4NDUsICJleHAiOiAxNzc4NDA5NzY5fQ.3b2kxCKkuaKiWlCVYT8-H5m5_DUFjwC0onjBqytAQQQ', '강하은');",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0009,jwt_token,"안녕하세요,
+
+윤채원 님의 jwt_token 정보를 안내드립니다.
+값: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDQ2MTM5NiIsICJuYW1lIjogInBhcmszNCIsICJpYXQiOiAxNzc4MzAxMDUyLCAiZXhwIjogMTc3ODM0ODYzOX0.xc7AtKdmAfxNDt1TiJ0xzRMpJrxBl1sKi2VENVEd59s
+
+감사합니다.",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0010,jwt_token,[INFO] user=강하은 action=submit field=jwt_token value=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzQzODUyNCIsICJuYW1lIjogImtpbTE5IiwgImlhdCI6IDE3NzgyODc4MTIsICJleHAiOiAxNzc4MzM3Mzc3fQ.xCSnFYU9hrr8OHXW2YIqJ62rZYCOCu6QylMREEK9bto ts=1778327754,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0011,jwt_token,"{
+  ""user_id"": ""59782"",
+  ""jwt_token"": ""eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODIwNzMyNSIsICJuYW1lIjogImNob2k5NSIsICJpYXQiOiAxNzc4MjgyNjM1LCAiZXhwIjogMTc3ODQwMTg5MH0.3JJlzyZnRPl3hILwjquCKeE1i7_oqXX01nJnP3j946Q"",
+  ""verified"": true
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0012,jwt_token,"user_profile:
+  name: 임수아
+  jwt_token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODE3OTE2NCIsICJuYW1lIjogInBhcms2OSIsICJpYXQiOiAxNzc4MzIzMjE0LCAiZXhwIjogMTc3ODQxMTYxMH0.vFPxk6hWSeKH_e8rBZtH5BGCsMOt_q3Ki7Li4VMJAuk
+  role: user",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0013,jwt_token,오지호 고객이 jwt token 정보를 제출했습니다: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODMwMjM0IiwgIm5hbWUiOiAicGFyazgzIiwgImlhdCI6IDE3NzgyOTM4NTEsICJleHAiOiAxNzc4MzQ5NjYwfQ.flpzE2B1N8a2NvxpxAe8GUy8xT5LWeDgYpF__j0qADA,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0014,jwt_token,"## 고객 정보
+- **jwt_token**: `eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTI5NzkyOSIsICJuYW1lIjogImNob2kzNiIsICJpYXQiOiAxNzc4Mjg5MTUwLCAiZXhwIjogMTc3ODM3MDg2N30._hHaOu7uQXNRzcEUxuCBpgs9N9mRngZiesA8FYbYXos`
+- **회사**: 신한은행",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0015,jwt_token,"customer = {
+    'jwt_token': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTcwOTM1MCIsICJuYW1lIjogImtpbTE3IiwgImlhdCI6IDE3NzgyNTM1NTcsICJleHAiOiAxNzc4NDEzMjQzfQ.mDHD9GxVD9a-B1q5uYbHQQ9xrpfMXFUetF9C1XoYd0w',
+    'status': 'active'
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0016,jwt_token,[현대자동차] 장예준 님이 jwt_token 공유: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDQ0NjAwOCIsICJuYW1lIjogInBhcms3MCIsICJpYXQiOiAxNzc4Mjk2NTg3LCAiZXhwIjogMTc3ODM5NjU3N30.mY7zymTQwVn86TYg_R4a-vf_MBzMWFLHS6ib23_bezg,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0017,jwt_token,"문태양,eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzQwNDM0OSIsICJuYW1lIjogImtpbTQyIiwgImlhdCI6IDE3NzgzMDU5ODgsICJleHAiOiAxNzc4NDA4MDEwfQ.5Miaev22Ahum7FbqWlR4KntmSLbNDCheFlTz9HOBjc4,네이버,active",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0018,jwt_token,"INSERT INTO users (jwt_token, name) VALUES ('eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTk2NjcwNCIsICJuYW1lIjogInBhcms4NSIsICJpYXQiOiAxNzc4MzE0OTUxLCAiZXhwIjogMTc3ODQwNjEzNH0.R1zzryrvVG63brrr0aA3OACKaEhWNX0HpCCkFpyYKmM', '강하은');",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0019,jwt_token,"안녕하세요,
+
+임수아 님의 jwt_token 정보를 안내드립니다.
+값: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTE5NzEyNCIsICJuYW1lIjogImNob2k3MyIsICJpYXQiOiAxNzc4Mjk2MjczLCAiZXhwIjogMTc3ODM2MzE0MH0.h9MMEl93HOm_94bg2TGDUISH5_MBKlxwhVXT913V3X4
+
+감사합니다.",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0020,jwt_token,[INFO] user=조민서 action=submit field=jwt_token value=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjQ5NzM4MCIsICJuYW1lIjogImtpbTMiLCAiaWF0IjogMTc3ODMyNDE3NywgImV4cCI6IDE3NzgzNDU3MTJ9.raEHKOP4J2kN6ogJ_fsulzc3kcJwIVt4yp6UkYfHO6Y ts=1778327754,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0021,jwt_token,"{
+  ""user_id"": ""11608"",
+  ""jwt_token"": ""eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzUxNzc4MCIsICJuYW1lIjogImxlZTIiLCAiaWF0IjogMTc3ODMwMTAwNiwgImV4cCI6IDE3NzgzMzI0ODB9.sCS07u_N7eh5wcDemsH0YCkPk1Z8W_2R71Q5j-7ezYc"",
+  ""verified"": true
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0022,jwt_token,"user_profile:
+  name: 윤채원
+  jwt_token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTcwMjg0MCIsICJuYW1lIjogImxlZTY0IiwgImlhdCI6IDE3NzgyNjUzNDEsICJleHAiOiAxNzc4NDAzODIyfQ.OFxKGfQMqrYoL2bGFlzJUpMCFooTTmMZM65Lx_tpgu8
+  role: user",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0023,jwt_token,최지우 고객이 jwt token 정보를 제출했습니다: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDUyOTIwMyIsICJuYW1lIjogInBhcmsyOCIsICJpYXQiOiAxNzc4MjU1MzM4LCAiZXhwIjogMTc3ODM1NjUyMX0.udrotQE4xuaZeqjE2yI3t76dPXbQrWIeoPcgsb9KLE0,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0024,jwt_token,"## 고객 정보
+- **jwt_token**: `eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTk3NTc0MSIsICJuYW1lIjogImNob2k1NSIsICJpYXQiOiAxNzc4MjcwOTAwLCAiZXhwIjogMTc3ODM5MTk1NX0.uDv4zDUNSXgzNUQkoOgIefYCSUzJ9763HUY3lScfjIg`
+- **회사**: 롯데쇼핑",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0025,jwt_token,"customer = {
+    'jwt_token': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTc5MTg5OCIsICJuYW1lIjogInBhcms3OCIsICJpYXQiOiAxNzc4MjU1NjYwLCAiZXhwIjogMTc3ODM5MTQyMH0.WZceKwpSA_OY-eQ0FB0_7aRJVtUt2d6OsiNDKCU2DY8',
+    'status': 'active'
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0026,jwt_token,[삼성전자] 이서연 님이 jwt_token 공유: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTU3MDk1MSIsICJuYW1lIjogInBhcms0NyIsICJpYXQiOiAxNzc4MjUxNzMxLCAiZXhwIjogMTc3ODM5ODE5N30.DLNBEclill1K_Fp116obrVfzyGhXphyTlH7O2X4EoSo,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0027,jwt_token,"임수아,eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDkzMTE0MCIsICJuYW1lIjogImtpbTU0IiwgImlhdCI6IDE3NzgyNzkxODMsICJleHAiOiAxNzc4MzYwNjUxfQ.tWGzZwnI_RC0nPoXJEpxlXqoUZP16CAYzepQvHXIxn8,네이버,active",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0028,jwt_token,"INSERT INTO users (jwt_token, name) VALUES ('eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTY1ODgwNSIsICJuYW1lIjogImtpbTE1IiwgImlhdCI6IDE3NzgyNDg3NzQsICJleHAiOiAxNzc4MzYzMTY4fQ.pb-rk5tkRA8FYwF0fNVwvYpbVbUiJGeP7oovNlscRc8', '이서연');",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0029,jwt_token,"안녕하세요,
+
+문태양 님의 jwt_token 정보를 안내드립니다.
+값: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTEyODU0MSIsICJuYW1lIjogInBhcms5NiIsICJpYXQiOiAxNzc4MzE5MDE3LCAiZXhwIjogMTc3ODM5NjEwNH0.wy-0JeORjKVhrRkv7Gc0YmpJNMqhZIlDwqbTkz1X-pg
+
+감사합니다.",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0030,jwt_token,[INFO] user=박도윤 action=submit field=jwt_token value=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMjU5NTU5MCIsICJuYW1lIjogImNob2k2NCIsICJpYXQiOiAxNzc4MzAyMzM4LCAiZXhwIjogMTc3ODM2ODc2MH0.C9ufWRCUvV-44Uoqr-7Y4--JUlhbaI2-pcv9DZuAHGU ts=1778327754,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0031,jwt_token,"{
+  ""user_id"": ""48348"",
+  ""jwt_token"": ""eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNTA3NzE2MCIsICJuYW1lIjogImNob2k5NyIsICJpYXQiOiAxNzc4Mjc2NDAxLCAiZXhwIjogMTc3ODM4NDY4NH0.T_SMOSHPRvQsYGcgB6TJVtoMf-dJKvl_2qmXM1a27Co"",
+  ""verified"": true
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0032,jwt_token,"user_profile:
+  name: 노윤아
+  jwt_token: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTc2NzE1NiIsICJuYW1lIjogImNob2k4MyIsICJpYXQiOiAxNzc4MzI3MjExLCAiZXhwIjogMTc3ODMzMzUyN30.J3EXCe6YCdi08Vq6dnthiB2yW4A8jXadeQsuHM-PODM
+  role: user",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0033,jwt_token,장예준 고객이 jwt token 정보를 제출했습니다: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzkyNTY1NyIsICJuYW1lIjogInBhcmsyMCIsICJpYXQiOiAxNzc4MzIzMjkxLCAiZXhwIjogMTc3ODMzMzIxOX0.BuwfDQgu9b2ryYQndv2Ly3ogHAIrEC5tA1DsCJQaBjc,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0034,jwt_token,"## 고객 정보
+- **jwt_token**: `eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiODg5NTE2MCIsICJuYW1lIjogImxlZTgwIiwgImlhdCI6IDE3NzgyOTAzMzEsICJleHAiOiAxNzc4MzM3MDY2fQ.stUU_exgHKpU8XWt3xnJQ3JvBNxL9EM20HSQrlud0Hk`
+- **회사**: 신한은행",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0035,jwt_token,"customer = {
+    'jwt_token': 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTI1OTkyMyIsICJuYW1lIjogImxlZTYzIiwgImlhdCI6IDE3NzgyNTM1MjYsICJleHAiOiAxNzc4MzgwNzg2fQ.Fph-pnXhtRcayRnPq4WbEODrMFkvlOMDNV8wHjLspwE',
+    'status': 'active'
+}",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0036,jwt_token,[SK하이닉스] 정시우 님이 jwt_token 공유: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzI2NzIzNiIsICJuYW1lIjogInBhcms1IiwgImlhdCI6IDE3NzgyNjY2MzEsICJleHAiOiAxNzc4MzYxNDk0fQ.BQ59YEyERFt5RsPnxc-QnOFWKR3jP06iOgLMtoqUxG0,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0037,jwt_token,"김민준,eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMzYxNTA5NyIsICJuYW1lIjogImNob2k0OCIsICJpYXQiOiAxNzc4Mjc5MDg1LCAiZXhwIjogMTc3ODM3ODA0N30.IUrAUh1DvmHUBRGMwhvTkfBr5sf5VW8isP2pP9IcVKg,KB금융,active",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0038,jwt_token,"INSERT INTO users (jwt_token, name) VALUES ('eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNzUwNzEwNSIsICJuYW1lIjogImNob2kzNSIsICJpYXQiOiAxNzc4MzEyMDMzLCAiZXhwIjogMTc3ODM1NTEwMX0.uHhB_nJB4zRuJdg0u6PRoQkEwvU3kvqjiNbR92uyfYw', '박도윤');",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0039,jwt_token,"안녕하세요,
+
+최지우 님의 jwt_token 정보를 안내드립니다.
+값: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiOTIxMDk1IiwgIm5hbWUiOiAicGFyazg2IiwgImlhdCI6IDE3NzgyNTQ5MTgsICJleHAiOiAxNzc4Mzk4NTk5fQ.CC3rFUZZ2rxYQ0mlqueqPPZa_PDaVqRpHu1AzFiaJFA
+
+감사합니다.",jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-JWT_TOKE-0040,jwt_token,[INFO] user=오지호 action=submit field=jwt_token value=eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiNDE3NzExIiwgIm5hbWUiOiAicGFyazM2IiwgImlhdCI6IDE3NzgzMTUwNDksICJleHAiOiAxNzc4NDA5NTEwfQ.GuGkmEnW2L988_qi9chmI6EKNY2l6vYfWIU1kYcznZI ts=1778327754,jwt_token,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0001,api_key_assignment,"{
+  ""user_id"": ""89475"",
+  ""api_key_assignment"": ""d1283e75f4092ab952ede6e18f9756ba"",
+  ""verified"": true
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0002,api_key_assignment,"user_profile:
+  name: 장예준
+  api_key_assignment: 452b32aedd6310c749ebf4fa3e6330f276ed47ae
+  role: user",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0003,api_key_assignment,최지우 고객이 api key assignment 정보를 제출했습니다: sk-YbWey5ViLLcIyGyuLpDLZtsou5fp01hxSgdhokvXKcKCUw0H,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0004,api_key_assignment,"## 고객 정보
+- **api_key_assignment**: `fa40a175-31c8-44a9-c47f-525fe89f3e9a`
+- **회사**: SK하이닉스",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0005,api_key_assignment,"customer = {
+    'api_key_assignment': 'VAHhdebNKtFJWvFBqeA49cRQ2D2Y16ML',
+    'status': 'active'
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0006,api_key_assignment,[카카오] 강하은 님이 api_key_assignment 공유: 89940d430cfca00ae2b480a0d48c875920920913,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0007,api_key_assignment,"오지호,R0Cztu4c4Z23z2zOEpQa6NVVpbJS9iOK,신한은행,active",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0008,api_key_assignment,"INSERT INTO users (api_key_assignment, name) VALUES ('11345d26890a34118627ee340ad4a65c', '정시우');",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0009,api_key_assignment,"안녕하세요,
+
+문태양 님의 api_key_assignment 정보를 안내드립니다.
+값: sk-FWfKv0UV4Kp6N5hVpRJJQSEBT08G4PE5bSQroJYKPwsHqZJH
+
+감사합니다.",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0010,api_key_assignment,[INFO] user=김민준 action=submit field=api_key_assignment value=sk-ZXuw86TGVUHhuTrxt9AAvdXH9LVHsyTzt0S7CbEcaQ4wDpmr ts=1778327754,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0011,api_key_assignment,"{
+  ""user_id"": ""16374"",
+  ""api_key_assignment"": ""74671393-1bf0-3a03-69ad-d2087735de45"",
+  ""verified"": true
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0012,api_key_assignment,"user_profile:
+  name: 오지호
+  api_key_assignment: ZqFWW8ilfjXAH5ddKVx7usmqSjsBt7NW
+  role: user",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0013,api_key_assignment,한가을 고객이 api key assignment 정보를 제출했습니다: sk-MRw0Wb58G6rlngmvlqcXTviYcPyNyvIzFC25o8jw3QHqnP6G,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0014,api_key_assignment,"## 고객 정보
+- **api_key_assignment**: `bb8a8728b65546cca984c7accfcf4d3d0fb3e0dd`
+- **회사**: 삼성전자",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0015,api_key_assignment,"customer = {
+    'api_key_assignment': 'S0WCy76B5JicskzM7awzlm3hADVy7go4',
+    'status': 'active'
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0016,api_key_assignment,[포스코] 오지호 님이 api_key_assignment 공유: 8e5dfb7f-de12-6932-502c-522bb4595469,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0017,api_key_assignment,"박도윤,sk-5ALfYCSBlV667thv19wkcyTKROOfF8yD8c4tjl9vJ3KEiO6C,네이버,active",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0018,api_key_assignment,"INSERT INTO users (api_key_assignment, name) VALUES ('d1386391a4a687c153eb60bf7274b689', '최지우');",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0019,api_key_assignment,"안녕하세요,
+
+김민준 님의 api_key_assignment 정보를 안내드립니다.
+값: sk-NYxDJYKVwoBovglqCgpXG7sEeLVUmcWpKqLiXSUhqSiGAcNL
+
+감사합니다.",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0020,api_key_assignment,[INFO] user=정시우 action=submit field=api_key_assignment value=4e21dec4818764bb1ba1dbd9cd511dea11ab6284 ts=1778327754,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0021,api_key_assignment,"{
+  ""user_id"": ""38553"",
+  ""api_key_assignment"": ""ce1fd6c5797e159e3813611313119511a33e0209"",
+  ""verified"": true
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0022,api_key_assignment,"user_profile:
+  name: 최지우
+  api_key_assignment: 8225353a-ff98-061f-636f-fe370d69b0af
+  role: user",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0023,api_key_assignment,임수아 고객이 api key assignment 정보를 제출했습니다: sk-ic6m4PwoshMDkIrDxJdNMUn0vH48QzjvqCR8urhpC3HqaBG4,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0024,api_key_assignment,"## 고객 정보
+- **api_key_assignment**: `3rRud709O5CaU2PU5TlvwDbgbZXEQAhP`
+- **회사**: LG전자",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0025,api_key_assignment,"customer = {
+    'api_key_assignment': 'd43a6b87399e035ae2e64c1decb2c86cba270255',
+    'status': 'active'
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0026,api_key_assignment,[신한은행] 서준혁 님이 api_key_assignment 공유: 25a8600e6961041e4a4b43871852f582,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0027,api_key_assignment,"이서연,25fef8fc39014fb0142be86f9985bea6,카카오,active",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0028,api_key_assignment,"INSERT INTO users (api_key_assignment, name) VALUES ('bfe6d742e1e478f2d7844385ad59c37035e05bc5', '조민서');",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0029,api_key_assignment,"안녕하세요,
+
+문태양 님의 api_key_assignment 정보를 안내드립니다.
+값: QCis2CbadwJfY9WLVvTXgfqDhwZ2vuhP
+
+감사합니다.",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0030,api_key_assignment,[INFO] user=노윤아 action=submit field=api_key_assignment value=2c5eeff4-7879-660f-b83b-c974e0ae0c08 ts=1778327754,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0031,api_key_assignment,"{
+  ""user_id"": ""94060"",
+  ""api_key_assignment"": ""da2c69dee851cac1f4c180b29a1b9f29"",
+  ""verified"": true
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0032,api_key_assignment,"user_profile:
+  name: 정시우
+  api_key_assignment: b258166b40d338f5c81423ac777ad382
+  role: user",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0033,api_key_assignment,박도윤 고객이 api key assignment 정보를 제출했습니다: 6bfbd537ae6cb0b60071070eae801fa6,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0034,api_key_assignment,"## 고객 정보
+- **api_key_assignment**: `sk-xEzO3CDpeQv6WjnA5de2bgQe0ZPGaJkixM17P6UkpBlznNsP`
+- **회사**: 카카오",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0035,api_key_assignment,"customer = {
+    'api_key_assignment': 'pCYOBjmbrDeXuDji3f29EbwkvxN3QpEz',
+    'status': 'active'
+}",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0036,api_key_assignment,[현대자동차] 노윤아 님이 api_key_assignment 공유: MZ9BLXL2qLC7Uene8VBnIk6GcwgOQ8w1,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0037,api_key_assignment,"한가을,1d661e72366caaa4a4f714da46a8c342,KB금융,active",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0038,api_key_assignment,"INSERT INTO users (api_key_assignment, name) VALUES ('VhbNrxyAFiT5MBl79s5vJwUPVgKci7Tv', '장예준');",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0039,api_key_assignment,"안녕하세요,
+
+이서연 님의 api_key_assignment 정보를 안내드립니다.
+값: eeL8G0MXRTUY4sgGTOZ6oh6JhQFiAVuQ
+
+감사합니다.",api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754
+SYN-RTP-API_KEY_-0040,api_key_assignment,[INFO] user=박도윤 action=submit field=api_key_assignment value=401c3dfe3dfc2fc84565d2c61751138b ts=1778327754,api_key_assignment,0.5,mask,합성 현실형 TP — 복합 문맥+포맷변형 seed=1778327754

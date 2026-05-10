@@ -1,24 +1,108 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  AI DLP Proxy — 원클릭 시작 스크립트
+#  AI DLP Proxy — TUI 실행 스크립트
 #
-#  실행 순서:
-#    1. venv 활성화
-#    2. DLP 엔진 서버 (백그라운드)
-#    3. mitmproxy 프록시 (백그라운드)
-#    4. TUI 대시보드 (포그라운드)
-#    5. TUI 종료 시 엔진·프록시 자동 정리
+#  서비스(엔진·mitmproxy·웹 대시보드)는 dlp-supervisor 로 관리합니다.
+#  이 스크립트는 TUI 대시보드만 실행합니다.
 #
 #  사용법:
-#    bash start_dlp.sh                  # 기본 실행 (서비스 + TUI 한 번에)
-#    bash start_dlp.sh --service        # 서비스만 시작 (엔진+mitm, TUI 없음, 백그라운드 유지)
-#    bash start_dlp.sh --tui            # TUI만 실행 (서비스가 이미 떠 있어야 함)
-#    bash start_dlp.sh --transparent    # 투명 프록시 모드 (iptables + SNI 라우터)
-#    bash start_dlp.sh --no-tui         # (구) 서비스만 실행, --service와 동일
-#    bash start_dlp.sh --port 4001      # mitmproxy 포트 변경
-#    bash start_dlp.sh --stop           # 실행 중인 프로세스 종료
+#    bash start_dlp.sh              # TUI 실행 (서비스가 이미 떠 있어야 함)
+#    bash start_dlp.sh --port 4001  # mitmproxy 포트 변경 (레거시 호환)
+#    bash start_dlp.sh --service    # (레거시) 서비스만 시작 → dlp-supervisor 사용 권장
+#    bash start_dlp.sh --stop       # (레거시) 서비스 중지 → dlp-supervisor stop 사용 권장
+#
+#  서비스 시작/중지는 dlp-supervisor 를 사용하세요:
+#    ./dlp-supervisor start          # 전체 데몬 시작 (engine + mitm + web)
+#    ./dlp-supervisor stop           # 전체 데몬 중지
+#    ./dlp-supervisor status         # 상태 확인
 # =============================================================================
 set -euo pipefail
+
+# ── 색상 ──────────────────────────────────────────────────────────────────────
+RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'
+CYAN='\033[0;36m'; BOLD='\033[1m'; RESET='\033[0m'
+
+info()  { echo -e "${CYAN}[INFO]${RESET}  $*"; }
+ok()    { echo -e "${GREEN}[OK]${RESET}    $*"; }
+warn()  { echo -e "${YELLOW}[WARN]${RESET}  $*"; }
+error() { echo -e "${RED}[ERROR]${RESET} $*" >&2; exit 1; }
+
+# ── 경로 설정 ─────────────────────────────────────────────────────────────────
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$BASE_DIR/venv"
+ENGINE_SOCK="/tmp/dlp-engine.sock"
+SUPERVISOR="$BASE_DIR/dlp-supervisor"
+
+# ── 인수 파싱 (레거시 호환) ───────────────────────────────────────────────────
+OPT_SERVICE=false
+OPT_STOP=false
+for arg in "$@"; do
+    case "$arg" in
+        --service|--no-tui) OPT_SERVICE=true ;;
+        --stop)             OPT_STOP=true ;;
+        --tui)              : ;;  # 기본 동작과 동일
+        --transparent|--sni) warn "투명 프록시 모드는 dlp-supervisor 가 지원하지 않습니다. setup_iptables.sh 를 직접 실행하세요." ;;
+        --help|-h)
+            sed -n 's/^#  //p' "$0"
+            exit 0 ;;
+    esac
+done
+
+# ── 레거시: --stop ─────────────────────────────────────────────────────────────
+if [[ "$OPT_STOP" == true ]]; then
+    warn "--stop 은 레거시 옵션입니다. dlp-supervisor stop 사용을 권장합니다."
+    if [[ -x "$SUPERVISOR" ]]; then
+        "$SUPERVISOR" stop
+    else
+        pkill -f "engine_server.py" 2>/dev/null || true
+        pkill -f "inspect_traffic.py" 2>/dev/null || true
+        rm -f "$ENGINE_SOCK"
+        ok "프로세스 종료 완료"
+    fi
+    exit 0
+fi
+
+# ── 레거시: --service ─────────────────────────────────────────────────────────
+if [[ "$OPT_SERVICE" == true ]]; then
+    warn "--service 는 레거시 옵션입니다. dlp-supervisor start 사용을 권장합니다."
+    if [[ -x "$SUPERVISOR" ]]; then
+        exec "$SUPERVISOR" start
+    else
+        error "dlp-supervisor 를 찾을 수 없습니다: $SUPERVISOR"
+    fi
+fi
+
+# =============================================================================
+# TUI 실행
+# =============================================================================
+if [[ ! -f "$VENV_DIR/bin/activate" ]]; then
+    error "venv 가 없습니다. 먼저 설치를 실행하세요:\n  bash install.sh"
+fi
+
+source "$VENV_DIR/bin/activate"
+
+# 서비스 동작 여부 경고 (중단하지는 않음)
+if [[ ! -S "$ENGINE_SOCK" ]]; then
+    echo ""
+    warn "DLP 엔진 소켓이 없습니다 ($ENGINE_SOCK)"
+    warn "TUI 를 실행하기 전에 서비스를 먼저 시작하세요:"
+    echo ""
+    echo -e "    ${CYAN}./dlp-supervisor start${RESET}"
+    echo ""
+    read -r -p "그래도 계속 실행하시겠습니까? [y/N] " yn
+    [[ "$yn" =~ ^[Yy]$ ]] || exit 0
+fi
+
+echo ""
+echo -e "${BOLD}╔══════════════════════════════════════════════╗${RESET}"
+echo -e "${BOLD}║          AI DLP Proxy — TUI 시작             ║${RESET}"
+echo -e "${BOLD}╚══════════════════════════════════════════════╝${RESET}"
+echo ""
+info "서비스 상태 확인: ./dlp-supervisor status"
+info "웹 대시보드: http://127.0.0.1:8765"
+echo ""
+
+PYTHONPATH="$BASE_DIR/src" python "$BASE_DIR/scripts/tui.py"
 
 # ── 색상 ──────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'

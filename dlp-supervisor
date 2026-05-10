@@ -1,0 +1,516 @@
+#!/usr/bin/env bash
+# =============================================================================
+#  dlp-supervisor — AI-DLP-Proxy 통합 데몬 관리자
+#
+#  관리 대상 (3개 서비스):
+#    engine   — DLP 파이프라인 엔진 (RegexStage + AssetStage + MLFilter)
+#    mitm     — mitmproxy 투명 프록시 (PII 인터셉트 + 마스킹 적용)
+#    web      — FastAPI 웹 대시보드 백엔드
+#
+#  사용법:
+#    ./dlp-supervisor start              # 전체 시작 (백그라운드)
+#    ./dlp-supervisor start engine       # 개별 시작
+#    ./dlp-supervisor stop               # 전체 중지
+#    ./dlp-supervisor stop web           # 개별 중지
+#    ./dlp-supervisor restart            # 전체 재시작
+#    ./dlp-supervisor restart mitm       # 개별 재시작
+#    ./dlp-supervisor status             # 전체 상태 + 자동재시작 횟수 조회
+#    ./dlp-supervisor watch              # 포그라운드 감시 루프 (크래시 자동 재시작)
+#    ./dlp-supervisor logs engine        # 실시간 로그 tail
+#    ./dlp-supervisor logs web|mitm|watch
+#
+#  환경변수:
+#    DLP_MITM_PORT=4001      mitmproxy transparent 포트 (기본: 4001)
+#    DLP_MITM_PROXY_PORT=4002 VS Code 등 로컬 명시 프록시 포트 (기본: 4002)
+#    DLP_WEB_HOST=127.0.0.1  웹 백엔드 호스트 (기본: 127.0.0.1)
+#    DLP_WEB_PORT=8765       웹 백엔드 포트 (기본: 8765)
+#    DLP_WEBDEV=true         SvelteKit dev 서버도 함께 실행
+#    DLP_WATCH_INTERVAL=5    watch 루프 체크 주기(초, 기본: 5)
+#    DLP_MAX_RESTART=10      서비스당 최대 자동 재시작 횟수 (기본: 10, 0=무제한)
+#    DLP_RESTART_DELAY=3     재시작 전 대기(초, 기본: 3)
+# =============================================================================
+set -euo pipefail
+
+# ── 경로 설정 ─────────────────────────────────────────────────────────────────
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$BASE_DIR/venv"
+LOG_DIR="$BASE_DIR/logs/daemon"
+mkdir -p "$LOG_DIR"
+
+# PID 파일
+ENGINE_PID="$LOG_DIR/engine.pid"
+MITM_PID="$LOG_DIR/mitm.pid"
+WEB_PID="$LOG_DIR/web.pid"
+WEBDEV_PID="$LOG_DIR/webdev.pid"
+WATCH_PID="$LOG_DIR/watch.pid"
+
+# 재시작 카운터 파일
+ENGINE_RESTARTS="$LOG_DIR/engine.restarts"
+MITM_RESTARTS="$LOG_DIR/mitm.restarts"
+WEB_RESTARTS="$LOG_DIR/web.restarts"
+
+# 로그 파일
+ENGINE_LOG="$LOG_DIR/engine.log"
+MITM_LOG="$LOG_DIR/mitm.log"
+WEB_LOG="$LOG_DIR/web.log"
+WEBDEV_LOG="$LOG_DIR/webdev.log"
+WATCH_LOG="$LOG_DIR/watch.log"
+
+# mitmproxy 설정 (transparent 4001 + explicit regular proxy 4002)
+MITM_PORT="${DLP_MITM_PORT:-4001}"
+MITM_PROXY_PORT="${DLP_MITM_PROXY_PORT:-4002}"
+MITM_MODE="${DLP_MITM_MODE:-transparent}"
+MITM_EXPLICIT_PROXY="${DLP_MITM_EXPLICIT_PROXY:-true}"
+
+MITM_OPTS=(--listen-host 0.0.0.0)
+if [[ "$MITM_MODE" == "transparent" && "$MITM_EXPLICIT_PROXY" == "true" ]]; then
+    MITM_OPTS+=(--mode "transparent@$MITM_PORT" --mode "regular@$MITM_PROXY_PORT")
+    MITM_LABEL="포트 $MITM_PORT, VS Code 프록시 $MITM_PROXY_PORT"
+else
+    MITM_OPTS+=(--mode "$MITM_MODE" --listen-port "$MITM_PORT")
+    MITM_LABEL="포트 $MITM_PORT"
+fi
+MITM_OPTS+=(
+    --ssl-insecure
+    --set block_global=false
+    -s "$BASE_DIR/scripts/inspect_traffic.py"
+    --set termlog_verbosity=warn
+)
+
+# web 설정
+WEB_HOST="${DLP_WEB_HOST:-0.0.0.0}"
+WEB_PORT="${DLP_WEB_PORT:-8765}"
+WEBDEV_ENABLED="${DLP_WEBDEV:-false}"
+
+# watch 설정
+WATCH_INTERVAL="${DLP_WATCH_INTERVAL:-5}"
+MAX_RESTART="${DLP_MAX_RESTART:-10}"      # 0 = 무제한
+RESTART_DELAY="${DLP_RESTART_DELAY:-3}"
+
+# 색상
+RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'
+CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
+
+_info()  { echo -e "${CYAN}[INFO]${RESET}  $*"; }
+_ok()    { echo -e "${GREEN}[ OK ]${RESET}  $*"; }
+_warn()  { echo -e "${YELLOW}[WARN]${RESET}  $*"; }
+_error() { echo -e "${RED}[ERR ]${RESET}  $*" >&2; }
+_ts()    { date '+%Y-%m-%d %H:%M:%S'; }
+
+# ── 헬퍼: PID 파일로 살아있는지 확인 ─────────────────────────────────────────
+_is_running() {
+    local pidfile="$1"
+    [[ -f "$pidfile" ]] || return 1
+    local pid; pid=$(cat "$pidfile" 2>/dev/null) || return 1
+    [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null
+}
+
+_pid_of() {
+    local pidfile="$1"
+    [[ -f "$pidfile" ]] && cat "$pidfile" 2>/dev/null || echo ""
+}
+
+_restarts_of() {
+    local rfile="$1"
+    [[ -f "$rfile" ]] && cat "$rfile" 2>/dev/null || echo "0"
+}
+
+_inc_restart() {
+    local rfile="$1"
+    local n; n=$(cat "$rfile" 2>/dev/null || echo "0")
+    echo $((n + 1)) > "$rfile"
+}
+
+_reset_restarts() {
+    echo "0" > "$1"
+}
+
+# ── 헬퍼: 데몬으로 실행 (nohup + pidfile) ─────────────────────────────────────
+_spawn() {
+    local name="$1" pidfile="$2" logfile="$3"
+    shift 3
+    (
+        source "$VENV_DIR/bin/activate"
+        export PYTHONPATH="$BASE_DIR/src"
+        nohup "$@" >> "$logfile" 2>&1 &
+        echo $! > "$pidfile"
+    )
+    sleep 0.8
+    if _is_running "$pidfile"; then
+        _ok "$name 시작됨 (PID $(_pid_of "$pidfile"))"
+        _info "  로그: $logfile"
+    else
+        _error "$name 시작 실패 — 로그 확인: $logfile"
+        tail -5 "$logfile" 2>/dev/null | sed 's/^/    /'
+        return 1
+    fi
+}
+
+# ── 헬퍼: 종료 ─────────────────────────────────────────────────────────────────
+_kill() {
+    local name="$1" pidfile="$2"
+    if ! _is_running "$pidfile"; then
+        _warn "$name 이미 중지됨"
+        rm -f "$pidfile"
+        return 0
+    fi
+    local pid; pid=$(cat "$pidfile")
+    kill "$pid" 2>/dev/null
+    local waited=0
+    while kill -0 "$pid" 2>/dev/null; do
+        sleep 0.3; waited=$((waited + 1))
+        [[ $waited -ge 20 ]] && { kill -9 "$pid" 2>/dev/null; break; }
+    done
+    rm -f "$pidfile"
+    _ok "$name 중지됨 (PID $pid)"
+}
+
+# ══ 서비스별 시작/중지 함수 ══════════════════════════════════════════════════
+
+start_engine() {
+    if _is_running "$ENGINE_PID"; then
+        _warn "engine 이미 실행 중 (PID $(_pid_of "$ENGINE_PID"))"
+        return 0
+    fi
+    _info "DLP 엔진 서버 시작 (RegexStage + AssetStage + MLFilter)..."
+    _spawn "engine" "$ENGINE_PID" "$ENGINE_LOG" \
+        python "$BASE_DIR/scripts/engine_server.py" --sock /tmp/dlp-engine.sock
+    # 소켓 준비 대기
+    local waited=0
+    while [[ ! -S "/tmp/dlp-engine.sock" ]]; do
+        sleep 0.3; waited=$((waited + 1))
+        [[ $waited -ge 30 ]] && { _warn "소켓 대기 시간 초과 (계속 진행)"; break; }
+    done
+}
+
+stop_engine() {
+    _info "DLP 엔진 서버 중지..."
+    _kill "engine" "$ENGINE_PID"
+    rm -f /tmp/dlp-engine.sock
+}
+
+start_mitm() {
+    if _is_running "$MITM_PID"; then
+        _warn "mitmproxy 이미 실행 중 (PID $(_pid_of "$MITM_PID"))"
+        return 0
+    fi
+    _info "mitmproxy 시작 ($MITM_LABEL, PII 인터셉트 + 마스킹)..."
+    local mitmdump="$VENV_DIR/bin/mitmdump"
+    [[ ! -x "$mitmdump" ]] && mitmdump="$BASE_DIR/mitmproxy_lib/mitmproxy_linux/mitmdump"
+    if [[ ! -x "$mitmdump" ]]; then
+        _error "mitmdump 를 찾을 수 없습니다"
+        return 1
+    fi
+
+    (
+        source "$VENV_DIR/bin/activate"
+        export PYTHONPATH="$BASE_DIR/src"
+        nohup "$mitmdump" "${MITM_OPTS[@]}" >> "$MITM_LOG" 2>&1 &
+        echo $! > "$MITM_PID"
+    )
+    sleep 1
+    if _is_running "$MITM_PID"; then
+        _ok "mitmproxy 시작됨 (PID $(_pid_of "$MITM_PID"), $MITM_LABEL)"
+        _info "  로그: $MITM_LOG"
+    else
+        _error "mitmproxy 시작 실패 — 로그 확인: $MITM_LOG"
+        tail -5 "$MITM_LOG" 2>/dev/null | sed 's/^/    /'
+        return 1
+    fi
+}
+
+stop_mitm() {
+    _info "mitmproxy 중지..."
+    _kill "mitmproxy" "$MITM_PID"
+}
+
+start_web() {
+    if _is_running "$WEB_PID"; then
+        _warn "웹 백엔드 이미 실행 중 (PID $(_pid_of "$WEB_PID"))"
+    else
+        _info "웹 대시보드 백엔드 시작 (${WEB_HOST}:${WEB_PORT})..."
+        _spawn "web-backend" "$WEB_PID" "$WEB_LOG" \
+            python -m uvicorn main:app \
+            --host "$WEB_HOST" --port "$WEB_PORT" \
+            --app-dir "$BASE_DIR/web/backend" \
+            --log-level info
+    fi
+
+    if [[ "$WEBDEV_ENABLED" == "true" ]]; then
+        if _is_running "$WEBDEV_PID"; then
+            _warn "SvelteKit dev 서버 이미 실행 중"
+        else
+            _info "SvelteKit dev 서버 시작 (포트 5173)..."
+            (
+                cd "$BASE_DIR/web/frontend"
+                nohup npm run dev -- --host 0.0.0.0 --port 5173 >> "$WEBDEV_LOG" 2>&1 &
+                echo $! > "$WEBDEV_PID"
+            )
+            sleep 2
+            if _is_running "$WEBDEV_PID"; then
+                _ok "SvelteKit dev 시작됨 (PID $(_pid_of "$WEBDEV_PID"))"
+                _info "  대시보드: http://localhost:5173"
+            else
+                _warn "SvelteKit dev 시작 실패"
+            fi
+        fi
+    else
+        _info "  대시보드: http://${WEB_HOST}:${WEB_PORT}"
+    fi
+}
+
+stop_web() {
+    _info "웹 서비스 중지..."
+    _kill "web-backend" "$WEB_PID"
+    _is_running "$WEBDEV_PID" && _kill "web-dev" "$WEBDEV_PID" || true
+}
+
+# ══ 상태 출력 ═══════════════════════════════════════════════════════════════
+
+show_status() {
+    echo ""
+    echo -e "${BOLD}  AI-DLP-Proxy 서비스 상태${RESET}"
+    echo "  $(_ts)"
+    echo "  ────────────────────────────────────────────────"
+
+    local -a SVCS=(
+        "engine|DLP 엔진 (Regex+Asset+MLFilter)|$ENGINE_PID|$ENGINE_RESTARTS|$ENGINE_LOG"
+        "mitm|mitmproxy 프록시 ($MITM_LABEL)|$MITM_PID|$MITM_RESTARTS|$MITM_LOG"
+        "web|웹 대시보드 (${WEB_HOST}:${WEB_PORT})|$WEB_PID|$WEB_RESTARTS|$WEB_LOG"
+    )
+    for entry in "${SVCS[@]}"; do
+        IFS='|' read -r svc label pidfile rfile logfile <<< "$entry"
+        local restarts; restarts=$(_restarts_of "$rfile")
+        if _is_running "$pidfile"; then
+            local pid; pid=$(cat "$pidfile")
+            local mem=""
+            [[ -f "/proc/$pid/status" ]] && mem=$(awk '/VmRSS/{printf "%.0fMB",$2/1024}' "/proc/$pid/status" 2>/dev/null)
+            local rinfo=""
+            [[ "$restarts" -gt 0 ]] && rinfo="${YELLOW} (재시작 ${restarts}회)${RESET}"
+            echo -e "  ${GREEN}●${RESET} ${label} ${DIM}PID=${pid} RSS=${mem}${RESET}${rinfo}"
+        else
+            local rinfo=""
+            [[ "$restarts" -gt 0 ]] && rinfo=" ${DIM}(이전 재시작 ${restarts}회)${RESET}"
+            echo -e "  ${RED}○${RESET} ${label} ${DIM}[중지됨]${RESET}${rinfo}"
+        fi
+    done
+
+    # SvelteKit dev
+    if _is_running "$WEBDEV_PID"; then
+        local pid; pid=$(cat "$WEBDEV_PID")
+        echo -e "  ${GREEN}●${RESET} SvelteKit dev ${DIM}PID=${pid}${RESET}  http://localhost:5173"
+    fi
+
+    # watch 루프
+    if _is_running "$WATCH_PID"; then
+        local pid; pid=$(cat "$WATCH_PID")
+        echo -e "  ${CYAN}👁${RESET} watch 감시루프 ${DIM}PID=${pid} (간격 ${WATCH_INTERVAL}s, 최대 ${MAX_RESTART}회)${RESET}"
+    fi
+
+    echo "  ────────────────────────────────────────────────"
+    echo ""
+}
+
+# ══ Watch 루프 (크래시 자동 재시작 감시) ══════════════════════════════════════
+
+_watch_loop() {
+    _info "Watch 루프 시작 (체크 간격: ${WATCH_INTERVAL}s, 최대 재시작: ${MAX_RESTART}회)"
+    echo $$ > "$WATCH_PID"
+
+    trap 'rm -f "$WATCH_PID"; exit 0' INT TERM EXIT
+
+    while true; do
+        sleep "$WATCH_INTERVAL"
+
+        local -a WATCH_SVCS=(
+            "engine|$ENGINE_PID|$ENGINE_RESTARTS|start_engine"
+            "mitm|$MITM_PID|$MITM_RESTARTS|start_mitm"
+            "web|$WEB_PID|$WEB_RESTARTS|start_web"
+        )
+        for entry in "${WATCH_SVCS[@]}"; do
+            IFS='|' read -r svc pidfile rfile startfn <<< "$entry"
+
+            # PID 파일이 없으면 의도적으로 중지된 것 → 재시작하지 않음
+            [[ ! -f "$pidfile" ]] && continue
+
+            if ! _is_running "$pidfile"; then
+                local restarts; restarts=$(_restarts_of "$rfile")
+                local ts; ts=$(_ts)
+
+                if [[ "$MAX_RESTART" -gt 0 && "$restarts" -ge "$MAX_RESTART" ]]; then
+                    echo "[$ts] [WATCH] $svc 최대 재시작 횟수($MAX_RESTART) 도달 — 자동 재시작 중단" >> "$WATCH_LOG"
+                    _error "[$svc] 최대 재시작 횟수 도달. 수동으로 확인하세요: ./dlp-supervisor logs $svc"
+                    # PID 파일 제거해서 반복 경고 방지
+                    rm -f "$pidfile"
+                    continue
+                fi
+
+                echo "[$ts] [WATCH] $svc 크래시 감지 — ${RESTART_DELAY}초 후 재시작 (${restarts}/${MAX_RESTART})" >> "$WATCH_LOG"
+                _warn "[$svc] 크래시 감지 — ${RESTART_DELAY}초 후 재시작 (#$((restarts + 1)))"
+
+                sleep "$RESTART_DELAY"
+                _inc_restart "$rfile"
+
+                # 재시작 (WATCH_LOG에도 stdout 기록)
+                $startfn >> "$WATCH_LOG" 2>&1 || {
+                    echo "[$(_ts)] [WATCH] $svc 재시작 실패" >> "$WATCH_LOG"
+                }
+            fi
+        done
+    done
+}
+
+start_watch() {
+    if _is_running "$WATCH_PID"; then
+        _warn "watch 루프 이미 실행 중 (PID $(_pid_of "$WATCH_PID"))"
+        return 0
+    fi
+    nohup bash "$0" _watch_internal >> "$WATCH_LOG" 2>&1 &
+    local wpid=$!
+    # _watch_loop 내부에서 자체 PID 기록하므로 잠깐 대기
+    sleep 0.5
+    _ok "watch 감시 루프 시작됨 (PID $wpid)"
+    _info "  로그: $WATCH_LOG"
+}
+
+stop_watch() {
+    if ! _is_running "$WATCH_PID"; then
+        _warn "watch 루프 이미 중지됨"
+        rm -f "$WATCH_PID"
+        return 0
+    fi
+    local pid; pid=$(cat "$WATCH_PID")
+    kill "$pid" 2>/dev/null
+    rm -f "$WATCH_PID"
+    _ok "watch 루프 중지됨 (PID $pid)"
+}
+
+# ══ 메인 ════════════════════════════════════════════════════════════════════
+
+CMD="${1:-help}"
+SVC="${2:-all}"
+
+case "$CMD" in
+  start)
+    _info "=== AI-DLP-Proxy 서비스 시작 ==="
+    source "$VENV_DIR/bin/activate" 2>/dev/null || true
+    case "$SVC" in
+      all)
+        _reset_restarts "$ENGINE_RESTARTS"
+        _reset_restarts "$MITM_RESTARTS"
+        _reset_restarts "$WEB_RESTARTS"
+        start_engine
+        start_mitm
+        start_web
+        # watch 루프도 함께 시작 (크래시 자동 재시작)
+        start_watch
+        ;;
+      engine) _reset_restarts "$ENGINE_RESTARTS"; start_engine ;;
+      mitm)   _reset_restarts "$MITM_RESTARTS";   start_mitm ;;
+      web)    _reset_restarts "$WEB_RESTARTS";    start_web ;;
+      watch)  start_watch ;;
+      *) _error "알 수 없는 서비스: $SVC (engine|mitm|web|watch|all)"; exit 1 ;;
+    esac
+    echo ""
+    show_status
+    ;;
+
+  stop)
+    _info "=== AI-DLP-Proxy 서비스 중지 ==="
+    case "$SVC" in
+      all)
+        stop_watch
+        stop_web
+        stop_mitm
+        stop_engine
+        ;;
+      engine) stop_engine ;;
+      mitm)   stop_mitm ;;
+      web)    stop_web ;;
+      watch)  stop_watch ;;
+      *) _error "알 수 없는 서비스: $SVC"; exit 1 ;;
+    esac
+    echo ""
+    show_status
+    ;;
+
+  restart)
+    _info "=== AI-DLP-Proxy 서비스 재시작 ==="
+    case "$SVC" in
+      all)
+        stop_watch
+        stop_web; stop_mitm; stop_engine
+        sleep 1
+        start_engine; start_mitm; start_web
+        start_watch
+        ;;
+      engine) stop_engine; sleep 0.5; start_engine ;;
+      mitm)   stop_mitm;   sleep 0.5; start_mitm ;;
+      web)    stop_web;    sleep 0.5; start_web ;;
+      watch)  stop_watch;  sleep 0.5; start_watch ;;
+      *) _error "알 수 없는 서비스: $SVC"; exit 1 ;;
+    esac
+    echo ""
+    show_status
+    ;;
+
+  status)
+    show_status
+    ;;
+
+  watch)
+    # 포그라운드 watch (터미널에서 직접 실행 시 유용)
+    source "$VENV_DIR/bin/activate" 2>/dev/null || true
+    _watch_loop
+    ;;
+
+  # 내부 명령 — start_watch 에서 nohup 으로 호출됨
+  _watch_internal)
+    source "$VENV_DIR/bin/activate" 2>/dev/null || true
+    _watch_loop
+    ;;
+
+  logs)
+    case "$SVC" in
+      engine)  tail -f "$ENGINE_LOG" ;;
+      mitm)    tail -f "$MITM_LOG" ;;
+      web)     tail -f "$WEB_LOG" ;;
+      webdev)  tail -f "$WEBDEV_LOG" ;;
+      watch)   tail -f "$WATCH_LOG" ;;
+      *) _error "알 수 없는 서비스: $SVC (engine|mitm|web|webdev|watch)"; exit 1 ;;
+    esac
+    ;;
+
+  help|*)
+    echo ""
+    echo -e "${BOLD}  dlp-supervisor — AI-DLP-Proxy 통합 데몬 관리자${RESET}"
+    echo ""
+    echo "  서비스:"
+    echo "    engine  — DLP 파이프라인 엔진 (RegexStage + AssetStage + MLFilter)"
+    echo "    mitm    — mitmproxy PII 인터셉트 프록시 ($MITM_LABEL)"
+    echo "    web     — FastAPI 웹 대시보드 (${WEB_HOST}:${WEB_PORT})"
+    echo "    watch   — 크래시 자동 재시작 감시 루프"
+    echo ""
+    echo "  사용법:"
+    echo "    $0 start   [engine|mitm|web|watch|all]"
+    echo "    $0 stop    [engine|mitm|web|watch|all]"
+    echo "    $0 restart [engine|mitm|web|watch|all]"
+    echo "    $0 status"
+    echo "    $0 watch                  # 포그라운드 감시"
+    echo "    $0 logs    [engine|mitm|web|webdev|watch]"
+    echo ""
+    echo "  환경변수:"
+    echo "    DLP_MITM_PORT=4001         mitmproxy transparent 포트 (기본: 4001)"
+    echo "    DLP_MITM_PROXY_PORT=4002   VS Code 명시 프록시 포트 (기본: 4002)"
+    echo "    DLP_MITM_EXPLICIT_PROXY=true regular 프록시 동시 실행 (기본: true)"
+    echo "    DLP_WEB_HOST=127.0.0.1     웹 백엔드 호스트 (기본: 127.0.0.1)"
+    echo "    DLP_WEB_PORT=8765          웹 백엔드 포트 (기본: 8765)"
+    echo "    DLP_WEBDEV=true            SvelteKit dev 서버도 실행"
+    echo "    DLP_WATCH_INTERVAL=5       watch 체크 주기 (초, 기본: 5)"
+    echo "    DLP_MAX_RESTART=10         서비스당 최대 자동 재시작 횟수 (0=무제한)"
+    echo "    DLP_RESTART_DELAY=3        재시작 전 대기 시간 (초, 기본: 3)"
+    echo ""
+    echo "  로그 디렉토리: $LOG_DIR"
+    echo ""
+    ;;
+esac

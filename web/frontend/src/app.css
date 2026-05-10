@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg:        #0f172a;
+  --color-surface:   #1e293b;
+  --color-surface2:  #273549;
+  --color-border:    #334155;
+  --color-text:      #e2e8f0;
+  --color-muted:     #94a3b8;
+  --color-accent:    #3b82f6;
+  --color-success:   #22c55e;
+  --color-warning:   #f59e0b;
+  --color-danger:    #ef4444;
+  --color-pass:      #22c55e;
+  --color-alert:     #f59e0b;
+  --color-mask:      #f97316;
+  --color-block:     #ef4444;
+}
+
+html, body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  font-family: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+  height: 100%;
+}
+
+/* 스크롤바 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }

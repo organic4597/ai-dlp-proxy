@@ -9,6 +9,7 @@ from .api.base import ParsedRequest
 from .api import openai as _openai
 from .api import anthropic as _anthropic
 from .api import gemini as _gemini
+from .api import copilot as _copilot
 
 # OpenAI Chat Completions 호환 API 호스트
 _OPENAI_COMPAT: frozenset[str] = frozenset({
@@ -80,10 +81,28 @@ def extract(
     if host.endswith(_AZURE_SUFFIX):
         provider = "Azure OpenAI"
 
-    if host in _OPENAI_COMPAT or host.endswith(_AZURE_SUFFIX):
-        return _openai.parse(provider, url, body)
-    elif host == "api.anthropic.com":
+    # IP 주소로 도달한 경우 URL 경로로 fallback 판별
+    if provider == "Unknown":
+        import ipaddress
+        try:
+            ip = ipaddress.ip_address(host)
+            if ip in ipaddress.ip_network("140.82.112.0/22"):
+                provider = "GitHub Copilot"
+            elif ip in ipaddress.ip_network("104.18.0.0/16") or ip in ipaddress.ip_network("172.64.0.0/13"):
+                provider = "OpenAI"
+        except ValueError:
+            pass
+
+    if provider == "GitHub Copilot":
+        return _copilot.parse(provider, url, body)
+
+    # /v1/messages 경로는 Anthropic Messages API 포맷
+    is_anthropic_format = "/v1/messages" in url
+
+    if host == "api.anthropic.com" or is_anthropic_format:
         return _anthropic.parse(provider, url, body)
+    elif host in _OPENAI_COMPAT or host.endswith(_AZURE_SUFFIX):
+        return _openai.parse(provider, url, body)
     elif host == "generativelanguage.googleapis.com":
         return _gemini.parse(provider, url, body)
 
@@ -102,6 +121,8 @@ def summarize_request(provider: str, body: dict) -> dict:
     """
     공급자별 파서의 summarize()를 호출해 로그/TUI 표시용 요약 dict 반환.
     """
+    if provider == "GitHub Copilot":
+        return _copilot.summarize(body)
     if provider in _OPENAI_COMPAT_PROVIDERS:
         return _openai.summarize(body)
     elif provider == "Anthropic":
@@ -116,6 +137,8 @@ def extract_messages(provider: str, body: dict, msg_max: int = 500) -> list[dict
     공급자별 파서의 extract_messages()를 호출해 JSONL 로그용 메시지 목록 반환.
     히스토리 제외, 신규 메시지만 포함.
     """
+    if provider == "GitHub Copilot":
+        return _copilot.extract_messages(body, msg_max)
     if provider in _OPENAI_COMPAT_PROVIDERS:
         return _openai.extract_messages(body, msg_max)
     elif provider == "Anthropic":

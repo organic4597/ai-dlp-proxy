@@ -85,16 +85,26 @@ def _extract_user_content(
             elif btype == "tool_result":
                 # 함수 실행 결과 — 파일 경로·DB 데이터 노출 위험
                 inner = block.get("content", [])
-                inner_list = inner if isinstance(inner, list) else []
-                for k, rb in enumerate(inner_list):
-                    text = rb.get("text", "") if isinstance(rb, dict) else str(rb)
-                    if text.strip():
+                if isinstance(inner, str):
+                    # tool_result content가 문자열 형식인 경우
+                    if inner.strip():
                         targets.append(DLPTarget(
-                            field_path=f"{base_path}[{j}].content[{k}].text",
+                            field_path=f"{base_path}[{j}].content",
                             role="tool_result",
-                            text=text,
+                            text=inner,
                             history=history,
                         ))
+                else:
+                    inner_list = inner if isinstance(inner, list) else []
+                    for k, rb in enumerate(inner_list):
+                        text = rb.get("text", "") if isinstance(rb, dict) else str(rb)
+                        if text.strip():
+                            targets.append(DLPTarget(
+                                field_path=f"{base_path}[{j}].content[{k}].text",
+                                role="tool_result",
+                                text=text,
+                                history=history,
+                            ))
             # tool_use (assistant의 함수 호출 입력) — 검사 제외
 
 

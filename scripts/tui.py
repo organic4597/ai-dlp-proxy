@@ -32,7 +32,7 @@ _SRC_DIR = Path(__file__).parent.parent / "src"
 if str(_SRC_DIR) not in sys.path:
     sys.path.insert(0, str(_SRC_DIR))
 
-from engine.pipeline import get_runtime_warning_lines
+from engine.pipeline import get_runtime_warning_lines, get_ml_filter_stats
 from engine.pipeline.default_assets import ensure_default_assets_file
 from engine.pipeline.masking import (
     DEFAULT_MASK_TEMPLATES,
@@ -82,6 +82,18 @@ _AUDIT_MAX_BYTES = 10 * 1024 * 1024
 _ASSETS_FILE = _AUDIT_DIR / "assets.json"   # 보호 자산 정의 파일
 
 
+def _sts(ts: str) -> str:
+    """ISO timestamp → HH:MM:SS 표시용."""
+    if not ts:
+        return "?"
+    try:
+        from datetime import datetime
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return dt.strftime("%H:%M:%S")
+    except Exception:
+        return ts[:8]
+
+
 def _read_assets() -> list[dict]:
     """보호 자산 파일 읽기. 없으면 기본 목록으로 초기화."""
     ensure_default_assets_file(_ASSETS_FILE)
@@ -103,6 +115,8 @@ _CTRL_DEFAULTS: dict = {
     "regex_enabled":  True,
     "asset_enabled":  True,
     "slm_enabled":    False,
+    "ml_filter_enabled": False,
+    "ml_filter_threshold": 0.4,
     "mask_on_detect": False,
     "block_on_alert": False,
     "block_on_mask":  False,
@@ -798,6 +812,16 @@ class DLPApp(App):
     /* 로그 */
     #elog { height: 1fr; }
 
+    /* 감사 로그 */
+    #audit-split { height: 1fr; }
+    #audit-list { width: 62; min-width: 50; border-right: tall $surface-lighten-2; }
+    #audit-table { height: 1fr; overflow-x: hidden; }
+    #audit-detail { width: 1fr; height: 1fr; }
+    #audit-filter-row { height: 3; padding: 0 1; background: $surface; align: left middle; }
+    #audit-filter-row Label { width: auto; content-align: left middle; margin: 0 1 0 0; color: $text-muted; }
+    #audit-action-filter { width: 14; margin: 0 1 0 0; }
+    #audit-rule-filter { width: 20; margin: 0 1 0 0; }
+
     /* 설정 */
     #settings-scroll { padding: 1 2; }
     .card {
@@ -887,6 +911,7 @@ class DLPApp(App):
     #mask-table { height: 14; }
     #allowlist-table { height: 10; }
     #ctrl-threshold-input { width: 10; margin: 0 1 0 0; }
+    #ctrl-ml-threshold-input { width: 10; margin: 0 1 0 0; }
     #mask-edit-input { width: 18; margin: 0 1 0 0; }
     .mask-action-row {
         height: 3;
@@ -955,6 +980,7 @@ class DLPApp(App):
         Binding("5", "tab('tab-procs')",     "프로세스",   show=True),
         Binding("6", "tab('tab-settings')",  "설정",      show=True),
         Binding("7", "tab('tab-log')",       "로그",      show=True),
+        Binding("8", "tab('tab-audit')",     "감사로그",   show=True),
     ]
 
     def __init__(self, sock: str, jsonl_path: str | None = None, supervise: bool = True):
@@ -975,11 +1001,14 @@ class DLPApp(App):
         self._selected_mask_rule: str | None = None
         self._startup_warnings: list[str] = []
         self._sent_text_cache = ""
+        self._sent_full_lines: list = []   # 전송 내용 전체 라인 (페이지네이션용)
+        self._sent_rendered_count: int = 0  # 이미 dsent에 렌더링된 라인 수
         self._live_events_by_request_id: dict[str, dict] = {}
         self._live_event_turns: dict[str, Turn] = {}
         self._mask_rule_hits: dict[str, int] = {}
         self._pipeline_stats: dict = {}
         self._bump_pending: bool = False  # _bump_mask_rule_hit 배치 디바운스
+        self._engine_stats: dict = {}     # engine_server stats API 응답 캐시
         self._supervise = supervise
         addon = str(_BASE / "scripts" / "inspect_traffic.py")
         self._sup = ProcessSupervisor(
@@ -1014,8 +1043,10 @@ class DLPApp(App):
                             with TabPane("전송 내용", id="tab-detail-sent"):
                                 with Horizontal(classes="tab-toolbar"):
                                     yield Label("전송 내용", classes="toolbar-title")
+                                    yield Label("", id="sent-page-info", classes="toolbar-title")
+                                    yield Button("더보기 ▼", id="btn-sent-more", classes="toolbar-btn", disabled=True)
                                     yield Button("복사", id="btn-copy-sent", classes="toolbar-btn")
-                                yield RichLog(id="dsent", highlight=True, markup=True, wrap=True, max_lines=300)
+                                yield RichLog(id="dsent", highlight=True, markup=True, wrap=True, max_lines=500)
             with TabPane("탐지 목록", id="tab-findings"):
                 with Horizontal(id="fsplit"):
                     with Vertical(id="flist"):
@@ -1082,6 +1113,19 @@ class DLPApp(App):
                             yield Button("직접 추가", id="btn-allowlist-add", variant="success")
                             yield Button("✏️ 선택 편집", id="btn-allowlist-edit", variant="primary")
                             yield Button("🗑 선택 삭제", id="btn-allowlist-delete", variant="error")
+                    # ── ML FP 필터 ─────────────────────────────────────────
+                    with Vertical(classes="ctrl-card"):
+                        yield Label("🤖 ML FP 필터", classes="ctrl-title")
+                        with Horizontal(classes="opt-row"):
+                            yield Label("ML FP 필터 활성화")
+                            yield Switch(id="ctrl-sw-ml-filter", value=False)
+                        yield Label("XGBoost 모델로 Regex False Positive 억제. 모델 파일 없으면 자동 no-op.", classes="opt-desc")
+                        with Horizontal(classes="opt-row"):
+                            yield Label("TP 확률 임계값  [dim](낮을수록 공격적 억제)[/]")
+                            yield Input(value="0.40", id="ctrl-ml-threshold-input")
+                            yield Button("저장", id="btn-ml-threshold-save", variant="primary")
+                        yield Label("0.0 ~ 1.0 범위. 확률이 임계값 미만이면 FP로 판정해 억제합니다.", classes="opt-desc")
+                        yield Label("", id="ctrl-ml-filter-status", classes="opt-desc")
             with TabPane("프로세스", id="tab-procs"):
                 with VerticalScroll(id="proc-scroll"):
                     # engine 카드
@@ -1146,6 +1190,14 @@ class DLPApp(App):
                             yield Label("sLM Stage")
                             yield Switch(id="sw-slm", value=False)
                         yield Label("소형 언어모델 보완 탐지 (이름·주소 등 문맥 PII) — Qwen2.5-1.5B", classes="opt-desc")
+                        with Horizontal(classes="opt-row"):
+                            yield Label("ML FP 필터  [dim](XGBoost)[/]")
+                            yield Switch(id="sw-ml-filter", value=False)
+                        yield Label("Regex 탐지 후 XGBoost 모델로 False Positive 억제 — 임계값은 제어 탭에서 조정", classes="opt-desc")
+                        with Horizontal(classes="opt-row"):
+                            yield Label("문맥 패널티")
+                            yield Switch(id="sw-ctx-penalty", value=True)
+                        yield Label("코드·URL 컨텍스트 감지 시 신뢰도 ×0.3 페널티 적용 (FP 억제)", classes="opt-desc")
                     # ── 표시 카드 ──
                     with Vertical(classes="card"):
                         yield Label("🖥️  표시", classes="card-title")
@@ -1204,6 +1256,23 @@ class DLPApp(App):
                         yield Label("엔진 로그", classes="toolbar-title")
                         yield Button("클리어", id="btn-clear-log", classes="toolbar-btn")
                     yield RichLog(id="elog", highlight=True, markup=True, wrap=True, max_lines=2000)
+            with TabPane("감사 로그", id="tab-audit"):
+                with Vertical():
+                    with Horizontal(id="audit-filter-row"):
+                        yield Label("액션 필터:")
+                        yield Select(
+                            [("전체", "all"), ("PASS", "pass"), ("ALERT", "alert"),
+                             ("MASK", "mask"), ("BLOCK", "block")],
+                            value="all", id="audit-action-filter",
+                        )
+                        yield Label("규칙 필터:")
+                        yield Input(placeholder="예: kr_rrn  (비우면 전체)", id="audit-rule-filter")
+                        yield Button("새로고침", id="btn-audit-refresh", classes="toolbar-btn")
+                    with Horizontal(id="audit-split"):
+                        with Vertical(id="audit-list"):
+                            yield DataTable(id="audit-table", cursor_type="row")
+                        with Vertical(id="audit-detail"):
+                            yield RichLog(id="audit-detail-log", highlight=True, markup=True, wrap=True, max_lines=500)
         yield Footer()
 
     # ── mount ─────────────────────────────────────────────────────────────────
@@ -1233,6 +1302,13 @@ class DLPApp(App):
         alt.add_column("규칙", key="rule", width=14)
         alt.add_column("값", key="value", width=28)
         alt.add_column("만료", key="expires", width=20)
+        # Audit 테이블
+        adt = self.query_one("#audit-table", DataTable)
+        adt.add_column("시각",   key="ts",      width=8)
+        adt.add_column("모델",   key="model",   width=14)
+        adt.add_column("액션",   key="action",  width=8)
+        adt.add_column("탐지",   key="findings", width=4)
+        adt.add_column("규칙",   key="rules",   width=20)
         self._init_mask_rules()
         self._init_control_file()
         self._init_asset_table()
@@ -1243,6 +1319,8 @@ class DLPApp(App):
         self._set_selected_asset(None, quiet=True)
         self._set_selected_allowlist(None, quiet=True)
         self._refresh_startup_warnings(show_popup=True)
+        self._refresh_ml_filter_status()
+        self._load_audit_log()
         self._subscribe()
         self._poll()
         if self._sup:
@@ -1776,6 +1854,40 @@ class DLPApp(App):
         self._set_selected_mask_rule(str(e.row_key.value), quiet=True)
         self._toggle_selected_mask_rule()
 
+    _SENT_PAGE = 80  # 한 번에 렌더링할 줄 수
+
+    def _render_sent_page(self) -> None:
+        """_sent_full_lines에서 다음 페이지를 dsent에 추가 렌더링."""
+        ds = self.query_one("#dsent", RichLog)
+        start = self._sent_rendered_count
+        end = min(start + self._SENT_PAGE, len(self._sent_full_lines))
+        for item in self._sent_full_lines[start:end]:
+            ds.write(item)
+        self._sent_rendered_count = end
+        self._update_sent_more_btn()
+
+    def _update_sent_more_btn(self) -> None:
+        remaining = len(self._sent_full_lines) - self._sent_rendered_count
+        try:
+            btn = self.query_one("#btn-sent-more", Button)
+            info = self.query_one("#sent-page-info", Label)
+            if remaining > 0:
+                btn.disabled = False
+                btn.label = f"더보기 ▼ ({remaining}줄 남음)"
+                info.update(f"[dim]{self._sent_rendered_count}/{len(self._sent_full_lines)}줄[/]")
+            else:
+                btn.disabled = True
+                btn.label = "더보기 ▼"
+                total = len(self._sent_full_lines)
+                info.update(f"[dim]{total}줄[/]" if total else "")
+        except Exception:
+            pass
+
+    @on(Button.Pressed, "#btn-sent-more")
+    def _btn_sent_more(self, e: Button.Pressed) -> None:
+        e.stop()
+        self._render_sent_page()
+
     @on(Button.Pressed, "#btn-copy-sent")
     def _btn_copy_sent(self, _: Button.Pressed) -> None:
         if not self._sent_text_cache.strip():
@@ -2031,6 +2143,11 @@ class DLPApp(App):
             self.query_one("#sw-regex", Switch).value = bool(ctrl.get("regex_enabled", True))
             self.query_one("#sw-asset", Switch).value = bool(ctrl.get("asset_enabled", True))
             self.query_one("#sw-slm", Switch).value = bool(ctrl.get("slm_enabled", False))
+            self.query_one("#sw-ml-filter", Switch).value = bool(ctrl.get("ml_filter_enabled", False))
+            self.query_one("#sw-ctx-penalty", Switch).value = bool(ctrl.get("context_penalty_enabled", True))
+            # 제어 탭 ML 필터 스위치/임계값 동기화
+            self.query_one("#ctrl-sw-ml-filter", Switch).value = bool(ctrl.get("ml_filter_enabled", False))
+            self.query_one("#ctrl-ml-threshold-input", Input).value = f"{float(ctrl.get('ml_filter_threshold', 0.4)):.2f}"
             # Role 스캔 스위치 동기화
             _skip = set(ctrl.get("skip_roles", ["system", "tool_def"]))
             self.query_one("#sw-role-user",        Switch).value = "user"        not in _skip
@@ -2101,7 +2218,10 @@ class DLPApp(App):
             "regex": {"total": 0, "suppressed": 0, "conf_sum": 0.0},
             "asset": {"total": 0, "suppressed": 0, "conf_sum": 0.0},
             "slm":   {"total": 0, "conf_sum": 0.0},
+            "ml_filter": {"total": 0, "suppressed": 0, "conf_sum": 0.0},
             "nms_suppressed": 0,
+            "allowlist_suppressed": 0,   # 허용목록으로 억제된 수
+            "suppress_by_rule": {},      # rule_id → suppress 이유별 카운트
             "conf_buckets": [0, 0, 0, 0, 0],  # 0-.3, .3-.5, .5-.7, .7-.9, .9-1.0
             "actions": {"pass": 0, "alert": 0, "mask": 0, "block": 0},
             "total_scans": 0,
@@ -2128,6 +2248,23 @@ class DLPApp(App):
                     s[stage]["suppressed"] = s[stage].get("suppressed", 0) + 1
                     if suppressed_reason == "nms" or (suppressed_reason == "" and not allowlisted):
                         s["nms_suppressed"] += 1
+            # ML FP 필터가 억제한 finding — stage=regex + suppressed_reason=ml_fp_filter
+            if suppressed_reason == "ml_fp_filter":
+                mf = s["ml_filter"]
+                mf["total"] += 1
+                mf["suppressed"] += 1
+                mf["conf_sum"] += conf
+            # 룰별 suppress 분류 통계
+            if suppressed:
+                rule_id = str(f.get("rule") or "?")
+                reason_key = suppressed_reason if suppressed_reason else ("allowlist" if allowlisted else "nms")
+                rbr = s["suppress_by_rule"].setdefault(rule_id, {"nms": 0, "ml_fp_filter": 0, "allowlist": 0, "other": 0})
+                if reason_key in rbr:
+                    rbr[reason_key] += 1
+                else:
+                    rbr["other"] += 1
+                if allowlisted:
+                    s["allowlist_suppressed"] += 1
             # 신뢰도 버킷 (억제되지 않은 탐지만)
             if not suppressed:
                 if conf < 0.3:
@@ -2155,6 +2292,7 @@ class DLPApp(App):
             )
         except Exception:
             pass
+        self._refresh_ml_filter_status()
 
     def _render_pipeline_flow(self) -> Group:
         s = self._pipeline_stats
@@ -2163,10 +2301,12 @@ class DLPApp(App):
         regex_on  = bool(ctrl.get("regex_enabled", True))
         asset_on  = bool(ctrl.get("asset_enabled", True))
         slm_on    = bool(ctrl.get("slm_enabled", False))
+        ml_on     = bool(ctrl.get("ml_filter_enabled", False))
 
         r  = s["regex"]
         a  = s["asset"]
         sl = s["slm"]
+        ml = s.get("ml_filter", {"total": 0, "suppressed": 0, "conf_sum": 0.0})
         nms_sup = s["nms_suppressed"]
         scans   = s["total_scans"]
         acts    = s["actions"]
@@ -2245,12 +2385,15 @@ class DLPApp(App):
             arrow_text(),
             stage_panel("🔍", "RegexStage  (12룰)", regex_on,
                         r["total"], r.get("suppressed", 0), avg(r), conf_style(r)),
+            arrow_text(),
+            stage_panel("🤖", f"ML FP 필터  (XGBoost, thr={float(ctrl.get('ml_filter_threshold', 0.4)):.2f})", ml_on,
+                        ml["total"], ml.get("suppressed", 0), avg(ml), conf_style(ml)),
             nms_rule(),
             arrow_text(),
             stage_panel("🛡", "AssetStage", asset_on,
                         a["total"], a.get("suppressed", 0), avg(a), conf_style(a)),
             arrow_text(),
-            stage_panel("🤖", "SLM Stage  (Gemma 4 2B-IT)", slm_on,
+            stage_panel("🔬", "SLM Stage  (Gemma 4 2B-IT)", slm_on,
                         sl["total"], 0, avg(sl), conf_style(sl)),
             arrow_text(),
             act_panel,
@@ -2264,6 +2407,8 @@ class DLPApp(App):
         ctx_on    = bool(ctrl.get("context_penalty_enabled", True))
         asset_on  = bool(ctrl.get("asset_enabled", True))
         slm_on    = bool(ctrl.get("slm_enabled", False))
+        ml_on     = bool(ctrl.get("ml_filter_enabled", False))
+        ml_thr    = float(ctrl.get("ml_filter_threshold", 0.4))
         disabled  = ctrl.get("disabled_rules", [])
         allowlist = ctrl.get("allowlist", [])
 
@@ -2278,6 +2423,13 @@ class DLPApp(App):
         grid.add_row("문맥 패널티",    flag(ctx_on))
         grid.add_row("보호 자산",      flag(asset_on))
         grid.add_row("SLM Stage",      flag(slm_on))
+        ml_cell = Text()
+        if ml_on:
+            ml_cell.append("✅ ON", style="bold green")
+            ml_cell.append(f"  (thr={ml_thr:.2f})", style="dim")
+        else:
+            ml_cell.append("⚫ OFF", style="dim")
+        grid.add_row("ML FP 필터",     ml_cell)
         grid.add_row("Allowlist",      Text(f"{len(allowlist)}개" if allowlist else "없음",
                                            style="white" if allowlist else "dim"))
 
@@ -2288,12 +2440,110 @@ class DLPApp(App):
         dis_grid.add_column()
         dis_grid.add_row("비활성 룰", dis_text)
 
+        # ── 캐시 통계 ──────────────────────────────────────────────────────
+        cache = self._engine_stats.get("cache", {})
+        c_hits   = cache.get("hits",   0)
+        c_misses = cache.get("misses", 0)
+        c_size   = cache.get("size",   0)
+        c_total  = c_hits + c_misses
+        c_rate   = c_hits / c_total if c_total else 0.0
+
+        cache_grid = Table.grid(padding=(0, 2))
+        cache_grid.add_column(style="dim", min_width=12)
+        cache_grid.add_column()
+        cache_grid.add_row(
+            "히트/미스",
+            Text(f"{c_hits} / {c_misses}", style="white"),
+        )
+        cache_grid.add_row(
+            "히트율",
+            Text(f"{c_rate:.1%}", style="bold green" if c_rate >= 0.8 else "yellow" if c_rate >= 0.5 else "dim"),
+        )
+        cache_grid.add_row(
+            "캐시 크기",
+            Text(f"{c_size}건", style="dim"),
+        )
+
+        # ── SLM 추론 통계 ──────────────────────────────────────────────────
+        slm_s = self._engine_stats.get("slm", {})
+        slm_calls    = slm_s.get("total_calls", 0)
+        slm_findings = slm_s.get("total_findings", 0)
+        slm_errors   = slm_s.get("errors", 0)
+        slm_avg      = slm_s.get("avg_ms", 0)
+        slm_p95      = slm_s.get("p95_ms", 0)
+
+        slm_grid = Table.grid(padding=(0, 2))
+        slm_grid.add_column(style="dim", min_width=12)
+        slm_grid.add_column()
+        if slm_calls:
+            avg_style = "green" if slm_avg < 500 else ("yellow" if slm_avg < 3000 else "red")
+            slm_grid.add_row("추론 횟수",  Text(f"{slm_calls}회", style="white"))
+            slm_grid.add_row("탐지 건수",  Text(f"{slm_findings}건", style="white"))
+            slm_grid.add_row("평균 응답",  Text(f"{slm_avg}ms", style=avg_style))
+            slm_grid.add_row("p95 응답",   Text(f"{slm_p95}ms", style="dim"))
+            if slm_errors:
+                slm_grid.add_row("오류",   Text(f"{slm_errors}건", style="red"))
+        else:
+            slm_grid.add_row("", Text("추론 기록 없음 (SLM 비활성화 또는 미사용)", style="dim"))
+
+        # ── 룰별 suppress 분류 ─────────────────────────────────────────────
+        sup_by_rule: dict = self._pipeline_stats.get("suppress_by_rule", {})
+        nms_sup_total  = self._pipeline_stats.get("nms_suppressed", 0)
+        ml_sup_total   = self._pipeline_stats.get("ml_filter", {}).get("suppressed", 0)
+        al_sup_total   = self._pipeline_stats.get("allowlist_suppressed", 0)
+
+        sup_total_grid = Table.grid(padding=(0, 2))
+        sup_total_grid.add_column(style="dim", min_width=12)
+        sup_total_grid.add_column()
+        sup_total_grid.add_row("NMS 중첩제거",   Text(f"{nms_sup_total}건", style="yellow"))
+        sup_total_grid.add_row("ML FP 필터",     Text(f"{ml_sup_total}건",  style="cyan"))
+        sup_total_grid.add_row("허용목록",        Text(f"{al_sup_total}건",  style="green"))
+
+        sup_rule_grid: RenderableType
+        if sup_by_rule:
+            sup_rule_grid = Table.grid(padding=(0, 1))
+            sup_rule_grid.add_column(style="dim", min_width=16)   # 규칙
+            sup_rule_grid.add_column(justify="right", min_width=5)  # nms
+            sup_rule_grid.add_column(justify="right", min_width=5)  # ml
+            sup_rule_grid.add_column(justify="right", min_width=5)  # al
+            sup_rule_grid.add_row(
+                Text("규칙", style="dim"),
+                Text("NMS", style="yellow"),
+                Text("ML",  style="cyan"),
+                Text("AL",  style="green"),
+            )
+            for rule_id, cnts in sorted(sup_by_rule.items(),
+                                        key=lambda kv: sum(kv[1].values()), reverse=True)[:12]:
+                sup_rule_grid.add_row(
+                    Text(rule_id[:16], style="white"),
+                    Text(str(cnts.get("nms", 0)) or "—", style="yellow"),
+                    Text(str(cnts.get("ml_fp_filter", 0)) or "—", style="cyan"),
+                    Text(str(cnts.get("allowlist", 0)) or "—", style="green"),
+                )
+        else:
+            sup_rule_grid = Text("억제된 탐지 없음", style="dim")
+
         return Group(
             Text("══ 현재 파이프라인 설정 ══", style="bold"),
             Text(""),
             grid,
             Text(""),
             dis_grid,
+            Text(""),
+            Text("══ 엔진 캐시 ══", style="bold"),
+            Text(""),
+            cache_grid,
+            Text(""),
+            Text("══ SLM 추론 통계 ══", style="bold"),
+            Text(""),
+            slm_grid,
+            Text(""),
+            Text("══ Suppress 분류 ══", style="bold"),
+            Text(""),
+            sup_total_grid,
+            Text(""),
+            Text("  [dim]룰별[/]"),
+            sup_rule_grid,
         )
 
     def _render_pipeline_conf_hist(self) -> Group:
@@ -2369,6 +2619,88 @@ class DLPApp(App):
         _patch_control("slm_enabled", e.value)
         self._update_pipeline_tab()
         self._lg(f"[{'green' if e.value else 'yellow'}]sLM Stage {'ON' if e.value else 'OFF'}[/]")
+
+    @on(Switch.Changed, "#sw-ml-filter")
+    def _sw_ml_filter(self, e: Switch.Changed):
+        _patch_control("ml_filter_enabled", e.value)
+        # 제어 탭 스위치도 동기화
+        try:
+            self.query_one("#ctrl-sw-ml-filter", Switch).value = e.value
+        except Exception:
+            pass
+        self._update_pipeline_tab()
+        self._lg(f"[{'green' if e.value else 'yellow'}]ML FP 필터 {'ON' if e.value else 'OFF'}[/]")
+
+    @on(Switch.Changed, "#ctrl-sw-ml-filter")
+    def _ctrl_sw_ml_filter(self, e: Switch.Changed):
+        _patch_control("ml_filter_enabled", e.value)
+        # 설정 탭 스위치도 동기화
+        try:
+            self.query_one("#sw-ml-filter", Switch).value = e.value
+        except Exception:
+            pass
+        self._update_pipeline_tab()
+        self._refresh_ml_filter_status()
+        self._lg(f"[{'green' if e.value else 'yellow'}]ML FP 필터 {'ON' if e.value else 'OFF'}[/]")
+
+    @on(Switch.Changed, "#sw-ctx-penalty")
+    def _sw_ctx_penalty(self, e: Switch.Changed):
+        _patch_control("context_penalty_enabled", e.value)
+        self._update_pipeline_tab()
+        self._lg(f"[{'green' if e.value else 'yellow'}]문맥 패널티 {'ON' if e.value else 'OFF'}[/]")
+
+    def _apply_ml_threshold_input(self) -> None:
+        inp = self.query_one("#ctrl-ml-threshold-input", Input)
+        raw = inp.value.strip() or "0.40"
+        try:
+            threshold = float(raw)
+        except ValueError:
+            self._lg(f"[yellow][ml-filter] 임계값이 올바르지 않습니다: {raw!r}[/]")
+            ctrl = self._read_control()
+            inp.value = f"{float(ctrl.get('ml_filter_threshold', 0.4)):.2f}"
+            return
+        threshold = min(max(threshold, 0.0), 1.0)
+        _patch_control("ml_filter_threshold", threshold)
+        inp.value = f"{threshold:.2f}"
+        self._update_pipeline_tab()
+        self._refresh_ml_filter_status()
+        self._lg(f"[cyan][ml-filter] ml_filter_threshold → {threshold:.2f}[/]")
+
+    @on(Input.Submitted, "#ctrl-ml-threshold-input")
+    def _ctrl_ml_threshold_submit(self, _: Input.Submitted):
+        self._apply_ml_threshold_input()
+
+    @on(Button.Pressed, "#btn-ml-threshold-save")
+    def _btn_ml_threshold_save(self, _: Button.Pressed):
+        self._apply_ml_threshold_input()
+
+    def _refresh_ml_filter_status(self) -> None:
+        """제어 탭 ML 필터 상태 레이블 갱신."""
+        try:
+            label = self.query_one("#ctrl-ml-filter-status", Label)
+        except Exception:
+            return
+        try:
+            stats = get_ml_filter_stats()
+            loaded = stats.get("loaded", False)
+            model_type = stats.get("model_type", "?")
+            trained_at = str(stats.get("trained_at", "?"))[:10]
+            total = stats.get("total_calls", 0)
+            suppressed = stats.get("suppressed", 0)
+            rate = stats.get("suppress_rate", 0.0)
+            if loaded:
+                label.update(
+                    f"모델: [green]{model_type}[/]  학습: [dim]{trained_at}[/]  "
+                    f"누적 억제: {suppressed}/{total} ({rate:.1%})"
+                )
+            else:
+                model_exists = stats.get("model_exists", False)
+                if model_exists:
+                    label.update("[yellow]모델 파일 있음 — 로드 실패[/]")
+                else:
+                    label.update("[dim]모델 파일 없음 — 학습 후 활성화 가능 (tests/train_ml_filter.py)[/]")
+        except Exception as exc:
+            label.update(f"[dim]상태 조회 실패: {exc}[/]")
 
     def _update_skip_roles(self):
         """Role 스위치 상태를 읽어 skip_roles 목록을 control 파일에 저장."""
@@ -2548,6 +2880,8 @@ class DLPApp(App):
         self._selected_finding = None
         self._selected_turn_id = None
         self._sent_text_cache = ""
+        self._sent_full_lines = []
+        self._sent_rendered_count = 0
         self._init_pipeline_stats()
         self.query_one("#ttable", DataTable).clear()
         self.query_one("#ftable", DataTable).clear()
@@ -2844,28 +3178,43 @@ class DLPApp(App):
                 if ca:
                     self._write_plain_block(d, "      [dim]뒤 컨텍스트:[/]", ca)
             d.write("")
-        # ── 전송 내용 탭 ─────────────────────────────────────────────────
-        ds = self.query_one("#dsent", RichLog)
-        ds.clear()
-        sent_lines = [f"═══ Turn #{t.id} — 전송된 프롬프트 ═══", f"모델: {t.model}  msgs: {t.mc}", ""]
-        ds.write(f"[bold]═══ Turn #{t.id} — 전송된 프롬프트 ═══[/]")
-        ds.write(f"  모델: [green]{t.model}[/]  msgs: {t.mc}")
-        ds.write("")
+        # ── 전송 내용 탭: 전체 라인 빌드 → 첫 페이지만 렌더링 ──────────────
+        all_lines: list = []       # ds.write()에 넘길 아이템 (str markup | Text)
+        sent_plain: list[str] = [] # 클립보드 복사용
+
+        def _al(markup: str, plain: str | None = None) -> None:
+            all_lines.append(markup)
+            sent_plain.append(plain if plain is not None else markup)
+
+        def _al_long(label_m: str, label_p: str, content: str) -> None:
+            """긴 텍스트를 줄 단위로 분리해 추가."""
+            if label_m:
+                _al(label_m, label_p)
+            for ln in content.splitlines():
+                all_lines.append(Text(f"  {ln}"))
+                sent_plain.append(f"  {ln}")
+            if not content.endswith("\n"):
+                pass  # splitlines가 처리
+
+        _al(f"[bold]═══ Turn #{t.id} — 전송된 프롬프트 ═══[/]",
+            f"═══ Turn #{t.id} — 전송된 프롬프트 ═══")
+        _al(f"  모델: [green]{t.model}[/]  msgs: {t.mc}",
+            f"모델: {t.model}  msgs: {t.mc}")
+        _al("")
+
         for i, rq in enumerate(t.reqs):
             targets = rq.get("targets", [])
             applied = self._applied_action_for_event(rq)
             if not targets:
-                # targets 없음 — 새 메시지(messages)에서 user 입력만 표시
                 raw_msgs = rq.get("messages", [])
                 user_msgs = [m for m in raw_msgs if m.get("role") == "user"]
                 if user_msgs:
-                    ds.write(f"[dim]── 요청 #{rq.get('id','?')} — 사용자 입력 ──[/]")
+                    _al(f"[dim]── 요청 #{rq.get('id','?')} — 사용자 입력 ──[/]",
+                        f"── 요청 #{rq.get('id','?')} — 사용자 입력 ──")
                     for msg in user_msgs:
                         content = str(msg.get("content", ""))
-                        ds.write(Text(f"  {content[:500]}"))
-                        if len(content) > 500:
-                            ds.write(f"  [dim]… (+{len(content)-500}자)[/]")
-                    ds.write("")
+                        _al_long("", "", content)
+                    _al("")
                 continue
             effective_findings = self._effective_findings_for_event(rq)
             effective_fc = len(effective_findings)
@@ -2873,60 +3222,57 @@ class DLPApp(App):
             pipeline_pa = self._pipeline_action_for_event(rq)
             pa = self._display_action_for_event(rq)
             label = ACT_LB.get(pa, pa.upper())
-            ds.write(f"[bold]── 요청 #{rq.get('id','?')} ({i+1}/{len(t.reqs)}) [{ACT_S.get(pa, '')}]{label}[/] ──[/]")
-            sent_lines.append(f"── 요청 #{rq.get('id','?')} ({i+1}/{len(t.reqs)}) [{label}] ──")
+            _al(f"[bold]── 요청 #{rq.get('id','?')} ({i+1}/{len(t.reqs)}) [{ACT_S.get(pa,'')}]{label}[/] ──[/]",
+                f"── 요청 #{rq.get('id','?')} ({i+1}/{len(t.reqs)}) [{label}] ──")
             if applied == "blocked":
-                ds.write("  [bold red]▶ 정책에 의해 차단되어 업스트림으로 전송되지 않음[/]")
-                ds.write("")
-                sent_lines.append("  ▶ 정책에 의해 차단되어 업스트림으로 전송되지 않음")
-                sent_lines.append("")
+                _al("  [bold red]▶ 정책에 의해 차단되어 업스트림으로 전송되지 않음[/]",
+                    "  ▶ 정책에 의해 차단되어 업스트림으로 전송되지 않음")
+                _al("")
                 continue
             if applied == "masked":
-                ds.write("  [cyan]▶ 실제 적용: 마스킹 후 전달[/]")
-                sent_lines.append("  ▶ 실제 적용: 마스킹 후 전달")
+                _al("  [cyan]▶ 실제 적용: 마스킹 후 전달[/]", "  ▶ 실제 적용: 마스킹 후 전달")
             elif effective_fc > 0:
                 if pipeline_pa in ("mask", "block"):
                     note = f"탐지는 있었지만 차단/마스킹 정책이 꺼져 있어 원문 그대로 전달 (엔진 판정: {ACT_LB.get(pipeline_pa, pipeline_pa.upper())})"
                 else:
                     note = "탐지는 있었지만 원문 그대로 전달"
-                ds.write(f"  [yellow]▶ {note}[/]")
-                sent_lines.append(f"  ▶ {note}")
+                _al(f"  [yellow]▶ {note}[/]", f"  ▶ {note}")
             elif suppressed_fc > 0:
                 note = f"억제된 탐지 {suppressed_fc}건 — 최종 전송은 원문 PASS"
-                ds.write(f"  [dim]▶ {note}[/]")
-                sent_lines.append(f"  ▶ {note}")
-            # 탐지된 필드만 표시: 원문 → 마스킹 결과
-            shown_fps = set()
+                _al(f"  [dim]▶ {note}[/]", f"  ▶ {note}")
+            shown_fps: set[str] = set()
             for f in effective_findings:
                 fp = f.get("field_path", "")
                 if fp in shown_fps:
                     continue
                 shown_fps.add(fp)
-                # 해당 field_path의 target 텍스트 찾기
                 orig = next((tgt.get("text", "") for tgt in targets if tgt.get("field_path") == fp), "")
                 masked = _simulate_mask(orig, effective_findings, fp, self._threshold(), self._mask_templates()) if applied == "masked" else orig
                 sev = f.get("severity") or "?"
-                ds.write(f"  [{SEV_S.get(sev,'')}]{f.get('rule','?')}[/] [dim]{markup_escape(fp)}[/]")
-                self._write_plain_block(ds, "    원문:", orig[:300])
+                _al(f"  [{SEV_S.get(sev,'')}]{f.get('rule','?')}[/] [dim]{markup_escape(fp)}[/]",
+                    f"  {f.get('rule','?')} ({fp})")
+                _al_long("    [dim]원문:[/]", "    원문:", orig)
                 if applied == "masked":
-                    self._write_plain_block(ds, "    [cyan]전송:[/]", masked[:300])
-                ds.write("")
-                sent_lines.append(f"  {f.get('rule','?')} ({fp})")
-                sent_lines.append(f"    원문: {orig[:300]}")
-                if applied == "masked":
-                    sent_lines.append(f"    전송: {masked[:300]}")
-                sent_lines.append("")
-            # 탐지 없는 경우 새 user 메시지만 표시
+                    _al_long("    [cyan]전송:[/]", "    전송:", masked)
+                _al("")
+            # 탐지 없는 경우 — 전체 targets 내용 표시 (잘라내지 않음)
             if not effective_findings:
-                user_msgs = [m for m in rq.get("messages", []) if m.get("role") == "user"]
-                for msg in user_msgs:
-                    content = str(msg.get("content", ""))
-                    ds.write(Text(f"  {content[:500]}"))
-                    if len(content) > 500:
-                        ds.write(f"  [dim]… (+{len(content)-500}자)[/]")
-                    sent_lines.append(f"  {content[:500]}")
-                ds.write("")
-        self._sent_text_cache = "\n".join(sent_lines).strip()
+                for tgt in targets:
+                    role = tgt.get("role", "?")
+                    fp = tgt.get("field_path", "")
+                    content = tgt.get("text", "")
+                    _al(f"  [dim]{markup_escape(role)}[/] [dim]{markup_escape(fp)}[/]",
+                        f"  {role} ({fp})")
+                    _al_long("", "", content)
+                    _al("")
+
+        self._sent_full_lines = all_lines
+        self._sent_rendered_count = 0
+        self._sent_text_cache = "\n".join(sent_plain).strip()
+
+        ds = self.query_one("#dsent", RichLog)
+        ds.clear()
+        self._render_sent_page()
 
     # ── 탐지 상세 ─────────────────────────────────────────────────────────────
 
@@ -3046,6 +3392,15 @@ class DLPApp(App):
                     d.write(f"  유지 신뢰도: [cyan]{by_conf:.2f}[/]")
                 if by_match:
                     d.write(f"  비교 대상  : [dim]{by_match!r}[/]")
+            elif suppressed_reason == "ml_fp_filter":
+                prob_tp = meta.get("ml_prob_tp")
+                prob_fp = meta.get("ml_prob_fp")
+                ml_thr  = meta.get("ml_threshold")
+                d.write(f"  억제 사유  : [magenta]ML FP 필터 (XGBoost)[/]")
+                if isinstance(prob_tp, (int, float)):
+                    d.write(f"  TP 확률    : [dim]{prob_tp:.4f}[/]  [yellow](임계값 {ml_thr:.2f} 미만)[/]")
+                if isinstance(prob_fp, (int, float)):
+                    d.write(f"  FP 확률    : [magenta]{prob_fp:.4f}[/]")
         cb = f.get("context_before") or ""
         ca = f.get("context_after") or ""
         if cb or ca:
@@ -3160,6 +3515,15 @@ class DLPApp(App):
                         raise ConnectionResetError
                     s = json.loads(line)
                     engine_ok = bool(s.get("ok"))
+                    # stats도 같이 조회
+                    if engine_ok:
+                        w.write(json.dumps({"action": "stats", "id": -2}).encode() + b"\n")
+                        await w.drain()
+                        sline = await asyncio.wait_for(r.readline(), timeout=3)
+                        if sline:
+                            sdata = json.loads(sline)
+                            if sdata.get("ok"):
+                                self._engine_stats = sdata
                 finally:
                     try:
                         w.close()
@@ -3227,6 +3591,8 @@ class DLPApp(App):
         self._selected_finding = None
         self._selected_turn_id = None
         self._sent_text_cache = ""
+        self._sent_full_lines = []
+        self._sent_rendered_count = 0
         self._init_pipeline_stats()
         self._refresh_startup_warnings()
         self.query_one("#ttable", DataTable).clear()
@@ -3238,6 +3604,159 @@ class DLPApp(App):
 
     def action_quit(self):
         self.exit()
+
+    # ── 감사 로그 ─────────────────────────────────────────────────────────────
+
+    _audit_rows: list[dict] = []   # 로드된 audit 레코드 전체
+
+    def _audit_action_filter(self) -> str:
+        try:
+            sel = self.query_one("#audit-action-filter", Select)
+            return str(sel.value) if sel.value != Select.BLANK else "all"
+        except Exception:
+            return "all"
+
+    def _audit_rule_filter(self) -> str:
+        try:
+            return self.query_one("#audit-rule-filter", Input).value.strip().lower()
+        except Exception:
+            return ""
+
+    @work(thread=True)
+    def _load_audit_log(self) -> None:
+        """audit.jsonl을 백그라운드에서 읽어 테이블 갱신."""
+        rows: list[dict] = []
+        for path in (_AUDIT_FILE, _AUDIT_ROTATED):
+            if not path.exists():
+                continue
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            rows.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            pass
+            except Exception:
+                pass
+        # 최신순 정렬 후 최대 500건
+        rows.sort(key=lambda r: r.get("ts", ""), reverse=True)
+        rows = rows[:500]
+        self.call_from_thread(self._populate_audit_table, rows)
+
+    def _populate_audit_table(self, rows: list[dict]) -> None:
+        self._audit_rows = rows
+        self._refresh_audit_table()
+
+    def _refresh_audit_table(self) -> None:
+        """필터 조건에 맞는 행만 audit-table에 표시."""
+        try:
+            adt = self.query_one("#audit-table", DataTable)
+        except Exception:
+            return
+        adt.clear()
+        action_f = self._audit_action_filter()
+        rule_f   = self._audit_rule_filter()
+
+        shown = 0
+        for rec in self._audit_rows:
+            action = str(rec.get("action", "pass") or "pass").lower()
+            findings: list[dict] = rec.get("findings", [])
+            rules = sorted({f.get("rule", "") for f in findings if not f.get("suppressed")})
+
+            if action_f != "all" and action != action_f:
+                continue
+            if rule_f and not any(rule_f in r for r in rules):
+                continue
+
+            ts    = _sts(rec.get("ts", ""))
+            model = (rec.get("model") or "?")[:14]
+            fc    = len([f for f in findings if not f.get("suppressed")])
+            rules_str = ", ".join(rules[:3]) + ("…" if len(rules) > 3 else "")
+            adt.add_row(
+                ts,
+                model,
+                f"[{ACT_S.get(action, '')}]{ACT_LB.get(action, action.upper())}[/]",
+                f"[red]{fc}[/]" if fc else "0",
+                rules_str or "[dim]—[/]",
+                key=str(shown),
+            )
+            shown += 1
+            if shown >= 300:
+                break
+
+    @on(DataTable.RowSelected, "#audit-table")
+    def _audit_row_selected(self, e: DataTable.RowSelected) -> None:
+        idx = int(str(e.row_key.value))
+        action_f = self._audit_action_filter()
+        rule_f   = self._audit_rule_filter()
+        # 필터링된 순서의 idx번째 레코드 찾기
+        filtered = []
+        for rec in self._audit_rows:
+            action = str(rec.get("action", "pass") or "pass").lower()
+            findings = rec.get("findings", [])
+            rules = {f.get("rule", "") for f in findings if not f.get("suppressed")}
+            if action_f != "all" and action != action_f:
+                continue
+            if rule_f and not any(rule_f in r for r in rules):
+                continue
+            filtered.append(rec)
+            if len(filtered) > 300:
+                break
+        if idx >= len(filtered):
+            return
+        rec = filtered[idx]
+        self._show_audit_detail(rec)
+
+    def _show_audit_detail(self, rec: dict) -> None:
+        try:
+            d = self.query_one("#audit-detail-log", RichLog)
+        except Exception:
+            return
+        d.clear()
+        action = str(rec.get("action", "pass") or "pass").lower()
+        findings: list[dict] = rec.get("findings", [])
+        d.write(f"[bold]═══ 감사 레코드 ═══[/]")
+        d.write(f"  시각    : {rec.get('ts', '')}")
+        d.write(f"  요청 ID : [dim]{rec.get('request_id', '?')}[/]")
+        d.write(f"  제공자  : {rec.get('provider', '?')}")
+        d.write(f"  모델    : [green]{rec.get('model', '?')}[/]")
+        d.write(f"  액션    : [{ACT_S.get(action, '')}]{ACT_LB.get(action, action.upper())}[/]")
+        d.write(f"  탐지 수 : [red]{rec.get('finding_count', 0)}[/]")
+        d.write(f"  텍스트  : {rec.get('total_text_len', 0):,}자  타겟: {rec.get('target_count', 0)}개")
+        d.write("")
+        effective = [f for f in findings if not f.get("suppressed")]
+        suppressed = [f for f in findings if f.get("suppressed")]
+        if effective:
+            d.write(f"[bold]── 유효 탐지 ({len(effective)}) ──[/]")
+            for f in effective:
+                sev = f.get("severity") or "?"
+                d.write(f"  [{SEV_S.get(sev,'')}]{sev.upper()}[/] {f.get('rule','?')} "
+                        f"conf={f.get('confidence', 0):.2f}  stage={f.get('stage','?')}")
+                mt = f.get("match_text", "")
+                if mt:
+                    self._write_plain_block(d, "    매치:", mt[:200], indent="      ")
+        if suppressed:
+            d.write(f"[dim]── 억제된 탐지 ({len(suppressed)}) ──[/]")
+            for f in suppressed:
+                sev = f.get("severity") or "?"
+                reason = (f.get("metadata") or {}).get("suppressed_reason", "?")
+                d.write(f"  [dim]{sev.upper()} {f.get('rule','?')} conf={f.get('confidence',0):.2f} ({reason})[/]")
+
+    @on(Select.Changed, "#audit-action-filter")
+    def _audit_action_changed(self, _: Select.Changed) -> None:
+        self._refresh_audit_table()
+
+    @on(Input.Changed, "#audit-rule-filter")
+    def _audit_rule_changed(self, _: Input.Changed) -> None:
+        self._refresh_audit_table()
+
+    @on(Button.Pressed, "#btn-audit-refresh")
+    def _btn_audit_refresh(self, _: Button.Pressed) -> None:
+        self._load_audit_log()
+        self._lg("[dim]감사 로그 새로고침…[/]")
 
     # ── 유틸 ──────────────────────────────────────────────────────────────────
 

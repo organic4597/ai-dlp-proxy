@@ -1,0 +1,1 @@
+ cd /home1/ai-dlp-proxy && source venv/bin/activate && python3 scripts/tui.py

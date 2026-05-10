@@ -1,0 +1,182 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { api } from '$lib/api';
+  import SevBadge from '$lib/components/SevBadge.svelte';
+
+  type Finding = {
+    id: number; request_id: string; ts: string;
+    rule: string; severity: string; confidence: number;
+    suppressed: boolean; suppressed_reason: string;
+    match_text: string; stage: string; field_path: string;
+    dlp_applied?: string;
+    policy_effective: boolean;
+    policy_reason?: string;
+    confidence_threshold?: number;
+  };
+  type RuleStat = { rule: string; total: number; effective: number; suppressed_count: number; avg_confidence: number; };
+
+  let findings = $state<Finding[]>([]);
+  let ruleStats = $state<RuleStat[]>([]);
+  let filterRule = $state('');
+  let filterSev  = $state('');
+  let filterStatus = $state<string>('all');
+  let loading = $state(true);
+
+  async function load() {
+    loading = true;
+    try {
+      const params: Record<string, string | boolean> = { limit: 300 };
+      if (filterRule) params.rule = filterRule;
+      if (filterSev)  params.severity = filterSev;
+      if (filterStatus !== 'all') params.status = filterStatus;
+
+      const [data, stats] = await Promise.all([
+        api.findings.list(params),
+        api.findings.byRule(),
+      ]);
+      findings = data as Finding[];
+      ruleStats = stats as RuleStat[];
+    } finally {
+      loading = false;
+    }
+  }
+
+  function fmt(ts: string) { return ts ? ts.slice(0, 19) : ''; }
+
+  function statusReason(f: Finding) {
+    if (f.policy_effective) return '정책 액션 계산 포함';
+    if (f.policy_reason === 'below_threshold') return `신뢰도 기준 미달 (${f.confidence_threshold?.toFixed(2) ?? '0.50'})`;
+    if (f.policy_reason === 'ml_fp_filter') return 'ML 오탐 필터';
+    if (f.policy_reason === 'nms') return '중복 탐지 정리';
+    if (f.policy_reason === 'allowlist') return '허용목록';
+    return f.policy_reason || f.suppressed_reason || '정책 제외';
+  }
+
+  onMount(load);
+</script>
+
+<div class="flex flex-col h-full">
+  <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+    <h1 class="text-lg font-semibold text-slate-100">🔍 탐지 목록</h1>
+    <button onclick={load} class="bg-slate-700 hover:bg-slate-600 text-sm px-3 py-1.5 rounded text-slate-200 transition-colors">새로고침</button>
+  </div>
+
+  <!-- 필터 바 -->
+  <div class="flex items-center gap-3 px-6 py-3 border-b border-slate-800 text-sm">
+    <input
+      bind:value={filterRule} placeholder="규칙 검색…"
+      class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-slate-200 placeholder:text-slate-500 text-sm w-40"
+    />
+    <select bind:value={filterSev} class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-slate-200 text-sm">
+      <option value="">심각도 전체</option>
+      <option value="critical">CRITICAL</option>
+      <option value="high">HIGH</option>
+      <option value="medium">MEDIUM</option>
+      <option value="low">LOW</option>
+    </select>
+    <select bind:value={filterStatus} class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-slate-200 text-sm">
+      <option value="all">전체</option>
+      <option value="effective">정책 대상(유효)</option>
+      <option value="suppressed">정책 제외(억제)</option>
+      <option value="below_threshold">신뢰도 미달</option>
+    </select>
+    <button onclick={load} class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition-colors">검색</button>
+  </div>
+
+  <div class="flex flex-1 overflow-hidden">
+    <!-- 탐지 테이블 -->
+    <div class="flex-1 overflow-auto">
+      {#if loading}
+        <div class="flex items-center justify-center h-40 text-slate-500">로딩 중…</div>
+      {:else}
+        <table class="w-full text-sm">
+          <thead class="sticky top-0 bg-slate-900 border-b border-slate-700 z-10">
+            <tr class="text-left text-xs text-slate-500 uppercase">
+              <th class="px-4 py-2">시각</th>
+              <th class="px-4 py-2">규칙</th>
+              <th class="px-4 py-2">심각도</th>
+              <th class="px-4 py-2 text-right">신뢰도</th>
+              <th class="px-4 py-2">스테이지</th>
+              <th class="px-4 py-2">DLP 처리</th>
+              <th class="px-4 py-2">탐지 판정</th>
+              <th class="px-4 py-2">매치 원문</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each findings as f (f.id)}
+              <tr class={`border-b border-slate-800 ${!f.policy_effective ? 'opacity-60' : ''} hover:bg-slate-800/40`}>
+                <td class="px-4 py-2 text-slate-400 font-mono text-xs">{fmt(f.ts)}</td>
+                <td class="px-4 py-2 text-slate-200 font-medium">{f.rule}</td>
+                <td class="px-4 py-2"><SevBadge severity={f.severity} /></td>
+                <td class="px-4 py-2 text-right font-mono text-xs text-slate-300">{f.confidence?.toFixed(2)}</td>
+                <td class="px-4 py-2 text-xs">{f.stage ?? '—'}</td>
+                <td class="px-4 py-2 text-xs">
+                  {#if !f.dlp_applied || f.dlp_applied === 'pass'}
+                    <span class="text-slate-500">통과</span>
+                  {:else if f.dlp_applied === 'masked'}
+                    <span class="bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded text-xs">마스킹</span>
+                  {:else if f.dlp_applied === 'blocked'}
+                    <span class="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-xs">차단</span>
+                  {:else}
+                    <span class="text-slate-400">{f.dlp_applied}</span>
+                  {/if}
+                </td>
+                <td class="px-4 py-2 text-xs">
+                  {#if f.policy_effective}
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-green-400">정책 대상(유효)</span>
+                      <span class="text-[11px] text-slate-600">{statusReason(f)}</span>
+                    </div>
+                  {:else if f.suppressed}
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-slate-500">정책 제외(억제)</span>
+                      <span class="text-[11px] text-slate-600">{statusReason(f)}</span>
+                    </div>
+                  {:else}
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-amber-300">정책 제외(신뢰도)</span>
+                      <span class="text-[11px] text-slate-600">{statusReason(f)}</span>
+                    </div>
+                  {/if}
+                </td>
+                <td class="px-4 py-2 font-mono text-xs text-slate-400 max-w-48 truncate">{f.match_text ?? '—'}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+        {#if findings.length === 0}
+          <div class="text-center py-16 text-slate-500">탐지 결과 없음</div>
+        {/if}
+      {/if}
+    </div>
+
+    <!-- 룰별 통계 사이드 -->
+    <div class="w-64 border-l border-slate-700 overflow-auto shrink-0 p-4">
+      <div class="text-xs text-slate-500 uppercase mb-3">룰별 통계</div>
+      {#each ruleStats as s}
+        <div class="mb-3 bg-slate-800 rounded p-3 text-xs space-y-1">
+          <div class="text-slate-200 font-medium truncate">{s.rule}</div>
+          <div class="flex justify-between text-slate-500">
+            <span>총 탐지</span><span class="text-slate-300">{s.total}</span>
+          </div>
+          <div class="flex justify-between text-slate-500">
+            <span>유효</span><span class="text-green-400">{s.effective}</span>
+          </div>
+          <div class="flex justify-between text-slate-500">
+            <span>억제</span><span class="text-amber-400">{s.suppressed_count}</span>
+          </div>
+          <div class="flex justify-between text-slate-500">
+            <span>평균 신뢰도</span><span class="text-slate-300">{s.avg_confidence?.toFixed(2)}</span>
+          </div>
+          <!-- 억제율 바 -->
+          <div class="w-full bg-slate-700 rounded-full h-1.5 mt-1">
+            <div
+              class="bg-amber-500 h-1.5 rounded-full"
+              style={`width: ${s.total > 0 ? Math.round(s.suppressed_count / s.total * 100) : 0}%`}
+            ></div>
+          </div>
+        </div>
+      {/each}
+    </div>
+  </div>
+</div>
