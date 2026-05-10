@@ -19,19 +19,23 @@ PC (AI Agent / 브라우저)
 mitmproxy :4001
     │  HTTPS 복호화 (CA 인증서)
     │  inspect_traffic.py addon
-    │    ├─ API 파서 (OpenAI / Anthropic / Gemini)
+    │    ├─ API 파서 (OpenAI / Anthropic / Copilot / Gemini)
     │    ├─ 텍스트 추출
     │    └─ DLP 엔진 스캔 요청
     │
     ▼ UDS /tmp/dlp-engine.sock
 engine_server.py
     │  NDJSON 프로토콜
-    └─ DLP Pipeline → RegexStage (12개 규칙)
-         ├─ 탐지 → 마스킹 후 LLM 전달
-         └─ 정책에 따라 403 차단 가능
+    └─ DLP Pipeline
+         ├─ RegexStage   (13개 규칙)
+         ├─ MLFilterStage (XGBoost FP 필터, optional)
+         └─ SLMStage     (Qwen2.5-1.5B, on-device, optional)
 
 tui.py (Textual TUI)
     └─ 6탭 실시간 모니터링 · 제어 대시보드
+
+web/ (SvelteKit 웹 대시보드)
+    └─ traffic / findings / pipeline / rules / audit / settings 등 9개 뷰
 ```
 
 ---
@@ -40,12 +44,13 @@ tui.py (Textual TUI)
 
 ### DLP 탐지 파이프라인
 
-**2단계 탐지 아키텍처**: Regex Stage → SLM Stage
+**3단계 탐지 아키텍처**: Regex Stage → ML FP Filter → SLM Stage
 
 ```
 DLPTarget.text (순수 텍스트)
-    ├─ RegexStage  ← 패턴이 명확한 PII: 주민번호 · 카드번호 · API 키 등 13개 규칙
-    └─ SLMStage   ← 문맥의존 PII: 이름 · 주소 · 의료정보 등 9종 (선택적)
+    ├─ RegexStage    ← 패턴이 명확한 PII: 주민번호 · 카드번호 · API 키 등 13개 규칙
+    ├─ MLFilterStage ← XGBoost 기반 False Positive 이진 분류 (오탐 제거)
+    └─ SLMStage      ← 문맥의존 PII: 이름 · 주소 · 의료정보 등 9종 (선택적)
 ```
 
 ### 왜 SLM이 필요한가
@@ -60,10 +65,24 @@ Regex는 **구조가 고정된 PII**에 탁월하지만 다음 PII는 탁지 불
 | 도메인 특화 표현 | 의료 진단명, 생체 정보 | `medical_info`, `biometric` |
 
 **SLM 환경**: Qwen2.5-1.5B-Instruct Q4_K_M (GGUF, ~1GB)  
+**파인튜닝**: `scripts/train_dlp_slm.py` — LoRA / QLoRA (Qwen3.5-4B 베이스, VRAM 6GB+)  
 **실행 위치**: RPi on-device — 데이터 외부 유출 제로  
-**활성화**: TUI 제어/설정 탭에서 `sLM Stage` 스위치
+**활성화**: TUI 제어/설정 탭에서 `SLM Stage` 스위치
 
-### DLP 탐지 규칙 (Regex Stage, 12개)
+### ML FP 필터 (MLFilterStage)
+
+RegexStage 출력 Finding을 입력받아 **진짜 PII인가?** 이진 분류합니다.
+
+| 항목 | 내용 |
+|---|---|
+| 모델 | XGBoost (sklearn 호환 Pipeline) |
+| 학습 데이터 | `tests/pii_findings_ml_dataset.csv` (~10,000건) |
+| 피처 | 매칭 텍스트 길이, 규칙명, 심각도, 문맥 길이 등 |
+| 모델 파일 | `models/fp_filter_xgb.pkl` |
+| Fallback | 모델 미존재 시 자동 no-op (모든 Finding 통과) |
+| 학습 | `tests/train_ml_filter.py`, 분석 노트북: `notebooks/dlp_fp_filter_ml.ipynb` |
+
+### DLP 탐지 규칙 (Regex Stage, 13개)
 
 | 규칙 | 대상 | 등급 | 검증 |
 |------|------|------|------|
@@ -77,6 +96,7 @@ Regex는 **구조가 고정된 PII**에 탁월하지만 다음 PII는 탁지 불
 | `kr_driver_license` | 운전면허번호 | HIGH | 패턴 |
 | `jwt_token` | JWT | HIGH | 3-part base64 |
 | `api_key_assignment` | API 키 할당문 | HIGH | 컨텍스트 |
+| `kr_bank_account` | 계좌번호 | HIGH | 패턴 |
 | `kr_phone` | 휴대전화번호 | MEDIUM | 010/011 패턴 |
 | `email` | 이메일 | LOW | RFC 패턴 |
 
@@ -108,6 +128,27 @@ Textual 기반 6탭 인터랙티브 모니터링
 - **로그** — 실시간 이벤트 스트림
 
 상단 StatsBar: `턴 N  요청 N  스캔 N  탐지 N  마스킹 N  │  Engine ●  mitm ●`
+
+### 웹 대시보드 (SvelteKit)
+
+브라우저 기반 GUI 대시보드 (`web/` 디렉토리)
+
+| 뷰 | 기능 |
+|---|---|
+| `/traffic` | 실시간 트래픽 목록 + 요청/응답 상세 |
+| `/findings` | PII 탐지 이력 필터링 및 상세 |
+| `/pipeline` | 스테이지별 ON/OFF 및 통계 |
+| `/rules` | Regex 규칙 관리 |
+| `/allowlist` | 도메인 허용 목록 관리 |
+| `/audit` | 감사 로그 |
+| `/assets` | 민감 자산 목록 |
+| `/control` | 정책 스위치 (마스킹/차단) |
+| `/settings` | 포트·연결 설정 |
+
+```bash
+cd web && bash start_web.sh
+# → http://localhost:5173
+```
 
 ---
 
@@ -416,15 +457,36 @@ ai-dlp-proxy/
 ├── scripts/
 │   ├── inspect_traffic.py    # mitmproxy addon — 트래픽 탐지·마스킹
 │   ├── engine_server.py      # UDS NDJSON DLP 엔진 서버
-│   └── tui.py                # Textual TUI 대시보드
+│   ├── tui.py                # Textual TUI 대시보드
+│   ├── train_dlp_slm.py      # SLM LoRA/QLoRA 파인튜닝 (Qwen3.5-4B)
+│   └── export_certs.sh       # 플랫폼별 인증서 내보내기
 ├── src/ai_dlp_proxy/
 │   └── engine/
-│       ├── api/              # LLM API 파서 (openai / anthropic / gemini)
+│       ├── api/              # LLM API 파서 (openai / anthropic / copilot / gemini)
 │       └── pipeline/
-│           ├── regex_stage.py   # 12개 DLP 탐지 규칙
-│           └── base.py          # Finding, Severity, Stage 추상 클래스
-├── docs/
-│   └── ppt_content.md        # 과제 발표 내용 초안
+│           ├── regex_stage.py    # 13개 DLP 탐지 규칙
+│           ├── ml_filter/        # XGBoost FP 필터 스테이지
+│           ├── slm_stage.py      # on-device SLM 추론
+│           └── base.py           # Finding, Severity, Stage 추상 클래스
+├── web/
+│   ├── frontend/             # SvelteKit 웹 대시보드 (9개 뷰)
+│   ├── backend/              # 웹 API 서버
+│   └── start_web.sh
+├── certs/
+│   ├── android/              # 플랫폼별 CA 인증서
+│   ├── linux/
+│   ├── windows/
+│   └── wsl/
+├── notebooks/
+│   └── dlp_fp_filter_ml.ipynb  # ML FP 필터 EDA·학습 분석
+├── tests/
+│   ├── build_ml_dataset.py      # ML 학습 데이터셋 생성
+│   ├── build_slm_dataset.py     # SLM 파인튜닝 데이터셋 생성
+│   ├── train_ml_filter.py       # XGBoost FP 필터 학습
+│   └── generate_synthetic_dataset.py
+├── dlp-daemon.sh             # 데몬 시작 스크립트
+├── dlp-supervisor            # 프로세스 수퍼바이저
+├── docs/                     # 설계 문서·개발 로그
 ├── pyproject.toml
 └── plan.md                   # 상세 개발 계획서
 ```
@@ -434,13 +496,18 @@ ai-dlp-proxy/
 ## 로드맵
 
 - [x] HTTPS 투명 프록싱 (mitmproxy)
-- [x] 12개 DLP 규칙 (체크섬·Luhn 알고리즘 검증)
+- [x] 13개 DLP 규칙 (체크섬·Luhn 알고리즘 검증)
 - [x] 실시간 마스킹 파이프라인
 - [x] Textual TUI 6탭 대시보드
 - [x] 오탐 개선 (kr_rrn 체크섬 검증 강화)
 - [x] SLM 보완 탐지 (Qwen2.5-1.5B-Instruct, on-device)
+- [x] Copilot API 파서 추가
+- [x] ML FP 필터 (XGBoost 기반 오탐 이진 분류)
+- [x] SLM QLoRA 파인튜닝 파이프라인 (Qwen3.5-4B)
+- [x] SvelteKit 웹 대시보드 (9개 뷰)
+- [x] 플랫폼별 CA 인증서 자동 내보내기 (android/linux/windows/wsl)
 - [ ] `pip install ai-dlp-proxy` 배포 패키지
-- [ ] CA 인증서 자동 설치
+- [ ] 파인튜닝된 SLM 모델 통합 (GGUF 변환)
 - [ ] 사용자 정의 정책 (`settings.yaml`)
 
 ---
@@ -450,6 +517,10 @@ ai-dlp-proxy/
 - **Python** 3.12
 - **mitmproxy** 12.2.1
 - **Textual** 8.2.2
+- **XGBoost** — ML FP 필터 (scikit-learn Pipeline)
+- **llama-cpp-python** — on-device SLM 추론
+- **Transformers / PEFT / TRL** — SLM LoRA/QLoRA 파인튜닝
+- **SvelteKit** — 웹 대시보드 프론트엔드
 - **asyncio** + Unix Domain Socket (IPC)
 - **Raspberry Pi** (ARM Linux)
 
