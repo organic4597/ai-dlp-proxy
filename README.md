@@ -27,9 +27,11 @@ mitmproxy :4001
 engine_server.py
     │  NDJSON 프로토콜
     └─ DLP Pipeline
-         ├─ RegexStage   (13개 규칙)
+         ├─ RegexStage    (12개 규칙)
          ├─ MLFilterStage (XGBoost FP 필터, optional)
-         └─ SLMStage     (Qwen2.5-1.5B, on-device, optional)
+         ├─ AssetStage    (등록 자산 매칭)
+         ├─ NMS           (겹치는 Finding 중복 제거)
+         └─ SLMStage      (Qwen2.5-1.5B, on-device, optional)
 
 tui.py (Textual TUI)
     └─ 6탭 실시간 모니터링 · 제어 대시보드
@@ -44,12 +46,14 @@ web/ (SvelteKit 웹 대시보드)
 
 ### DLP 탐지 파이프라인
 
-**3단계 탐지 아키텍처**: Regex Stage → ML FP Filter → SLM Stage
+**3단계 + NMS 탐지 아키텍처**: Regex Stage → ML FP Filter → NMS → SLM Stage
 
 ```
 DLPTarget.text (순수 텍스트)
-    ├─ RegexStage    ← 패턴이 명확한 PII: 주민번호 · 카드번호 · API 키 등 13개 규칙
+    ├─ RegexStage    ← 패턴이 명확한 PII: 주민번호 · 카드번호 · API 키 등 12개 규칙
     ├─ MLFilterStage ← XGBoost 기반 False Positive 이진 분류 (오탐 제거)
+    ├─ AssetStage    ← 등록된 민감 자산 매칭
+    ├─ NMS           ← 겹치는 Finding 중 우선순위 낮은 것 제거 (Severity > Confidence > Length)
     └─ SLMStage      ← 문맥의존 PII: 이름 · 주소 · 의료정보 등 9종 (선택적)
 ```
 
@@ -82,7 +86,17 @@ RegexStage 출력 Finding을 입력받아 **진짜 PII인가?** 이진 분류합
 | Fallback | 모델 미존재 시 자동 no-op (모든 Finding 통과) |
 | 학습 | `tests/train_ml_filter.py`, 분석 노트북: `notebooks/dlp_fp_filter_ml.ipynb` |
 
-### DLP 탐지 규칙 (Regex Stage, 13개)
+### NMS (Non-Maximum Suppression)
+
+동일 텍스트 구간에 **겹치는 Finding이 여러 개** 발생할 경우, 우선순위가 낮은 것을 자동으로 억제합니다.  
+억제된 Finding은 삭제되지 않고 `suppressed=True`로 표시되어 감사 추적(audit trail)이 유지됩니다.
+
+**우선순위**: `Severity(높을수록) > Confidence(높을수록) > 매칭 길이(길수록)`
+
+예시: 동일 구간에 `kr_rrn`(CRITICAL)과 `kr_phone`(MEDIUM)이 겹치면 → `kr_phone` 억제  
+TUI 탐지 탭 / 웹 대시보드에서 NMS 억제 건수와 사유 확인 가능.
+
+### DLP 탐지 규칙 (Regex Stage, 12개)
 
 | 규칙 | 대상 | 등급 | 검증 |
 |------|------|------|------|
