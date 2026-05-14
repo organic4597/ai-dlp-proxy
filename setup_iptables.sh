@@ -100,14 +100,34 @@ iptables -t nat -A PREROUTING -p tcp --dport 443 \
 ok "PREROUTING: :443 → :$SNI_PORT (sni-router)"
 
 # ── mitmproxy transparent 모드를 위한 추가 규칙 ──────────────────────────────
-# mitmproxy가 패킷을 포워드할 때 루프 방지:
-# sni-router → mitmproxy(:4001) → 인터넷 경로에서
-# mitmproxy 프로세스 자체의 443 아웃바운드는 제외
-MITM_USER="ubuntu"  # mitmproxy 실행 사용자 (필요시 수정)
-iptables -t nat -I OUTPUT 1 -p tcp --dport 443 \
-    -m owner --uid-owner "$MITM_USER" -j RETURN 2>/dev/null \
-    && info "mitmproxy ($MITM_USER) 아웃바운드 루프 방지 규칙 적용" \
-    || warn "owner 모듈 없음 — 루프 방지 규칙 생략 (xt_owner 모듈 필요)"
+# mitmproxy 전용 계정(dlp-mitm)의 아웃바운드만 제외 → 루프 방지
+# root(VS Code extensionHost 포함) 등 나머지 모든 프로세스는 REDIRECT 적용
+#
+# 계정 생성: sudo useradd -r -M -s /bin/false dlp-mitm
+MITM_USER="${DLP_MITM_USER:-dlp-mitm}"  # mitmproxy 실행 전용 계정
+MITM_PORT_LOCAL="${DLP_MITM_PORT:-4001}"
+
+if id "$MITM_USER" &>/dev/null 2>&1; then
+    # 1. mitmproxy 계정 아웃바운드 → RETURN (루프 방지)
+    iptables -t nat -I OUTPUT 1 -p tcp --dport 443 \
+        -m owner --uid-owner "$MITM_USER" -j RETURN 2>/dev/null \
+        && info "mitmproxy ($MITM_USER) 루프 방지 규칙 적용" \
+        || warn "owner 모듈 없음 — 루프 방지 규칙 생략 (xt_owner 필요)"
+
+    # 2. 로컬 목적지 제외 (로컬 서비스 무한루프 방지)
+    iptables -t nat -I OUTPUT 2 -p tcp --dport 443 \
+        -m addrtype --dst-type LOCAL -j RETURN 2>/dev/null || true
+
+    # 3. 그 외 모든 프로세스(root/VS Code 포함) → transparent proxy
+    iptables -t nat -A OUTPUT -p tcp --dport 443 \
+        -j REDIRECT --to-ports "$MITM_PORT_LOCAL" 2>/dev/null \
+        && ok "OUTPUT REDIRECT 적용 (root/VS Code 포함 → :$MITM_PORT_LOCAL)" \
+        || warn "OUTPUT REDIRECT 실패"
+else
+    warn "계정 '$MITM_USER' 없음 → OUTPUT REDIRECT 생략 (VS Code 트래픽 미탐지)"
+    warn "  계정 생성: sudo useradd -r -M -s /bin/false $MITM_USER"
+    warn "  이후 DLP_MITM_USER=$MITM_USER 환경변수와 함께 재실행"
+fi
 
 # ── 규칙 영구 저장 ───────────────────────────────────────────────────────────
 if command -v netfilter-persistent &>/dev/null; then

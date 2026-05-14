@@ -7,13 +7,13 @@ DLP Pipeline — 스테이지를 순차 실행하는 러너.
   캐시 히트 시 이전 findings를 재사용하여 Regex/SLM 스캔 생략.
 """
 from __future__ import annotations
-import copy
 import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from ..api.base import DLPTarget
 from .base import Stage, Finding, Action, Severity, PipelineResult
 from .control import DEFAULT_CONTROL_PATH, load_control
 from .regex_stage import RegexStage
@@ -27,6 +27,11 @@ log = logging.getLogger(__name__)
 
 CACHE_TTL = 300  # 캐시 유효 시간 (초)
 CACHE_MAX = 500  # 최대 캐시 항목 수
+SLM_SKIP_ROLES: frozenset[str] = frozenset({"system", "assistant", "tool_def"})
+SLM_COVERED_STAGES: frozenset[str] = frozenset({"regex", "asset"})
+SLM_MIN_WINDOW_CHARS = 40
+SLM_SKIP_COVERAGE_RATIO = 0.80
+SLM_SKIP_REMAINING_CHARS = 120
 
 
 @dataclass
@@ -36,7 +41,9 @@ class _CacheEntry:
 
 
 _msg_cache: dict[str, _CacheEntry] = {}
+_slm_cache: dict[str, _CacheEntry] = {}
 _cache_stats = {"hits": 0, "misses": 0}
+_slm_cache_stats = {"hits": 0, "misses": 0}
 
 
 def _cache_key(field_path: str, role: str, text: str, control_tag: str) -> str:
@@ -53,19 +60,30 @@ def _cache_key(field_path: str, role: str, text: str, control_tag: str) -> str:
 def _cache_gc() -> None:
     """만료 항목 제거 + 최대 크기 초과 시 오래된 항목 삭제."""
     now = time.monotonic()
-    expired = [k for k, v in _msg_cache.items() if now - v.ts > CACHE_TTL]
-    for k in expired:
-        del _msg_cache[k]
-    # 여전히 초과하면 오래된 순 삭제
-    if len(_msg_cache) > CACHE_MAX:
-        by_age = sorted(_msg_cache.items(), key=lambda x: x[1].ts)
-        for k, _ in by_age[: len(_msg_cache) - CACHE_MAX]:
-            del _msg_cache[k]
+    for cache in (_msg_cache, _slm_cache):
+        expired = [k for k, v in cache.items() if now - v.ts > CACHE_TTL]
+        for k in expired:
+            del cache[k]
+        # 여전히 초과하면 오래된 순 삭제
+        if len(cache) > CACHE_MAX:
+            by_age = sorted(cache.items(), key=lambda x: x[1].ts)
+            for k, _ in by_age[: len(cache) - CACHE_MAX]:
+                del cache[k]
 
 
 def get_cache_stats() -> dict:
     """외부(engine_server)에서 캐시 통계 조회."""
-    return {**_cache_stats, "size": len(_msg_cache)}
+    return {
+        **_cache_stats,
+        "size": len(_msg_cache),
+        "slm_hits": _slm_cache_stats["hits"],
+        "slm_misses": _slm_cache_stats["misses"],
+        "slm_size": len(_slm_cache),
+    }
+
+
+def _should_skip_slm_target(target) -> bool:
+    return getattr(target, "role", "") in SLM_SKIP_ROLES
 
 
 def get_slm_stats() -> dict:
@@ -201,34 +219,92 @@ def _apply_ml_filter(
     return findings
 
 
-def _mask_text_for_slm(
-    text: str,
+def _merge_spans(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    merged: list[list[int]] = []
+    for start, end in sorted(spans):
+        if end <= start:
+            continue
+        if not merged or start > merged[-1][1]:
+            merged.append([start, end])
+        else:
+            merged[-1][1] = max(merged[-1][1], end)
+    return [(start, end) for start, end in merged]
+
+
+def _covered_spans_for_slm(
     findings: list[Finding],
     field_path: str,
-    mask_templates: dict[str, str],
-) -> str:
-    """effective findings를 SLM 입력 전에 마스킹한다.
-
-    Asset 임베딩 매치는 마스킹하지 않아 SLM에게 문맥을 보존한다.
-    Asset 키워드 매치는 [보호자산] 라벨로 교체한다.
-    """
-    relevant = sorted(
-        [f for f in findings if f.field_path == field_path],
-        key=lambda f: f.match_start, reverse=True,
-    )
-    masked = text
-    for f in relevant:
-        # Asset 임베딩 매치는 마스킹 생략 (SLM 문맥 보존)
-        if f.stage == "asset" and f.metadata.get("match_type") == "embedding":
+    text_len: int,
+) -> list[tuple[int, int]]:
+    spans: list[tuple[int, int]] = []
+    for finding in findings:
+        if finding.field_path != field_path:
             continue
-        # Asset 키워드 매치 → [보호자산]
-        if f.stage == "asset":
-            label = "[보호자산]"
-        else:
-            label = mask_templates.get(f.rule, "[REDACTED]")
-        if 0 <= f.match_start < f.match_end <= len(masked):
-            masked = masked[:f.match_start] + label + masked[f.match_end:]
-    return masked
+        if finding.stage not in SLM_COVERED_STAGES:
+            continue
+        start = max(0, min(text_len, finding.match_start))
+        end = max(0, min(text_len, finding.match_end))
+        if end > start:
+            spans.append((start, end))
+    return _merge_spans(spans)
+
+
+def _invert_spans(text_len: int, covered_spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    if text_len <= 0:
+        return []
+    if not covered_spans:
+        return [(0, text_len)]
+
+    unresolved: list[tuple[int, int]] = []
+    cursor = 0
+    for start, end in covered_spans:
+        if cursor < start:
+            unresolved.append((cursor, start))
+        cursor = max(cursor, end)
+    if cursor < text_len:
+        unresolved.append((cursor, text_len))
+    return unresolved
+
+
+def _build_slm_targets_for_target(
+    target: DLPTarget,
+    effective_findings: list[Finding],
+) -> list[DLPTarget]:
+    text = getattr(target, "text", "") or ""
+    if not text.strip():
+        return []
+
+    text_len = len(text)
+    covered_spans = _covered_spans_for_slm(effective_findings, target.field_path, text_len)
+    covered_chars = sum(end - start for start, end in covered_spans)
+    remaining_chars = max(0, text_len - covered_chars)
+    coverage_ratio = covered_chars / text_len if text_len else 0.0
+
+    if covered_spans and coverage_ratio >= SLM_SKIP_COVERAGE_RATIO and remaining_chars < SLM_SKIP_REMAINING_CHARS:
+        return []
+
+    unresolved_spans = _invert_spans(text_len, covered_spans)
+    if not covered_spans:
+        return [target]
+
+    windows = [
+        (start, end)
+        for start, end in unresolved_spans
+        if end - start >= SLM_MIN_WINDOW_CHARS
+    ]
+    if not windows:
+        return []
+
+    return [
+        DLPTarget(
+            field_path=target.field_path,
+            role=target.role,
+            text=text[start:end],
+            history=getattr(target, "history", False),
+            base_offset=start,
+        )
+        for start, end in windows
+    ]
 
 
 def run_pipeline(
@@ -313,7 +389,7 @@ def run_pipeline(
     if len(all_findings) > 1:
         all_findings = _suppress_overlapping(all_findings)
 
-    # ── 2단계: SLM Stage (Regex 마스킹된 텍스트 전달) ─────────────────────────
+    # ── 2단계: SLM Stage (Regex/Asset 미처리 window만 전달) ──────────────────
     if slm_enabled:
         try:
             effective_findings = [
@@ -321,24 +397,60 @@ def run_pipeline(
                 for finding in all_findings
                 if finding.confidence >= control.confidence_threshold and not finding.suppressed
             ]
-            # SLM에는 Regex+Asset이 마스킹한 텍스트를 전달하여
-            # 이미 잡힌 PII/자산은 건너뛰고, 못 잡은 것(이름/주소 등)에 집중
-            from ..api.base import DLPTarget
-            slm_targets = []
+            slm_entries: list[tuple[DLPTarget, str]] = []
+            cached_slm_findings: list[Finding] = []
+            slm_tag = f"{control_tag}:slm"
+            slm_targets_before = 0
+            slm_targets_after = 0
+            slm_chars_before = 0
+            slm_chars_after = 0
             for target in targets:
-                masked_text = _mask_text_for_slm(
-                    target.text,
-                    effective_findings,
-                    target.field_path,
-                    control.mask_templates,
+                if _should_skip_slm_target(target):
+                    continue
+                slm_targets_before += 1
+                slm_chars_before += len(target.text)
+                for prepared_target in _build_slm_targets_for_target(target, effective_findings):
+                    key = _cache_key(
+                        f"{prepared_target.field_path}:{prepared_target.base_offset}",
+                        prepared_target.role,
+                        prepared_target.text,
+                        slm_tag,
+                    )
+                    slm_chars_after += len(prepared_target.text)
+                    slm_targets_after += 1
+                    entry = _slm_cache.get(key)
+                    if entry and (time.monotonic() - entry.ts) < CACHE_TTL:
+                        _slm_cache_stats["hits"] += 1
+                        cached_slm_findings.extend(entry.findings)
+                        continue
+                    _slm_cache_stats["misses"] += 1
+                    slm_entries.append((prepared_target, key))
+
+            if slm_targets_before:
+                log.debug(
+                    "[pipeline] slm windows before=%d (%d chars), after=%d (%d chars), uncached=%d",
+                    slm_targets_before,
+                    slm_chars_before,
+                    slm_targets_after,
+                    slm_chars_after,
+                    len(slm_entries),
                 )
-                slm_targets.append(DLPTarget(
-                    field_path=target.field_path,
-                    role=target.role,
-                    text=masked_text,
-                    history=getattr(target, "history", False),
-                ))
-            slm_findings = _slm_stage.scan(slm_targets, effective_findings)
+
+            slm_targets = [target for target, _ in slm_entries]
+            slm_findings = _slm_stage.scan(slm_targets, effective_findings) if slm_targets else []
+            now = time.monotonic()
+            for prepared_target, key in slm_entries:
+                window_start = prepared_target.base_offset
+                window_end = window_start + len(prepared_target.text)
+                target_findings = [
+                    finding
+                    for finding in slm_findings
+                    if finding.field_path == prepared_target.field_path
+                    and window_start <= finding.match_start < window_end
+                    and window_start < finding.match_end <= window_end
+                ]
+                _slm_cache[key] = _CacheEntry(findings=target_findings, ts=now)
+            all_findings.extend(cached_slm_findings)
             all_findings.extend(slm_findings)
         except Exception as e:
             log.error("[pipeline] slm 스테이지 오류: %s", e)

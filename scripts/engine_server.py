@@ -432,11 +432,52 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
 
 # ── 메인 서버 ─────────────────────────────────────────────────────────────────
 
+async def _is_socket_alive(sock_path: str, timeout: float = 0.5) -> bool:
+    """기존 UDS 파일이 실제로 응답하는 서버인지 확인.
+
+    True  → 다른 engine_server 인스턴스가 이미 살아있음 (중복 실행 차단)
+    False → stale 소켓 (안전하게 unlink 가능)
+    """
+    try:
+        reader, writer = await asyncio.wait_for(
+            asyncio.open_unix_connection(sock_path),
+            timeout=timeout,
+        )
+    except (FileNotFoundError, ConnectionRefusedError, OSError, asyncio.TimeoutError):
+        return False
+    try:
+        writer.write(b'{"action":"ping"}\n')
+        await writer.drain()
+        try:
+            line = await asyncio.wait_for(reader.readline(), timeout=timeout)
+        except asyncio.TimeoutError:
+            return False
+        return bool(line)
+    except Exception:
+        return False
+    finally:
+        try:
+            writer.close()
+            await writer.wait_closed()
+        except Exception:
+            pass
+
+
 async def main(sock_path: str | None = None, tcp_port: int | None = None):
     if sock_path:
-        # UDS 모드
+        # UDS 모드 — 기존 소켓이 있으면 살아있는 서버인지 먼저 확인
         if os.path.exists(sock_path):
-            os.unlink(sock_path)
+            if await _is_socket_alive(sock_path):
+                log.error(
+                    f"[FATAL] 이미 다른 engine_server 인스턴스가 {sock_path} 에서 응답 중입니다. "
+                    f"중복 실행을 방지하려고 종료합니다."
+                )
+                sys.exit(3)
+            # 응답 없는 stale 소켓만 정리
+            try:
+                os.unlink(sock_path)
+            except OSError:
+                pass
         server = await asyncio.start_unix_server(
             handle_client, path=sock_path,
             limit=4 * 1024 * 1024,

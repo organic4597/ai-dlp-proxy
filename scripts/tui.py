@@ -601,10 +601,70 @@ class ProcessSupervisor:
         except (FileNotFoundError, ConnectionRefusedError, OSError):
             return False
 
+    @staticmethod
+    def _external_pid_alive(pid_file: Path) -> int | None:
+        """외부(`dlp-supervisor` / `dlp-daemon.sh`) PID 파일이 살아있으면 PID 반환.
+
+        PID 파일은 여러 위치에 동시에 존재할 수 있으므로 호출부에서 묶어 검사한다.
+        kill -0 만 신뢰하면 PID 재사용 시 false-positive 가 가능하지만,
+        TUI 의 중복 spawn 가드 용도로는 충분히 안전한 보수적 검사.
+        """
+        try:
+            pid = int(pid_file.read_text().strip())
+        except (FileNotFoundError, ValueError, OSError):
+            return None
+        if pid <= 0:
+            return None
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return None
+        return pid
+
+    def _external_supervisor_pid(self, key: str) -> int | None:
+        """다른 supervisor(dlp-supervisor / dlp-daemon.sh / start_dlp.sh)가
+        해당 서비스를 이미 띄워놨는지 PID 파일들로 확인."""
+        candidates: list[Path] = []
+        if key == "engine":
+            candidates = [
+                _BASE / "logs" / "daemon" / "engine.pid",
+                _BASE / "logs" / "engine.pid",
+                Path("/tmp/dlp-engine.pid"),
+            ]
+        elif key == "mitm":
+            candidates = [
+                _BASE / "logs" / "daemon" / "mitm.pid",
+                _BASE / "logs" / "mitm.pid",
+                Path("/tmp/dlp-mitm.pid"),
+            ]
+        for pf in candidates:
+            pid = self._external_pid_alive(pf)
+            if pid is not None:
+                return pid
+        return None
+
     async def _watch(self, key: str, ps: ProcState):
         """한 프로세스를 무한 감시. 종료 시 restart_delay 후 재시작."""
         log_file = self._log_dir / f"{key}.log"
         while self._running and ps.enabled:
+            # ── 외부 supervisor(dlp-supervisor / dlp-daemon.sh / start_dlp.sh)가
+            #    이미 띄워놨다면 spawn 하지 않고 종료를 감지할 때까지 대기
+            ext_pid = self._external_supervisor_pid(key)
+            if ext_pid is not None:
+                ps.status = "외부 실행 중"
+                ps.pid = ext_pid
+                ps.running = True
+                self._emit(key, f"[cyan]외부 supervisor 가 관리 중 (PID {ext_pid}) — TUI 내부 spawn 건너뜀[/]")
+                while self._running and ps.enabled and self._external_supervisor_pid(key) is not None:
+                    await asyncio.sleep(5.0)
+                ps.running = False
+                ps.pid = None
+                if not self._running or not ps.enabled:
+                    ps.status = "중지"
+                    return
+                self._emit(key, f"[yellow]외부 {key} 종료 감지 — 내부 인스턴스 시작[/]")
+                continue
+
             # ── 이미 실행 중인 외부 프로세스가 포트/소켓을 점유 중이면 띄우지 않음
             if key == "mitm":
                 mitm_port = int(next(
@@ -3827,9 +3887,58 @@ def _reset_terminal() -> None:
         pass
 
 
+_TUI_LOCK_PATH = Path("/tmp/dlp-tui.lock")
+
+
+def _acquire_singleton_lock():
+    """TUI 중복 실행 방지용 advisory file lock.
+
+    이미 다른 TUI가 실행 중이면 친절한 메시지를 출력하고 종료한다.
+    프로세스 종료 시 자동 해제 (커널이 fd 닫을 때).
+    """
+    import fcntl
+    try:
+        fp = open(_TUI_LOCK_PATH, "w")
+    except OSError as e:
+        # 락 파일을 못 만들면 그냥 진행 (권한 등)
+        sys.stderr.write(f"[WARN] TUI 락 파일 생성 실패 ({e}) — 중복 실행 가드 비활성\n")
+        return None
+    try:
+        fcntl.flock(fp.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        # 다른 TUI가 보유 중 — 보유자 PID 안내
+        try:
+            other = _TUI_LOCK_PATH.read_text().strip()
+        except Exception:
+            other = "?"
+        sys.stderr.write(
+            "\n[ERROR] 이미 다른 TUI 인스턴스가 실행 중입니다 "
+            f"(PID {other}, lock={_TUI_LOCK_PATH}).\n"
+            "        같은 머신에서 두 번 띄우면 engine/mitmproxy가 중복 spawn 됩니다.\n"
+            "        - 기존 TUI 를 사용하거나\n"
+            "        - 강제 종료가 필요하면:  kill " + other + "  &&  rm -f " + str(_TUI_LOCK_PATH) + "\n\n"
+        )
+        fp.close()
+        sys.exit(2)
+    # 우리 PID 기록 (디버깅/안내용)
+    try:
+        fp.seek(0)
+        fp.truncate()
+        fp.write(str(os.getpid()))
+        fp.flush()
+    except Exception:
+        pass
+    return fp  # 살아있는 동안 fd 유지 → 락 유지
+
+
 def main():
     import atexit
     atexit.register(_reset_terminal)
+
+    # 싱글턴 락 (TUI 중복 실행 방지)
+    _lock_fp = _acquire_singleton_lock()
+    if _lock_fp is not None:
+        atexit.register(lambda: _lock_fp.close())
 
     p = argparse.ArgumentParser(description="AI DLP Proxy TUI")
     p.add_argument("--sock", default=_DEFAULT_SOCK)

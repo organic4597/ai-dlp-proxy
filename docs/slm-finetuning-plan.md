@@ -374,14 +374,21 @@ echo "완료: $GGUF_OUT"
 
 ### 6-4. slm_stage.py 교체
 
-`DEFAULT_MODEL_PATH`만 변경하면 즉시 교체 가능:
+현재 저장소 기준으로는 GGUF fallback과 transformers adapter 경로를 각각 아래처럼 두는 편이 맞다.
 
 ```python
-# slm_stage.py 수정 (1줄)
+# slm_stage.py 경로 예시
 DEFAULT_MODEL_PATH = str(
-    Path(__file__).parents[4] / "models" / "qwen2.5-1.5b-dlp-q4_k_m.gguf"
+  Path(__file__).parents[3] / "models" / "qwen2.5-1.5b-dlp-q4_k_m.gguf"
+)
+
+DEFAULT_ADAPTER_MODEL_PATH = str(
+  Path(__file__).parents[3] / "fine-tunning" / "sLM" / "merged_v5"
 )
 ```
+
+즉, 현재 첨부된 파인튜닝 산출물은 저장소 내부의 fine-tunning/sLM/merged_v5 아래에 두고,
+엔진은 그 경로를 기본 adapter 모델 위치로 사용하면 된다.
 
 ---
 

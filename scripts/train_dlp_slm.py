@@ -153,6 +153,7 @@ def main() -> None:
     parser.add_argument("--use-qlora",  action="store_true",      help="4bit QLoRA 사용 (VRAM ~6GB)")
     parser.add_argument("--use-8bit",   action="store_true",      help="8bit 양자화 사용 (VRAM ~8GB)")
     parser.add_argument("--no-merge",   action="store_true",      help="학습 후 LoRA 병합 생략")
+    parser.add_argument("--resume",     type=str, default=None,   help="체크포인트 경로에서 재개 (예: output/lora/checkpoint-1114)")
     args = parser.parse_args()
 
     print("=" * 60)
@@ -229,19 +230,25 @@ def main() -> None:
     # ── 4. LoRA 설정 ───────────────────────────────────────────────────────────
     print("[4/5] LoRA 어댑터 설정...")
 
-    # Qwen3.5 Gated DeltaNet 하이브리드 아키텍처 target modules
-    # - GatedDeltaNet 레이어: qk_proj (QK 통합), v_proj (V), o_proj (출력)
-    # - GatedAttention 레이어: q_proj, k_proj, v_proj, o_proj
-    # - FFN: gate_proj, up_proj, down_proj
-    # PEFT가 없는 모듈명은 자동으로 건너뜀
-    target_modules = [
-        # 표준 어텐션 (GatedAttention 레이어)
-        "q_proj", "k_proj", "v_proj", "o_proj",
-        # Gated DeltaNet 레이어 (선형 어텐션)
-        "qk_proj",
-        # FFN (공통)
-        "gate_proj", "up_proj", "down_proj",
-    ]
+    # 모델 아키텍처에 따라 target_modules 분기
+    # - Qwen3.5-4B: Gated DeltaNet 하이브리드 → qk_proj 추가 필요
+    # - Qwen3-1.7B / Qwen2.5 등: 표준 Transformer → qk_proj 없음
+    # PEFT가 없는 모듈명은 자동으로 건너뛰지만, 명시적으로 분기해 경고 방지
+    _model_id_lower = args.model.lower()
+    if "qwen3.5" in _model_id_lower or "qwen3_5" in _model_id_lower:
+        # Qwen3.5 Gated DeltaNet 하이브리드 아키텍처
+        target_modules = [
+            "q_proj", "k_proj", "v_proj", "o_proj",  # GatedAttention
+            "qk_proj",                                 # GatedDeltaNet
+            "gate_proj", "up_proj", "down_proj",       # FFN
+        ]
+    else:
+        # 표준 Transformer (Qwen3-1.7B, Qwen2.5-*, Llama 등)
+        target_modules = [
+            "q_proj", "k_proj", "v_proj", "o_proj",   # Attention
+            "gate_proj", "up_proj", "down_proj",        # FFN
+        ]
+    print(f"  target_modules: {target_modules}")
 
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
@@ -296,7 +303,7 @@ def main() -> None:
         callbacks=[ProgressCallback()],
     )
 
-    trainer.train()
+    trainer.train(resume_from_checkpoint=args.resume)
     trainer.save_model(args.output)
     tokenizer.save_pretrained(args.output)
     print(f"\nLoRA 어댑터 저장 완료: {args.output}")

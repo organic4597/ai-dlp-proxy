@@ -33,11 +33,14 @@ log = logging.getLogger(__name__)
 # ── 상수 ─────────────────────────────────────────────────────────────────────
 
 DEFAULT_MODEL_PATH = str(
-    Path(__file__).parents[4] / "models" / "gemma-4-2b-it-q4_k_m.gguf"
+    Path(__file__).parents[3] / "models" / "gemma-4-2b-it-q4_k_m.gguf"
+)
+DEFAULT_ADAPTER_MODEL_PATH = str(
+    Path(__file__).parents[3] / "fine-tunning" / "sLM" / "merged_v5"
 )
 
 CHUNK_CHARS   = 1500   # 청크 최대 길이 (문자)
-OVERLAP_CHARS = 100    # 청크 간 겹침 (offset 보정용)
+OVERLAP_CHARS = 30     # 청크 간 겹침 (경계 보정 + 중복 토큰 절감)
 MAX_TOKENS    = 512    # SLM 출력 최대 토큰
 TEMPERATURE   = 0.0    # 결정적 출력
 CONFIDENCE_THRESHOLD = 0.5  # 이 값 미만 finding 무시
@@ -134,28 +137,38 @@ class SLMStage(Stage):
     # ── 추론 통계 (클래스 레벨, 싱글톤 공유) ─────────────────────────────────
     _infer_stats: dict = {
         "total_calls": 0,
+        "chunk_count": 0,
         "total_findings": 0,
         "errors": 0,
         "elapsed_ms_sum": 0,
         "elapsed_ms_p95_buf": [],  # 최근 100개 보관 (p95 계산용)
+        "backend": "uninitialized",
     }
 
     def __init__(
         self,
         model_path: str | None = None,
+        adapter_model_path: str | None = None,
         n_ctx: int = 2048,
         n_threads: int | None = None,
         n_gpu_layers: int | None = None,
         verbose: bool = False,
+        backend: str | None = None,
     ):
         self._model_path = model_path or DEFAULT_MODEL_PATH
+        self._adapter_model_path = adapter_model_path or DEFAULT_ADAPTER_MODEL_PATH
         self._n_ctx = n_ctx
         self._n_threads = n_threads or max(1, (os.cpu_count() or 4) // 2)
         self._compute_mode = _detect_compute_mode()
         self._n_gpu_layers = n_gpu_layers if n_gpu_layers is not None else _gpu_layers_for(self._compute_mode)
         self._verbose = verbose
+        self._backend_preference = (backend or os.getenv("DLP_SLM_BACKEND", "auto")).lower()
+        self._active_backend = "uninitialized"
         self._llm: Any = None  # Llama 인스턴스 (지연 로드)
         self._load_error: str | None = None
+        self._adapter: Any = None
+        self._adapter_error: str | None = None
+        self._adapter_stats_prev = {"chunks": 0, "infer_ms": 0.0, "errors": 0}
 
         # 컴퓨팅 환경 로그 — CPU 전용이면 경고
         if self._compute_mode == ComputeMode.CPU_ONLY:
@@ -175,10 +188,53 @@ class SLMStage(Stage):
             return list(_CPU_ONLY_WARNING_LINES)
         return []
 
+    def _adapter_device(self) -> str:
+        forced = os.getenv("DLP_SLM_DEVICE")
+        if forced:
+            return forced
+        if self._compute_mode == ComputeMode.CUDA_GPU:
+            return "cuda"
+        if self._compute_mode == ComputeMode.APPLE_SILICON:
+            return "mps"
+        return "cpu"
+
+    def _should_prefer_adapter(self) -> bool:
+        if self._backend_preference == "gguf":
+            return False
+        if self._backend_preference == "adapter":
+            return True
+        return Path(self._adapter_model_path).exists() and self._compute_mode == ComputeMode.CUDA_GPU
+
+    def _ensure_adapter_loaded(self) -> bool:
+        if self._adapter is not None:
+            return True
+        if self._adapter_error:
+            return False
+        if not Path(self._adapter_model_path).exists():
+            self._adapter_error = f"어댑터 모델 디렉터리 없음: {self._adapter_model_path}"
+            return False
+        try:
+            from .slm_adapter import SLMAdapter
+
+            device = self._adapter_device()
+            log.info("[SLM] adapter 로딩 중: %s (%s)", self._adapter_model_path, device)
+            self._adapter = SLMAdapter(self._adapter_model_path, device=device)
+            self._active_backend = "adapter"
+            SLMStage._infer_stats["backend"] = self._active_backend
+            return True
+        except Exception as exc:
+            self._adapter_error = str(exc)
+            log.warning("[SLM] adapter 로드 실패: %s", exc)
+            return False
+
     # ── 모델 로드 (최초 scan 호출 시 1회) ────────────────────────────────────
 
     def _ensure_loaded(self) -> bool:
+        if self._should_prefer_adapter() and self._ensure_adapter_loaded():
+            return True
         if self._llm is not None:
+            self._active_backend = "gguf"
+            SLMStage._infer_stats["backend"] = self._active_backend
             return True
         if self._load_error:
             return False
@@ -201,11 +257,79 @@ class SLMStage(Stage):
             )
             elapsed = round((time.monotonic() - t0) * 1000)
             log.info("[SLM] 모델 로드 완료 (%dms, gpu_layers=%d)", elapsed, self._n_gpu_layers)
+            self._active_backend = "gguf"
+            SLMStage._infer_stats["backend"] = self._active_backend
             return True
         except Exception as e:
             self._load_error = str(e)
             log.error("[SLM] 모델 로드 실패: %s", e)
             return False
+
+    def _prior_ranges_for_target(self, target, prior_findings: list[Finding]) -> list[tuple[int, int]]:
+        base_offset = int(getattr(target, "base_offset", 0))
+        window_end = base_offset + len(getattr(target, "text", "") or "")
+        ranges: list[tuple[int, int]] = []
+        for finding in prior_findings:
+            if finding.field_path != getattr(target, "field_path", ""):
+                continue
+            start = max(base_offset, finding.match_start)
+            end = min(window_end, finding.match_end)
+            if end > start:
+                ranges.append((start - base_offset, end - base_offset))
+        return ranges
+
+    def _scan_with_adapter(self, targets: list, prior_findings: list[Finding]) -> list[Finding]:
+        texts = [getattr(target, "text", "") for target in targets]
+        prior_ranges_per_text = [
+            self._prior_ranges_for_target(target, prior_findings)
+            for target in targets
+        ]
+        results_per_target = self._adapter.detect_combined(texts, prior_ranges_per_text)
+        adapter_stats = self._adapter.get_stats()
+        chunk_delta = int(adapter_stats.get("chunks", 0)) - int(self._adapter_stats_prev.get("chunks", 0))
+        infer_ms_delta = float(adapter_stats.get("infer_ms", 0.0)) - float(self._adapter_stats_prev.get("infer_ms", 0.0))
+        errors_delta = int(adapter_stats.get("errors", 0)) - int(self._adapter_stats_prev.get("errors", 0))
+        self._adapter_stats_prev = {
+            "chunks": int(adapter_stats.get("chunks", 0)),
+            "infer_ms": float(adapter_stats.get("infer_ms", 0.0)),
+            "errors": int(adapter_stats.get("errors", 0)),
+        }
+        SLMStage._infer_stats["total_calls"] += max(0, chunk_delta)
+        SLMStage._infer_stats["chunk_count"] += max(0, chunk_delta)
+        SLMStage._infer_stats["elapsed_ms_sum"] += max(0.0, infer_ms_delta)
+        SLMStage._infer_stats["errors"] += max(0, errors_delta)
+
+        findings: list[Finding] = []
+        for target, detections in zip(targets, results_per_target):
+            text = getattr(target, "text", "") or ""
+            base_offset = int(getattr(target, "base_offset", 0))
+            for item in detections:
+                rule = str(item.get("rule", "slm_pii"))
+                start = int(item.get("start", -1))
+                end = int(item.get("end", -1))
+                if not (0 <= start < end <= len(text)):
+                    continue
+                match_text = str(item.get("text", "")).strip() or text[start:end]
+                confidence = float(item.get("confidence", 0.85))
+                ctx_before = text[max(0, start - 60) : start]
+                ctx_after = text[end : end + 60]
+                findings.append(Finding(
+                    stage="slm",
+                    rule=rule,
+                    severity=Severity.HIGH,
+                    field_path=getattr(target, "field_path", ""),
+                    role=getattr(target, "role", ""),
+                    match_text=match_text,
+                    match_start=base_offset + start,
+                    match_end=base_offset + end,
+                    context_before=ctx_before,
+                    context_after=ctx_after,
+                    confidence=confidence,
+                    history=getattr(target, "history", False),
+                    metadata={"slm_rule": rule, "slm_backend": "adapter"},
+                ))
+        SLMStage._infer_stats["total_findings"] += len(findings)
+        return findings
 
     # ── Stage 인터페이스 ──────────────────────────────────────────────────────
 
@@ -219,6 +343,9 @@ class SLMStage(Stage):
         with self._lock:
             if not self._ensure_loaded():
                 return []
+
+            if self._adapter is not None:
+                return self._scan_with_adapter(targets, prior_findings)
 
             # 텍스트가 있는 타깃만 선별, 각 시작 오프셋 기록
             SEP = "\n\n"
@@ -243,10 +370,8 @@ class SLMStage(Stage):
             # Regex findings → 전체 combined 기준 절대 범위로 변환
             prior_ranges: list[tuple[int, int]] = []
             for target, seg_start, _ in segments:
-                fp = getattr(target, "field_path", "")
-                for f in prior_findings:
-                    if f.field_path == fp:
-                        prior_ranges.append((seg_start + f.match_start, seg_start + f.match_end))
+                for start, end in self._prior_ranges_for_target(target, prior_findings):
+                    prior_ranges.append((seg_start + start, seg_start + end))
 
             # SLM 추론 (청크 분할 포함)
             raw_findings = self._scan_text(combined, prior_ranges)
@@ -260,9 +385,10 @@ class SLMStage(Stage):
                         target     = t
                         role       = getattr(t, "role", "")
                         field_path = getattr(t, "field_path", "")
+                        base_offset = int(getattr(t, "base_offset", 0))
                         # 오프셋을 타깃 내부 로컬 좌표로 변환
-                        local_start = rf.match_start - seg_start
-                        local_end   = rf.match_end   - seg_start
+                        local_start = rf.match_start - seg_start + base_offset
+                        local_end   = rf.match_end   - seg_start + base_offset
                         break
                 else:
                     # 어느 세그먼트에도 속하지 않으면 첫 번째 타깃
@@ -270,8 +396,9 @@ class SLMStage(Stage):
                         target     = segments[0][0]
                         role       = getattr(target, "role", "")
                         field_path = getattr(target, "field_path", "")
-                        local_start = rf.match_start
-                        local_end   = rf.match_end
+                        base_offset = int(getattr(target, "base_offset", 0))
+                        local_start = rf.match_start + base_offset
+                        local_end   = rf.match_end + base_offset
 
                 results.append(Finding(
                     stage="slm",
@@ -302,10 +429,12 @@ class SLMStage(Stage):
         p95_ms = buf[int(len(buf) * 0.95)] if buf else 0
         return {
             "total_calls": total,
+            "chunk_count": s["chunk_count"],
             "total_findings": s["total_findings"],
             "errors": s["errors"],
             "avg_ms": avg_ms,
             "p95_ms": p95_ms,
+            "backend": s["backend"],
         }
 
     def _scan_text(
@@ -316,6 +445,7 @@ class SLMStage(Stage):
         """텍스트를 청크로 분할해 SLM 추론, Finding 목록 반환 (combined 기준 오프셋)."""
         findings: list[Finding] = []
         chunks = _split_chunks(text, CHUNK_CHARS, OVERLAP_CHARS)
+        SLMStage._infer_stats["chunk_count"] += len(chunks)
 
         for chunk_text, chunk_offset in chunks:
             raw = self._infer(chunk_text)

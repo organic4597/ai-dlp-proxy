@@ -27,6 +27,7 @@ OUT_EVAL  = REPO_ROOT / "tests" / "slm_eval_dataset.jsonl"
 SYSTEM_PROMPT = (
     "당신은 개인정보(PII) 탐지 전문 AI입니다. "
     "주어진 텍스트에서 개인정보를 찾아 JSON 배열로만 반환하세요. "
+    "출력 형식: [[\"rule_id\", start, end], ...] — 규칙ID와 문자 오프셋만 포함합니다. "
     "<<<...>>> 로 이미 마스킹된 항목은 무시합니다. "
     "테스트/예시 데이터, 공개 정보, 가상 인물은 PII로 분류하지 않습니다. "
     "마크다운 없이 순수 JSON만 출력합니다. "
@@ -132,8 +133,14 @@ def _guess_rule(val):
     return "person_name"
 
 
+def _compact(f: dict) -> list:
+    """내부 finding dict → [rule, start, end] compact 형식."""
+    return [f["rule"], f["start"], f["end"]]
+
+
 def _make(user_text, findings):
-    answer = json.dumps(findings, ensure_ascii=False) if findings else "[]"
+    compact = [_compact(f) for f in findings] if findings else []
+    answer = json.dumps(compact, ensure_ascii=False) if compact else "[]"
     return {
         "messages": [
             {"role": "system",    "content": SYSTEM_PROMPT},
@@ -146,7 +153,7 @@ def _make(user_text, findings):
 def _dedup(findings):
     seen, out = set(), []
     for f in findings:
-        key = (f["start"], f["text"])
+        key = (f["start"], f["end"])
         if key not in seen:
             seen.add(key)
             out.append(f)
@@ -815,6 +822,7 @@ def gen_C():
 # ── 오프셋 검증 ───────────────────────────────────────────────────────────────
 
 def validate(samples):
+    """compact 포맷 [rule, start, end] 오프셋 유효성 검증."""
     errors = 0
     prefix = "다음 텍스트에서 개인정보를 탐지하세요:\n\n"
     for s in samples:
@@ -831,9 +839,10 @@ def validate(samples):
             errors += 1
             continue
         for f in findings:
-            actual = text[f["start"]:f["end"]]
-            if actual != f["text"]:
-                print(f"  OFFSET ERR: expected={repr(f['text'])} got={repr(actual)}")
+            # compact 포맷: [rule, start, end]
+            rule, start, end = f[0], f[1], f[2]
+            if not (0 <= start < end <= len(text)):
+                print(f"  OFFSET ERR: rule={rule} start={start} end={end} text_len={len(text)}")
                 errors += 1
     return errors
 

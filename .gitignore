@@ -44,3 +44,12 @@ Thumbs.db
 # Temp
 /tmp/
 sni-router/target/
+
+# 대용량 모델 가중치 파일 (GitHub 100MB 제한 초과)
+*.safetensors
+*.gguf
+*.bin
+models/
+# merged_v5 가중치만 제외, 설정/토크나이저 파일은 포함
+fine-tunning/sLM/merged_v5/*.safetensors
+fine-tunning/sLM/merged_v5/*.bin
