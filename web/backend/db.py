@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS requests (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
     ts                      TEXT    NOT NULL,
     request_id              TEXT    UNIQUE,
+    prompt_excerpt          TEXT,
     provider                TEXT,
     model                   TEXT,
     pipeline_action         TEXT DEFAULT 'pass',
@@ -101,6 +102,7 @@ async def init_db() -> None:
         _db.row_factory = aiosqlite.Row
         await _db.executescript(SCHEMA_SQL)
         await _ensure_column(_db, "requests", "dlp_applied", "TEXT DEFAULT 'pass'")
+        await _ensure_column(_db, "requests", "prompt_excerpt", "TEXT")
         await _db.commit()
         log.info(f"DB 초기화 완료: {DB_PATH}")
 
@@ -138,15 +140,45 @@ async def insert_request(event: dict) -> None:
     if not rid:
         return
     ts = event.get("ts") or ""
+
+    def _prompt_excerpt(messages: list[dict] | None, max_len: int = 700) -> str | None:
+        if not messages:
+            return None
+        parts: list[str] = []
+        for m in messages:
+            if not isinstance(m, dict):
+                continue
+            role = str(m.get("role", "")).strip().lower()
+            text = m.get("text")
+            if text is None:
+                content = m.get("content")
+                if isinstance(content, str):
+                    text = content
+            if text is None:
+                continue
+            s = str(text).strip()
+            if not s:
+                continue
+            parts.append(f"[{role}] {s}" if role else s)
+            if len("\n".join(parts)) >= max_len:
+                break
+        if not parts:
+            return None
+        out = "\n".join(parts)
+        return out[:max_len]
+
+    prompt_excerpt = _prompt_excerpt(event.get("messages"))
+
     try:
         await db.execute(
             """INSERT INTO requests
-               (ts, request_id, provider, model, pipeline_action,
+               (ts, request_id, prompt_excerpt, provider, model, pipeline_action,
                 raw_finding_count, effective_finding_count,
                 total_text_len, target_count, elapsed_ms, cache_hit, dlp_applied)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                ON CONFLICT(request_id) DO UPDATE SET
                    ts=excluded.ts,
+                   prompt_excerpt=COALESCE(excluded.prompt_excerpt, requests.prompt_excerpt),
                    provider=excluded.provider,
                    model=excluded.model,
                    pipeline_action=excluded.pipeline_action,
@@ -158,7 +190,7 @@ async def insert_request(event: dict) -> None:
                    cache_hit=excluded.cache_hit,
                    dlp_applied=excluded.dlp_applied""",
             (
-                ts, rid,
+                ts, rid, prompt_excerpt,
                 event.get("provider"), event.get("model"),
                 event.get("pipeline_action", "pass"),
                 event.get("raw_finding_count", event.get("finding_count", 0)),

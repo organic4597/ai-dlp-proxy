@@ -55,7 +55,7 @@ async def list_findings(
         params.append(stage)
 
     sql = (
-        f"SELECT f.*, r.dlp_applied, r.pipeline_action as req_action"
+        f"SELECT f.*, r.dlp_applied, r.pipeline_action as req_action, r.prompt_excerpt"
         f" FROM findings f"
         f" LEFT JOIN requests r ON f.request_id = r.request_id"
         f" WHERE {' AND '.join(where)}"

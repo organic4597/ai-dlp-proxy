@@ -8,6 +8,7 @@
 
   type TrafficRow = {
     id: number; ts: string; request_id: string;
+    prompt_excerpt?: string;
     provider: string; model: string; pipeline_action: string;
     raw_finding_count: number; effective_finding_count: number;
     elapsed_ms: number; cache_hit: boolean;
@@ -26,6 +27,21 @@
   let detailLoading = $state(false);
   let filterAction = $state('all');
   let autoScroll = $state(true);
+
+  function toExcerpt(messages: unknown, maxLen = 220): string {
+    if (!Array.isArray(messages)) return '';
+    const chunks: string[] = [];
+    for (const m of messages) {
+      if (!m || typeof m !== 'object') continue;
+      const rec = m as Record<string, unknown>;
+      const role = typeof rec.role === 'string' ? rec.role : '';
+      const text = typeof rec.text === 'string' ? rec.text : '';
+      if (!text.trim()) continue;
+      chunks.push(role ? `[${role}] ${text.trim()}` : text.trim());
+      if (chunks.join(' ').length >= maxLen) break;
+    }
+    return chunks.join(' ').slice(0, maxLen);
+  }
 
   // request_id 정규화 — SSE 이벤트의 id(숫자)를 문자열로 통일
   function rowKey(row: TrafficRow): string {
@@ -74,7 +90,12 @@
     const e = ev as TrafficRow & { type: string; id: number };
     if (filterAction !== 'all' && e.pipeline_action !== filterAction) return;
     // id → request_id 정규화
-    const normalized: TrafficRow = { ...e, request_id: String(e.request_id ?? e.id) };
+    const normalized: TrafficRow = {
+      ...e,
+      request_id: String(e.request_id ?? e.id),
+      prompt_excerpt: (e as Record<string, unknown>).prompt_excerpt as string | undefined
+        ?? toExcerpt((e as Record<string, unknown>).messages),
+    };
     // 기존 행 중복 방지
     rows = [normalized, ...rows.filter(r => rowKey(r) !== rowKey(normalized)).slice(0, 498)];
     // summary 갱신
@@ -152,6 +173,7 @@
               <tr class="text-left text-xs text-slate-500 uppercase border-b border-slate-700">
                 <th class="px-4 py-2">시각</th>
                 <th class="px-4 py-2">제공자</th>
+                <th class="px-4 py-2">프롬프트 요약</th>
                 <th class="px-4 py-2">모델</th>
                 <th class="px-4 py-2">액션</th>
                 <th class="px-4 py-2 text-right">탐지</th>
@@ -170,6 +192,7 @@
                 >
                   <td class="px-4 py-2 text-slate-400 font-mono text-xs">{fmt(row.ts)}</td>
                   <td class="px-4 py-2 text-slate-300 max-w-24 truncate">{row.provider ?? '—'}</td>
+                  <td class="px-4 py-2 text-slate-400 max-w-72 truncate text-xs">{row.prompt_excerpt ?? '—'}</td>
                   <td class="px-4 py-2 text-slate-400 max-w-32 truncate text-xs">{row.model ?? '—'}</td>
                   <td class="px-4 py-2"><ActionBadge action={row.pipeline_action} /></td>
                   <td class="px-4 py-2 text-right">
@@ -222,6 +245,7 @@
             <div><span class="text-slate-500">모델</span><br/><span class="text-slate-300 break-all">{selected.model ?? '—'}</span></div>
             <div><span class="text-slate-500">액션</span><br/><ActionBadge action={selected.pipeline_action} /></div>
             <div><span class="text-slate-500">응답 시간</span><br/><span class="text-slate-300">{selected.elapsed_ms ? `${Math.round(selected.elapsed_ms)}ms` : '—'}</span></div>
+            <div class="col-span-2"><span class="text-slate-500">프롬프트 요약</span><br/><span class="text-slate-300 whitespace-pre-wrap break-words">{selected.prompt_excerpt ?? '—'}</span></div>
           </div>
 
           <!-- Finding 목록 -->

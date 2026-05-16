@@ -1,10 +1,17 @@
 """파이프라인 통계 API."""
 from __future__ import annotations
 
+import asyncio
+import json
+import urllib.error
+import urllib.request
+from pathlib import Path
+
 from fastapi import APIRouter, Query
 
 import engine_client
 from db import get_db
+from settings import CONTROL_FILE
 
 router = APIRouter()
 
@@ -42,3 +49,25 @@ async def pipeline_snapshots_latest():
     ) as cur:
         row = await cur.fetchone()
     return dict(row) if row else {}
+
+
+@router.get("/slm/health")
+async def slm_health():
+    """SLM API 서버 연결 상태 확인 (제어 파일의 slm_api_url 사용)."""
+    try:
+        ctrl_data = json.loads(CONTROL_FILE.read_text(encoding="utf-8"))
+        api_url = ctrl_data.get("slm_api_url", "http://localhost:8766").rstrip("/")
+    except Exception:
+        api_url = "http://localhost:8766"
+
+    def _check() -> dict:
+        try:
+            with urllib.request.urlopen(f"{api_url}/health", timeout=3) as resp:
+                return json.loads(resp.read().decode())
+        except urllib.error.URLError as exc:
+            return {"status": "error", "error": str(exc.reason), "url": api_url}
+        except Exception as exc:
+            return {"status": "error", "error": str(exc), "url": api_url}
+
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _check)

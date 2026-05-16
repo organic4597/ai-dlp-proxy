@@ -44,6 +44,33 @@ _LABELS: dict[str, str] = {
 }
 
 
+def _infer_provider_from_url_and_model(url: str, body: dict) -> str:
+    """호스트를 알 수 없을 때 URL 경로 + model명으로 provider 추정.
+    IP 대역 기반 추정은 사용하지 않는다.
+    """
+    model = str(body.get("model", "")).lower()
+    path = url.lower()
+
+    if "claude" in model:
+        return "Anthropic"
+    if any(k in model for k in ("gpt-", "o1-", "o3-", "o4-", "text-davinci")):
+        return "OpenAI"
+    if any(k in model for k in ("gemini", "palm", "bison")):
+        return "Gemini"
+    if "deepseek" in model:
+        return "DeepSeek"
+    if "grok" in model:
+        return "xAI"
+    if "mistral" in model or "mixtral" in model:
+        return "Mistral"
+
+    if "/v1/messages" in path:
+        return "Anthropic"
+    if "/v1/chat/completions" in path:
+        return "OpenAI"
+    return "Unknown"
+
+
 def extract(
     host: str,
     url: str,
@@ -81,17 +108,9 @@ def extract(
     if host.endswith(_AZURE_SUFFIX):
         provider = "Azure OpenAI"
 
-    # IP 주소로 도달한 경우 URL 경로로 fallback 판별
+    # 호스트 미식별 시 URL/모델 기반 fallback (IP 대역 기반 추정 금지)
     if provider == "Unknown":
-        import ipaddress
-        try:
-            ip = ipaddress.ip_address(host)
-            if ip in ipaddress.ip_network("140.82.112.0/22"):
-                provider = "GitHub Copilot"
-            elif ip in ipaddress.ip_network("104.18.0.0/16") or ip in ipaddress.ip_network("172.64.0.0/13"):
-                provider = "OpenAI"
-        except ValueError:
-            pass
+        provider = _infer_provider_from_url_and_model(url, body)
 
     if provider == "GitHub Copilot":
         return _copilot.parse(provider, url, body)

@@ -25,6 +25,8 @@ _DEFAULTS: dict = {
     "mask_templates": {},
     "skip_roles": ["system", "tool_def"],
     "custom_rules": [],
+    "slm_backend": "auto",
+    "slm_api_url": "http://localhost:8766",
 }
 
 

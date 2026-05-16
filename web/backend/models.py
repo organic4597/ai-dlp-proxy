@@ -18,6 +18,7 @@ class FindingOut(BaseModel):
     field_path: str | None = None
     role: str | None = None
     metadata: dict[str, Any] | None = None
+    prompt_excerpt: str | None = None
     dlp_applied: str | None = None
     policy_effective: bool = False
     policy_reason: str | None = None
@@ -28,16 +29,17 @@ class RequestOut(BaseModel):
     id: int | None = None
     ts: str
     request_id: str
+    prompt_excerpt: str | None = None
     provider: str | None = None
     model: str | None = None
-    pipeline_action: str = "pass"
+    pipeline_action: str | None = "pass"
     raw_finding_count: int = 0
     effective_finding_count: int = 0
     total_text_len: int = 0
     target_count: int = 0
     elapsed_ms: float | None = None
     cache_hit: bool = False
-    dlp_applied: str = "pass"
+    dlp_applied: str | None = "pass"
     findings: list[FindingOut] | None = None
 
 
@@ -79,6 +81,8 @@ class ControlIn(BaseModel):
     mask_templates: dict[str, str] | None = None
     skip_roles: list[str] | None = None
     custom_rules: list[dict] | None = None
+    slm_backend: str | None = None   # "auto" | "gguf" | "adapter" | "api"
+    slm_api_url: str | None = None   # SLM API 서버 URL (api 모드)
 
 
 class ControlOut(BaseModel):
@@ -97,6 +101,8 @@ class ControlOut(BaseModel):
     mask_templates: dict[str, str] = {}
     skip_roles: list[str] = ["system", "tool_def"]
     custom_rules: list[dict] = []
+    slm_backend: str = "auto"
+    slm_api_url: str = "http://localhost:8766"
 
 
 class ProcessStatus(BaseModel):

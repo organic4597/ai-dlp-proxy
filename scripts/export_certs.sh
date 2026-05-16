@@ -87,6 +87,11 @@ else
     warn "openssl 없음 — windows/.cer 생성 건너뜀"
 fi
 
+# ── Windows (.crt PEM) — Node.js / Python 용 ─────────────────────────────────
+info "Windows (.crt PEM — Node.js NODE_EXTRA_CA_CERTS / Python REQUESTS_CA_BUNDLE 용)"
+cp "$CA_PEM" "$CERTS_DIR/windows/mitmproxy-ca.crt"
+ok "certs/windows/mitmproxy-ca.crt"
+
 # ── Android (.cer DER) ───────────────────────────────────────────────────────
 info "Android (.cer DER — 설정 → 보안 → 인증서 설치)"
 if command -v openssl &>/dev/null; then

@@ -21,6 +21,8 @@
     actionMsg = { ...actionMsg, [name]: '시작 중…' };
     try {
       await api.process.start(name);
+      // dlp-supervisor가 프로세스를 띄울 때까지 대기 후 상태 재조회
+      await new Promise(r => setTimeout(r, 2500));
       await load();
       actionMsg = { ...actionMsg, [name]: '시작됨' };
     } catch (e) { actionMsg = { ...actionMsg, [name]: `오류: ${String(e)}` }; }
@@ -31,6 +33,7 @@
     actionMsg = { ...actionMsg, [name]: '중지 중…' };
     try {
       await api.process.stop(name);
+      await new Promise(r => setTimeout(r, 1500));
       await load();
       actionMsg = { ...actionMsg, [name]: '중지됨' };
     } catch (e) { actionMsg = { ...actionMsg, [name]: `오류: ${String(e)}` }; }

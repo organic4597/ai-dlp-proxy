@@ -44,6 +44,9 @@ WEB_PID="$LOG_DIR/web.pid"
 WEBDEV_PID="$LOG_DIR/webdev.pid"
 WATCH_PID="$LOG_DIR/watch.pid"
 
+# watch 싱글턴 잠금 파일 (중복 실행 방지)
+WATCH_LOCK="$LOG_DIR/watch.lock"
+
 # 재시작 카운터 파일
 ENGINE_RESTARTS="$LOG_DIR/engine.restarts"
 MITM_RESTARTS="$LOG_DIR/mitm.restarts"
@@ -239,11 +242,66 @@ _kill() {
 
 # ══ 서비스별 시작/중지 함수 ══════════════════════════════════════════════════
 
-start_engine() {
-    if _is_running "$ENGINE_PID"; then
-        _warn "engine 이미 실행 중 (PID $(_pid_of "$ENGINE_PID"))"
+# ── iptables 투명 프록시 규칙 적용 ──────────────────────────────────────────
+# LAN의 443 트래픽을 mitmproxy(4001)로 리다이렉트
+# 이미 규칙이 있으면 건너뜀 (idempotent), root가 아니면 경고만 출력
+_setup_iptables() {
+    if [[ $EUID -ne 0 ]]; then
+        _warn "root가 아니므로 iptables 규칙을 건너뜁니다 (투명 프록시 미적용)"
         return 0
     fi
+
+    # LAN 인터페이스 및 Pi IP 자동 감지 (기본 게이트웨이 아닌 LAN 방향 인터페이스)
+    local lan_iface pi_ip lan_subnet
+    # default route 인터페이스에서 LAN 서브넷 탐색
+    lan_iface=$(ip route show default 2>/dev/null | awk '/default/{print $5}' | head -1)
+    [[ -z "$lan_iface" ]] && { _warn "iptables: 네트워크 인터페이스 감지 실패 — 건너뜀"; return 0; }
+
+    pi_ip=$(ip -4 addr show "$lan_iface" 2>/dev/null | awk '/inet /{print $2}' | cut -d/ -f1 | head -1)
+    lan_subnet=$(ip -4 addr show "$lan_iface" 2>/dev/null | awk '/inet /{print $2}' | head -1)
+    [[ -z "$pi_ip" || -z "$lan_subnet" ]] && { _warn "iptables: IP 감지 실패 — 건너뜀"; return 0; }
+
+    # 이미 규칙이 있으면 건너뜀
+    if iptables -t nat -C PREROUTING -s "$lan_subnet" ! -d "$pi_ip" \
+        -p tcp --dport 443 -j REDIRECT --to-port "$MITM_PORT" 2>/dev/null; then
+        _info "iptables: PREROUTING 규칙 이미 적용됨 (건너뜀)"
+        return 0
+    fi
+
+    # 기존 DLP REDIRECT 규칙 중복 제거 후 추가
+    while iptables -t nat -D PREROUTING -s "$lan_subnet" ! -d "$pi_ip" \
+        -p tcp --dport 443 -j REDIRECT --to-port "$MITM_PORT" 2>/dev/null; do :; done
+
+    iptables -t nat -A PREROUTING \
+        -s "$lan_subnet" ! -d "$pi_ip" \
+        -p tcp --dport 443 \
+        -j REDIRECT --to-port "$MITM_PORT"
+    _ok "iptables: LAN($lan_subnet) → :443 투명 프록시 활성화 (→ :$MITM_PORT)"
+}
+
+# ── iptables 규칙 제거 ───────────────────────────────────────────────────────
+_teardown_iptables() {
+    [[ $EUID -ne 0 ]] && return 0
+    local lan_iface pi_ip lan_subnet
+    lan_iface=$(ip route show default 2>/dev/null | awk '/default/{print $5}' | head -1)
+    [[ -z "$lan_iface" ]] && return 0
+    pi_ip=$(ip -4 addr show "$lan_iface" 2>/dev/null | awk '/inet /{print $2}' | cut -d/ -f1 | head -1)
+    lan_subnet=$(ip -4 addr show "$lan_iface" 2>/dev/null | awk '/inet /{print $2}' | head -1)
+    [[ -z "$pi_ip" || -z "$lan_subnet" ]] && return 0
+    while iptables -t nat -D PREROUTING -s "$lan_subnet" ! -d "$pi_ip" \
+        -p tcp --dport 443 -j REDIRECT --to-port "$MITM_PORT" 2>/dev/null; do :; done
+    _info "iptables: PREROUTING 규칙 제거됨"
+}
+
+start_engine() {
+    if _is_running "$ENGINE_PID"; then
+        _warn "engine 이미 실행 중 (PID $(_pid_of "$ENGINE_PID")) — 기존 프로세스 종료 후 재시작..."
+        stop_engine
+        sleep 0.5
+    fi
+    # PID 파일 없이 잔존하는 engine 프로세스 강제 정리
+    pkill -KILL -f "engine_server.py" 2>/dev/null || true
+    rm -f /tmp/dlp-engine.sock "$ENGINE_PID"
     _info "DLP 엔진 서버 시작 (RegexStage + AssetStage + MLFilter)..."
     _spawn "engine" "$ENGINE_PID" "$ENGINE_LOG" \
         python "$BASE_DIR/scripts/engine_server.py" --sock /tmp/dlp-engine.sock
@@ -263,9 +321,17 @@ stop_engine() {
 
 start_mitm() {
     if _is_running "$MITM_PID"; then
-        _warn "mitmproxy 이미 실행 중 (PID $(_pid_of "$MITM_PID"))"
-        return 0
+        _warn "mitmproxy 이미 실행 중 (PID $(_pid_of "$MITM_PID")) — 기존 프로세스 종료 후 재시작..."
+        stop_mitm
+        sleep 0.5
     fi
+
+    # 잔존 mitmproxy 프로세스 및 포트 점유 강제 정리
+    _cleanup_mitm_port
+
+    # 투명 프록시 iptables 규칙 적용 (재부팅 후 초기화 대비)
+    _setup_iptables
+
     _info "mitmproxy 시작 ($MITM_LABEL, PII 인터셉트 + 마스킹)..."
     local mitmdump="$VENV_DIR/bin/mitmdump"
     [[ ! -x "$mitmdump" ]] && mitmdump="$BASE_DIR/mitmproxy_lib/mitmproxy_linux/mitmdump"
@@ -294,37 +360,108 @@ start_mitm() {
 stop_mitm() {
     _info "mitmproxy 중지..."
     _kill "mitmproxy" "$MITM_PID"
+    # 포트가 완전히 해제될 때까지 최대 3초 대기
+    _wait_port_free "$MITM_PORT" 6
+    # 투명 프록시 규칙 제거 (mitm이 꺼지면 트래픽 차단 방지)
+    _teardown_iptables
+}
+
+# mitmproxy 잔존 프로세스 및 포트 강제 정리
+# (start_mitm 호출 전, watch 루프 재시작 전 사용)
+_cleanup_mitm_port() {
+    # 패턴 기반 잔존 프로세스 종료
+    pkill -TERM -f "inspect_traffic.py" 2>/dev/null || true
+    pkill -TERM -f "mitmdump" 2>/dev/null || true
+    sleep 0.5
+    pkill -KILL -f "inspect_traffic.py" 2>/dev/null || true
+    pkill -KILL -f "mitmdump" 2>/dev/null || true
+
+    # fuser 로 포트 점유 프로세스 추가 정리
+    local ports=("$MITM_PORT")
+    [[ "$MITM_EXPLICIT_PROXY" == "true" ]] && ports+=("$MITM_PROXY_PORT")
+    for port in "${ports[@]}"; do
+        local pids
+        pids=$(fuser "${port}/tcp" 2>/dev/null || true)
+        if [[ -n "$pids" ]]; then
+            _warn "포트 ${port} 점유 PID $pids 강제 종료"
+            kill -KILL $pids 2>/dev/null || true
+        fi
+    done
+
+    rm -f "$MITM_PID"
+
+    # 포트 해제 대기 (최대 5초)
+    _wait_port_free "$MITM_PORT" 10
+}
+
+# 포트가 해제될 때까지 대기 (ticks × 0.5s)
+_wait_port_free() {
+    local port="$1" max_ticks="${2:-10}" i=0
+    while fuser "${port}/tcp" >/dev/null 2>&1; do
+        sleep 0.5; i=$((i + 1))
+        [[ $i -ge $max_ticks ]] && {
+            _warn "포트 ${port} 해제 대기 시간 초과 — 계속 진행"
+            return 1
+        }
+    done
+    return 0
+}
+
+# 프로젝트 관련 모든 프로세스를 패턴으로 강제 종료 (PID 파일 우회)
+_purge_all_procs() {
+    pkill -TERM -f "engine_server.py" 2>/dev/null || true
+    pkill -TERM -f "inspect_traffic.py" 2>/dev/null || true
+    pkill -TERM -f "mitmdump" 2>/dev/null || true
+    pkill -TERM -f "uvicorn main:app" 2>/dev/null || true
+    pkill -TERM -f "web/frontend" 2>/dev/null || true
+    sleep 0.5
+    pkill -KILL -f "engine_server.py" 2>/dev/null || true
+    pkill -KILL -f "inspect_traffic.py" 2>/dev/null || true
+    pkill -KILL -f "mitmdump" 2>/dev/null || true
+    pkill -KILL -f "uvicorn main:app" 2>/dev/null || true
+    pkill -KILL -f "web/frontend" 2>/dev/null || true
+    # PID 파일 및 소켓 정리
+    rm -f "$ENGINE_PID" "$MITM_PID" "$WEB_PID" "$WEBDEV_PID" "$WATCH_PID"
+    rm -f /tmp/dlp-engine.sock
 }
 
 start_web() {
     if _is_running "$WEB_PID"; then
-        _warn "웹 백엔드 이미 실행 중 (PID $(_pid_of "$WEB_PID"))"
-    else
-        _info "웹 대시보드 백엔드 시작 (${WEB_HOST}:${WEB_PORT})..."
-        _spawn "web-backend" "$WEB_PID" "$WEB_LOG" \
-            python -m uvicorn main:app \
-            --host "$WEB_HOST" --port "$WEB_PORT" \
-            --app-dir "$BASE_DIR/web/backend" \
-            --log-level info
+        _warn "웹 백엔드 이미 실행 중 (PID $(_pid_of "$WEB_PID")) — 기존 프로세스 종료 후 재시작..."
+        stop_web
+        sleep 0.5
     fi
+    # PID 파일 없이 잔존하는 uvicorn 프로세스 강제 정리
+    pkill -KILL -f "uvicorn main:app" 2>/dev/null || true
+    rm -f "$WEB_PID" "$WEBDEV_PID"
+
+    _info "웹 대시보드 백엔드 시작 (${WEB_HOST}:${WEB_PORT})..."
+    _spawn "web-backend" "$WEB_PID" "$WEB_LOG" \
+        python -m uvicorn main:app \
+        --host "$WEB_HOST" --port "$WEB_PORT" \
+        --app-dir "$BASE_DIR/web/backend" \
+        --log-level info
 
     if [[ "$WEBDEV_ENABLED" == "true" ]]; then
         if _is_running "$WEBDEV_PID"; then
-            _warn "SvelteKit dev 서버 이미 실행 중"
+            _warn "SvelteKit dev 서버 이미 실행 중 — 기존 프로세스 종료 후 재시작..."
+            _kill "web-dev" "$WEBDEV_PID"
+            sleep 0.3
+        fi
+        pkill -KILL -f "web/frontend" 2>/dev/null || true
+        rm -f "$WEBDEV_PID"
+        _info "SvelteKit dev 서버 시작 (포트 5173)..."
+        (
+            cd "$BASE_DIR/web/frontend"
+            nohup npm run dev -- --host 0.0.0.0 --port 5173 >> "$WEBDEV_LOG" 2>&1 &
+            echo $! > "$WEBDEV_PID"
+        )
+        sleep 2
+        if _is_running "$WEBDEV_PID"; then
+            _ok "SvelteKit dev 시작됨 (PID $(_pid_of "$WEBDEV_PID"))"
+            _info "  대시보드: http://localhost:5173"
         else
-            _info "SvelteKit dev 서버 시작 (포트 5173)..."
-            (
-                cd "$BASE_DIR/web/frontend"
-                nohup npm run dev -- --host 0.0.0.0 --port 5173 >> "$WEBDEV_LOG" 2>&1 &
-                echo $! > "$WEBDEV_PID"
-            )
-            sleep 2
-            if _is_running "$WEBDEV_PID"; then
-                _ok "SvelteKit dev 시작됨 (PID $(_pid_of "$WEBDEV_PID"))"
-                _info "  대시보드: http://localhost:5173"
-            else
-                _warn "SvelteKit dev 시작 실패"
-            fi
+            _warn "SvelteKit dev 시작 실패"
         fi
     else
         _info "  대시보드: http://${WEB_HOST}:${WEB_PORT}"
@@ -389,7 +526,20 @@ _watch_loop() {
     _info "Watch 루프 시작 (체크 간격: ${WATCH_INTERVAL}s, 최대 재시작: ${MAX_RESTART}회)"
     echo $$ > "$WATCH_PID"
 
-    trap 'rm -f "$WATCH_PID"; exit 0' INT TERM EXIT
+    # watch 프로세스가 종료되면(시그널·시스템 셧다운 포함) 서비스 전체 정리
+    _WATCH_CLEANUP_DONE=0
+    _on_watch_exit() {
+        [[ "$_WATCH_CLEANUP_DONE" -eq 1 ]] && return 0
+        _WATCH_CLEANUP_DONE=1
+        _info "[watch] 종료 신호 수신 — 모든 서비스 중지 중..."
+        stop_web   2>/dev/null || true
+        stop_mitm  2>/dev/null || true
+        stop_engine 2>/dev/null || true
+        _purge_all_procs 2>/dev/null || true
+        rm -f "$WATCH_PID"
+    }
+    trap '_on_watch_exit; exit 0' INT TERM
+    trap 'rm -f "$WATCH_PID"' EXIT
 
     while true; do
         sleep "$WATCH_INTERVAL"
@@ -423,6 +573,13 @@ _watch_loop() {
                 sleep "$RESTART_DELAY"
                 _inc_restart "$rfile"
 
+                # 재시작 전 잔존 프로세스/포트 정리
+                case "$svc" in
+                    mitm) _cleanup_mitm_port >> "$WATCH_LOG" 2>&1 ;;
+                    engine) pkill -KILL -f "engine_server.py" 2>/dev/null || true; rm -f "$ENGINE_PID" /tmp/dlp-engine.sock ;;
+                    web) pkill -KILL -f "uvicorn main:app" 2>/dev/null || true; rm -f "$WEB_PID" ;;
+                esac
+
                 # 재시작 (WATCH_LOG에도 stdout 기록)
                 $startfn >> "$WATCH_LOG" 2>&1 || {
                     echo "[$(_ts)] [WATCH] $svc 재시작 실패" >> "$WATCH_LOG"
@@ -434,9 +591,12 @@ _watch_loop() {
 
 start_watch() {
     if _is_running "$WATCH_PID"; then
-        _warn "watch 루프 이미 실행 중 (PID $(_pid_of "$WATCH_PID"))"
-        return 0
+        _warn "watch 루프 이미 실행 중 (PID $(_pid_of "$WATCH_PID")) — 기존 인스턴스 종료 후 재시작..."
+        stop_watch
+        sleep 0.3
     fi
+    # 이전 flock 잠금 파일 초기화 (start_watch 재호출 시 즉시 획득 가능하도록)
+    rm -f "$WATCH_LOCK"
     nohup bash "$0" _watch_internal >> "$WATCH_LOG" 2>&1 &
     local wpid=$!
     # _watch_loop 내부에서 자체 PID 기록하므로 잠깐 대기
@@ -495,6 +655,8 @@ case "$CMD" in
         stop_web
         stop_mitm
         stop_engine
+        # 잔존 프로세스 최종 강제 정리 (고아 프로세스 완전 제거)
+        _purge_all_procs
         ;;
       engine) stop_engine ;;
       mitm)   stop_mitm ;;
@@ -538,6 +700,12 @@ case "$CMD" in
 
   # 내부 명령 — start_watch 에서 nohup 으로 호출됨
   _watch_internal)
+    # flock 으로 싱글턴 보장: 두 번째 인스턴스는 즉시 종료
+    exec 200>"$WATCH_LOCK"
+    if ! flock -n 200; then
+        echo "[$(_ts)] [WATCH] 다른 watch 인스턴스가 이미 실행 중 — 중복 실행 방지로 종료" >> "$WATCH_LOG"
+        exit 0
+    fi
     source "$VENV_DIR/bin/activate" 2>/dev/null || true
     _watch_loop
     ;;

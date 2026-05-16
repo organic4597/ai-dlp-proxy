@@ -50,15 +50,19 @@ function _page($$renderer, $$props) {
         });
       }
     );
-    $$renderer2.push(` <button class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition-colors">검색</button></div> <div class="flex flex-1 overflow-hidden"><div class="flex-1 overflow-auto">`);
+    $$renderer2.push(` <button class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-1.5 rounded transition-colors">검색</button></div> <div class="flex flex-1 overflow-hidden"><div class="flex-1 overflow-auto min-w-0">`);
     {
       $$renderer2.push("<!--[0-->");
       $$renderer2.push(`<div class="flex items-center justify-center h-40 text-slate-500">로딩 중…</div>`);
     }
-    $$renderer2.push(`<!--]--></div> <div class="w-64 border-l border-slate-700 overflow-auto shrink-0 p-4"><div class="text-xs text-slate-500 uppercase mb-3">룰별 통계</div> <!--[-->`);
-    const each_array_1 = ensure_array_like(ruleStats);
-    for (let $$index_1 = 0, $$length = each_array_1.length; $$index_1 < $$length; $$index_1++) {
-      let s = each_array_1[$$index_1];
+    $$renderer2.push(`<!--]--></div> `);
+    {
+      $$renderer2.push("<!--[-1-->");
+    }
+    $$renderer2.push(`<!--]--> <div class="w-64 border-l border-slate-700 overflow-auto shrink-0 p-4"><div class="text-xs text-slate-500 uppercase mb-3">룰별 통계</div> <!--[-->`);
+    const each_array_2 = ensure_array_like(ruleStats);
+    for (let $$index_2 = 0, $$length = each_array_2.length; $$index_2 < $$length; $$index_2++) {
+      let s = each_array_2[$$index_2];
       $$renderer2.push(`<div class="mb-3 bg-slate-800 rounded p-3 text-xs space-y-1"><div class="text-slate-200 font-medium truncate">${escape_html(s.rule)}</div> <div class="flex justify-between text-slate-500"><span>총 탐지</span><span class="text-slate-300">${escape_html(s.total)}</span></div> <div class="flex justify-between text-slate-500"><span>유효</span><span class="text-green-400">${escape_html(s.effective)}</span></div> <div class="flex justify-between text-slate-500"><span>억제</span><span class="text-amber-400">${escape_html(s.suppressed_count)}</span></div> <div class="flex justify-between text-slate-500"><span>평균 신뢰도</span><span class="text-slate-300">${escape_html(s.avg_confidence?.toFixed(2))}</span></div> <div class="w-full bg-slate-700 rounded-full h-1.5 mt-1"><div class="bg-amber-500 h-1.5 rounded-full"${attr_style(`width: ${s.total > 0 ? Math.round(s.suppressed_count / s.total * 100) : 0}%`)}></div></div></div>`);
     }
     $$renderer2.push(`<!--]--></div></div></div>`);

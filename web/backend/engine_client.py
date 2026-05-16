@@ -64,14 +64,16 @@ async def subscribe() -> AsyncGenerator[dict, None]:
     """scan_result 이벤트 무한 스트림 (자동 재연결)."""
     while True:
         try:
-            r, w = await _open(timeout=5.0)
+            r, w = await _open(timeout=10.0)
             try:
                 w.write(json.dumps({"action": "subscribe", "id": _next_id()}).encode() + b"\n")
                 await w.drain()
-                await asyncio.wait_for(r.readline(), timeout=3)  # ack
+                # 엔진이 바쁠 때(예: SLM 추론) ACK가 늦을 수 있으므로 여유 있게 대기
+                await asyncio.wait_for(r.readline(), timeout=30)  # ack
                 log.info("Engine subscribe 연결됨")
                 while True:
-                    line = await asyncio.wait_for(r.readline(), timeout=90)
+                    # 유휴 구간에서 끊지 않도록 타임아웃 없이 대기
+                    line = await r.readline()
                     if not line:
                         break
                     try:
@@ -86,7 +88,8 @@ async def subscribe() -> AsyncGenerator[dict, None]:
         except asyncio.CancelledError:
             return
         except Exception as e:
-            log.warning(f"Engine subscribe 연결 끊김: {e} — 3초 후 재연결")
+            msg = str(e).strip() or type(e).__name__
+            log.warning(f"Engine subscribe 연결 끊김: {msg} — 3초 후 재연결")
         await asyncio.sleep(3)
 
 
@@ -94,14 +97,16 @@ async def log_subscribe() -> AsyncGenerator[dict, None]:
     """엔진 로그 무한 스트림 (자동 재연결)."""
     while True:
         try:
-            r, w = await _open(timeout=5.0)
+            r, w = await _open(timeout=10.0)
             try:
                 w.write(json.dumps({"action": "log_subscribe", "id": _next_id()}).encode() + b"\n")
                 await w.drain()
-                await asyncio.wait_for(r.readline(), timeout=3)  # ack
+                # 엔진이 바쁠 때(예: SLM 추론) ACK가 늦을 수 있으므로 여유 있게 대기
+                await asyncio.wait_for(r.readline(), timeout=30)  # ack
                 log.info("Engine log_subscribe 연결됨")
                 while True:
-                    line = await asyncio.wait_for(r.readline(), timeout=90)
+                    # 유휴 구간에서 끊지 않도록 타임아웃 없이 대기
+                    line = await r.readline()
                     if not line:
                         break
                     try:
@@ -116,5 +121,6 @@ async def log_subscribe() -> AsyncGenerator[dict, None]:
         except asyncio.CancelledError:
             return
         except Exception as e:
-            log.warning(f"Engine log_subscribe 연결 끊김: {e} — 3초 후 재연결")
+            msg = str(e).strip() or type(e).__name__
+            log.warning(f"Engine log_subscribe 연결 끊김: {msg} — 3초 후 재연결")
         await asyncio.sleep(3)

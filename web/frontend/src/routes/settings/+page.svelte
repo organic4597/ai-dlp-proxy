@@ -12,6 +12,8 @@
     skip_roles: string[];
     allowlist: AllowlistEntry[];
     mask_templates: Record<string, string>;
+    slm_backend: string;
+    slm_api_url: string;
   };
 
   let ctrl = $state<Control | null>(null);
@@ -22,7 +24,51 @@
   let newAlValue = $state('');
   let clearConfirm = $state<null | 'logs' | 'traffic'>(null);
 
-  async function load() { ctrl = await api.control.get() as Control; }
+  // SLM 헬스 체크
+  type SlmHealth = { status: string; model?: string; device?: string; dtype?: string; error?: string; url?: string };
+  let slmHealth = $state<SlmHealth | null>(null);
+  let slmHealthLoading = $state(false);
+  let editingApiUrl = $state(false);
+  let apiUrlDraft = $state('');
+
+  async function checkSlmHealth() {
+    slmHealthLoading = true;
+    slmHealth = null;
+    try {
+      slmHealth = await api.pipeline.slmHealth();
+    } catch (e) {
+      slmHealth = { status: 'error', error: String(e) };
+    } finally {
+      slmHealthLoading = false;
+    }
+  }
+
+  async function saveSlmBackend(backend: string) {
+    if (!ctrl) return;
+    ctrl = { ...ctrl, slm_backend: backend };
+    try {
+      await api.control.put({ slm_backend: backend });
+      showToast('저장됨', 'ok');
+    } catch (e) { showToast('오류: ' + String(e), 'err'); }
+  }
+
+  async function saveApiUrl() {
+    if (!ctrl) return;
+    const url = apiUrlDraft.trim();
+    if (!url) return;
+    ctrl = { ...ctrl, slm_api_url: url };
+    editingApiUrl = false;
+    try {
+      await api.control.put({ slm_api_url: url });
+      showToast('저장됨', 'ok');
+    } catch (e) { showToast('오류: ' + String(e), 'err'); }
+  }
+
+
+  async function load() {
+    ctrl = await api.control.get() as Control;
+    if (ctrl) apiUrlDraft = ctrl.slm_api_url;
+  }
 
   async function toggle(key: string) {
     if (!ctrl) return;
@@ -105,9 +151,16 @@
   const STAGE_TOGGLES = [
     { key: 'regex_enabled',           label: 'Regex Stage',    desc: '정규식 기반 PII 탐지' },
     { key: 'asset_enabled',           label: 'Asset Stage',    desc: '보호 자산 키워드·임베딩 탐지' },
-    { key: 'slm_enabled',             label: 'SLM Stage',      desc: '소형 언어모델 보완 탐지 (Gemma 4 2B)' },
+    { key: 'slm_enabled',             label: 'SLM Stage',      desc: '소형 언어모델 보완 탐지 (아래 백엔드 설정 점상)' },
     { key: 'ml_filter_enabled',       label: 'ML FP 필터',     desc: 'XGBoost False Positive 억제' },
     { key: 'context_penalty_enabled', label: '문맥 페널티',    desc: '코드·URL 컨텍스트 감지 시 신뢰도 ×0.3' },
+  ];
+
+  const SLM_BACKENDS = [
+    { value: 'auto',    label: 'Auto',    desc: 'GPU있으면 adapter, 없으면 GGUF' },
+    { value: 'gguf',    label: 'GGUF',    desc: 'llama-cpp-python (Gemma 4 2B)' },
+    { value: 'adapter', label: 'Adapter', desc: 'HuggingFace Qwen3.5-4B QLoRA' },
+    { value: 'api',     label: 'API',     desc: '외부 충론 서버 (SSH 터널)' },
   ];
 
   const ACTION_TOGGLES = [
@@ -237,8 +290,117 @@
         </div>
       </div>
 
-      <!-- ③ 허용목록 -->
+      <!-- ② SLM 백엔드 설정 -->
       <div class="bg-slate-800 border border-slate-700 rounded-lg p-5 lg:col-span-2">
+        <div class="text-xs text-slate-500 uppercase mb-4">🤖 SLM 백엔드 설정</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- 백엔드 선택 -->
+          <div>
+            <div class="text-sm text-slate-300 mb-3">추론 백엔드</div>
+            <div class="space-y-2">
+              {#each SLM_BACKENDS as b}
+                <label class={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors
+                  ${ctrl.slm_backend === b.value
+                    ? 'bg-blue-500/10 border-blue-500/40'
+                    : 'bg-slate-700/40 border-slate-700 hover:border-slate-600'}`}>
+                  <input
+                    type="radio"
+                    name="slm_backend"
+                    value={b.value}
+                    checked={ctrl.slm_backend === b.value}
+                    onchange={() => saveSlmBackend(b.value)}
+                    class="mt-0.5 accent-blue-500"
+                  />
+                  <div>
+                    <div class="text-sm text-slate-200 font-medium">{b.label}</div>
+                    <div class="text-xs text-slate-500 mt-0.5">{b.desc}</div>
+                  </div>
+                </label>
+              {/each}
+            </div>
+          </div>
+
+          <!-- API 설정 + 헬스 체크 -->
+          <div class="flex flex-col gap-4">
+            <div>
+              <div class="text-sm text-slate-300 mb-2">API 서버 URL
+                <span class="text-xs text-slate-500 ml-1">(백엔드 = API 일 때 사용)</span>
+              </div>
+              {#if editingApiUrl}
+                <div class="flex gap-2">
+                  <input
+                    bind:value={apiUrlDraft}
+                    onkeydown={(e) => { if (e.key === 'Enter') saveApiUrl(); if (e.key === 'Escape') editingApiUrl = false; }}
+                    class="flex-1 bg-slate-700 border border-blue-500/50 rounded px-3 py-1.5 text-slate-200 text-sm font-mono focus:outline-none focus:border-blue-400"
+                    placeholder="http://localhost:8766"
+                  />
+                  <button onclick={saveApiUrl}
+                    class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded transition-colors shrink-0">저장</button>
+                  <button onclick={() => { editingApiUrl = false; apiUrlDraft = ctrl?.slm_api_url ?? ''; }}
+                    class="text-slate-500 hover:text-slate-300 text-sm px-2 py-1.5 rounded transition-colors shrink-0">취소</button>
+                </div>
+              {:else}
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-sm text-slate-300 bg-slate-700 border border-slate-600 rounded px-3 py-1.5 flex-1 min-w-0 truncate">{ctrl.slm_api_url}</span>
+                  <button onclick={() => { apiUrlDraft = ctrl?.slm_api_url ?? ''; editingApiUrl = true; }}
+                    class="text-slate-500 hover:text-slate-300 text-sm px-2 py-1.5 rounded transition-colors shrink-0">편집</button>
+                </div>
+              {/if}
+            </div>
+
+            <!-- 헬스 체크 버튼 + 결과 -->
+            <div>
+              <button
+                onclick={checkSlmHealth}
+                disabled={slmHealthLoading}
+                class="bg-slate-700 hover:bg-slate-600 border border-slate-600 disabled:opacity-50 text-slate-200 text-sm px-4 py-2 rounded transition-colors flex items-center gap-2"
+              >
+                {#if slmHealthLoading}
+                  <span class="w-3 h-3 rounded-full border-2 border-slate-400 border-t-transparent animate-spin"></span>
+                  확인 중…
+                {:else}
+                  🔌 API 연결 확인
+                {/if}
+              </button>
+
+              {#if slmHealth}
+                <div class={`mt-3 rounded-lg p-3 text-xs border
+                  ${slmHealth.status === 'ok'
+                    ? 'bg-green-500/10 border-green-500/30 text-green-300'
+                    : slmHealth.status === 'loading'
+                    ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300'
+                    : 'bg-red-500/10 border-red-500/30 text-red-300'}`}>
+                  <div class="font-semibold mb-1">
+                    {slmHealth.status === 'ok' ? '✓ 연결됨' : slmHealth.status === 'loading' ? '⏳ 모델 로딩 중' : '✗ 연결 실패'}
+                  </div>
+                  {#if slmHealth.model}
+                    <div class="text-slate-400">모델: <span class="text-slate-300">{slmHealth.model}</span></div>
+                  {/if}
+                  {#if slmHealth.device}
+                    <div class="text-slate-400">장치: <span class="text-slate-300">{slmHealth.device} / {slmHealth.dtype}</span></div>
+                  {/if}
+                  {#if slmHealth.error}
+                    <div class="mt-1 text-red-400 break-all">{slmHealth.error}</div>
+                  {/if}
+                  {#if slmHealth.url}
+                    <div class="text-slate-500 mt-1">{slmHealth.url}</div>
+                  {/if}
+                </div>
+              {/if}
+            </div>
+
+            <!-- 참고 안내 -->
+            <div class="text-xs text-slate-500 bg-slate-700/40 rounded p-3 leading-relaxed">
+              <strong class="text-slate-400">백엔드 변경 안내</strong><br />
+              API 모드: 학습 서버(WSL2)에서 <code class="bg-slate-700 px-1 rounded">start_slm_services.sh</code> 실행 후 SSH 터널 연결 필요.<br />
+              백엔드 변경은 제어 파일에 즉시 저장되며 다음 스캔부터 반영됩니다.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ③ 허용목록 -->      <div class="bg-slate-800 border border-slate-700 rounded-lg p-5 lg:col-span-2">
         <div class="text-xs text-slate-500 uppercase mb-4">허용목록 (Allowlist)</div>
         <div class="flex gap-2 mb-4">
           <input bind:value={newAlRule} placeholder="규칙 (예: kr_rrn, * = 전체)"

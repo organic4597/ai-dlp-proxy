@@ -21,7 +21,8 @@ const api = {
   },
   pipeline: {
     stats: () => req("/pipeline/stats"),
-    snapshots: (range_h = 1) => req(`/pipeline/snapshots?range_h=${range_h}`)
+    snapshots: (range_h = 1) => req(`/pipeline/snapshots?range_h=${range_h}`),
+    slmHealth: () => req("/slm/health")
   },
   control: {
     get: () => req("/control"),

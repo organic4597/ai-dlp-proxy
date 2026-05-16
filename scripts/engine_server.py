@@ -62,6 +62,10 @@ DEFAULT_SOCK = "/tmp/dlp-engine.sock"
 # ── 통계 ─────────────────────────────────────────────────────────────────────
 _stats = {"total": 0, "scanned": 0, "findings": 0, "errors": 0, "masked": 0}
 
+# scan 파이프라인은 CPU 바운드라 이벤트 루프를 막을 수 있음.
+# 별도 스레드로 오프로딩하고, 파이프라인 내부 상태 보호를 위해 직렬화한다.
+_scan_lock = asyncio.Lock()
+
 # ── 이벤트 구독자 (TUI 등) ───────────────────────────────────────────────────
 _subscribers: list[asyncio.Queue] = []
 
@@ -279,7 +283,8 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                 if not _logged_conn:
                     log.info(f"{C.GREEN}[CONN]{C.RESET} {peer} (scan)")
                     _logged_conn = True
-                resp = _handle_scan(request)
+                async with _scan_lock:
+                    resp = await asyncio.to_thread(_handle_scan, request)
             elif action == "ping":
                 resp = {"ok": True, "action": "pong"}
             elif action == "masked_inc":
@@ -391,20 +396,21 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
                 _stats["errors"] += 1
                 log.warning(f"  #{req_id} {C.RED}ERR{C.RESET}: {resp.get('error', '?')}")
 
-            # 구독자에게 이벤트 브로드캐스트
-            if _subscribers and resp.get("matched"):
+            # 구독자에게 이벤트 브로드캐스트 (scan 액션만 전달)
+            # ping/stats/subscribe 응답이 scan_result로 저장되는 것을 방지
+            if action == "scan" and _subscribers:
                 _broadcast_event({
                     "type": "scan_result",
                     "id": req_id,
                     "request_id": str(req_id),
                     "ts": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "provider": resp.get("provider"),
+                    "provider": resp.get("provider") or request.get("provider"),
                     "model": resp.get("model"),
                     "stream": resp.get("stream"),
                     "msg_count": resp.get("msg_count", 0),
                     "target_count": resp.get("target_count", 0),
                     "total_text_len": resp.get("total_text_len", 0),
-                    "pipeline_action": resp.get("pipeline_action"),
+                    "pipeline_action": resp.get("pipeline_action") or "pass",
                     "finding_count": resp.get("finding_count", 0),
                     "raw_finding_count": resp.get("raw_finding_count", resp.get("finding_count", 0)),
                     "effective_finding_count": resp.get("effective_finding_count", 0),

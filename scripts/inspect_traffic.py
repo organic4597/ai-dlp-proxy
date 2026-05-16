@@ -109,6 +109,7 @@ TARGET_HOSTS = {
     "api.openai.com":                       "OpenAI",
     # Anthropic
     "api.anthropic.com":                    "Anthropic",
+    "zen.anthropic.com":                    "Anthropic",
     # Google Gemini
     "generativelanguage.googleapis.com":    "Gemini",
     # GitHub Copilot
@@ -126,13 +127,7 @@ TARGET_HOSTS = {
     "api.x.ai":                             "xAI",
 }
 
-TARGET_IP_PATTERNS = [
-    # GitHub/Copilot transparent mode may expose only the destination IP.
-    r"140\.82\.(112|113|114|115)\.\d+",
-    # Common OpenAI/Cloudflare ranges seen when SNI/Host is unavailable.
-    r"104\.18\.\d+\.\d+",
-    r"172\.(6[4-9]|7[0-1])\.\d+\.\d+",
-]
+TARGET_IP_PATTERNS: list[str] = []  # IP 기반 판별 미사용 — SNI 도메인으로만 처리
 
 # Azure OpenAI 패턴: *.openai.azure.com
 AZURE_SUFFIX = ".openai.azure.com"
@@ -271,26 +266,52 @@ CAPTURE_OUT = LOG_DIR / "captured_packet.json"
 
 
 def _provider(host: str, path: str = "") -> str | None:
-    """호스트 이름으로 LLM 제공자 판별. 대상 아니면 None."""
+    """SNI/도메인으로 LLM 제공자 판별. 대상 아니면 None."""
     if host in TARGET_HOSTS:
         return TARGET_HOSTS[host]
     if host.endswith(AZURE_SUFFIX):
         return "Azure OpenAI"
-    # GitHub Copilot IP 대역 (140.82.112.0/22) → /v1/messages 경로
-    # transparent 프록시에서 SNI 없이 IP로 도달하는 경우
-    if path.startswith("/v1/messages") or path.startswith("/v1/chat/completions"):
-        import ipaddress
+    return None
+
+
+def _infer_provider_from_path_and_body(path: str, body: bytes) -> str | None:
+    """URL 경로 + body의 model 필드로 provider 추정.
+    SNI/Host 헤더로 도메인을 알 수 없을 때 사용하는 fallback.
+    IP 주소로 provider를 추정하지 않음.
+    """
+    LLM_PATHS = ("/v1/messages", "/v1/chat/completions", "/v1/completions", "/v1/embeddings")
+    if not any(p in path for p in LLM_PATHS):
+        return None
+
+    model = ""
+    if body:
         try:
-            ip = ipaddress.ip_address(host)
-            # GitHub IP 범위: 140.82.112.0/22
-            if ip in ipaddress.ip_network("140.82.112.0/22"):
-                return "GitHub Copilot"
-            # OpenAI IP 범위: 104.18.x.x, 172.64.x.x 등 Cloudflare (openai)
-            if ip in ipaddress.ip_network("104.18.0.0/16") or ip in ipaddress.ip_network("172.64.0.0/13"):
-                return "OpenAI"
-        except ValueError:
+            obj = json.loads(body)
+            model = str(obj.get("model", "")).lower()
+        except Exception:
             pass
-    # api.github.com 토큰 교환 — 감시 대상 제외
+
+    # model 이름으로 판별 (가장 정확)
+    if "claude" in model:
+        return "Anthropic"
+    if any(k in model for k in ("gpt-", "o1-", "o3-", "o4-", "text-davinci")):
+        return "OpenAI"
+    if any(k in model for k in ("gemini", "palm", "bison")):
+        return "Gemini"
+    if "deepseek" in model:
+        return "DeepSeek"
+    if "llama" in model:
+        return "Meta"
+    if "mistral" in model or "mixtral" in model:
+        return "Mistral"
+    if "grok" in model:
+        return "xAI"
+
+    # model 이름이 없거나 모르면 API 형식으로 추정
+    if "/v1/messages" in path:
+        return "Anthropic"       # Messages API = Anthropic 형식
+    if "/v1/chat/completions" in path:
+        return "OpenAI"          # Chat Completions = OpenAI 형식
     return None
 
 
@@ -361,15 +382,23 @@ class InspectAddon:
         except Exception as e:
             log.warning(f"[CONFIG] HTTP/2 옵션 설정 실패 (무시): {e}")
 
-        # 타겟 호스트만 TLS 인터셉트 — 나머지는 mitmproxy가 투명하게 터널링
-        # allow_hosts에 없는 호스트는 TLS 복호화 없이 TCP 터널로 그대로 통과
+        # TLS 인터셉트 범위 설정 — allow_hosts는 어떤 TLS를 복호화할지 결정
+        # ※ provider 판별과 무관 — SNI/Host/URL/model로 별도 판별
+        # SNI가 없는 클라이언트(IP 직접 연결)를 위해 알려진 IP 대역도 포함
         try:
             _target_patterns = [
                 re.escape(host) for host in TARGET_HOSTS
-            ] + [r".*\.openai\.azure\.com", *TARGET_IP_PATTERNS]  # Azure + IP fallback
+            ] + [
+                r".*\.openai\.azure\.com",
+                # GitHub / Copilot IP 대역 — SNI 없이 IP로 직접 연결하는 클라이언트용
+                # (intercept 범위 설정일 뿐, provider는 Host헤더/URL/model로 판별)
+                r"140\.82\.\d{1,3}\.\d{1,3}",
+                r"185\.199\.\d{1,3}\.\d{1,3}",
+                r"192\.30\.\d{1,3}\.\d{1,3}",
+            ]
             ctx.options.allow_hosts = _target_patterns
             log.info(
-                f"[CONFIG] ✓ TLS 인터셉트 대상 {len(_target_patterns)}개 호스트로 제한"
+                f"[CONFIG] ✓ TLS 인터셉트 대상 {len(_target_patterns)}개 패턴으로 제한"
             )
             for p in _target_patterns:
                 log.debug(f"[CONFIG]   allow: {p}")
@@ -381,7 +410,20 @@ class InspectAddon:
     async def request(self, flow: http.HTTPFlow) -> None:
         host = flow.request.pretty_host
         path = flow.request.path
+
+        # 1단계: SNI/도메인으로 판별 (pretty_host는 SNI가 있으면 도메인 반환)
         provider = _provider(host, path)
+
+        if provider is None:
+            # 2단계: Host 헤더로 판별 (IP 직접 연결이지만 Host 헤더에 도메인 있는 경우)
+            host_header = flow.request.headers.get("host", "").split(":")[0].lower()
+            if host_header and host_header != host:
+                provider = _provider(host_header, path)
+
+        if provider is None:
+            # 3단계: URL 경로 + body model 필드로 판별 (IP 기반 추정 없음)
+            provider = _infer_provider_from_path_and_body(path, flow.request.content or b"")
+
         if provider is None:
             return
 
@@ -475,6 +517,7 @@ class InspectAddon:
                     "body": body_obj,
                     "msg_count": dlp_summary.get("msg_count", 0),
                     "messages": _extract_messages(body_obj, provider, url=url),
+                    "provider": provider,
                 })
                 if result is None:
                     lines.append(f"  {C.DIM}[Engine 미연결 — UDS {_ENGINE_SOCK}]{C.RESET}")
@@ -536,6 +579,7 @@ class InspectAddon:
                 if (
                     float(finding.get("confidence", 0.0)) >= _threshold
                     and not finding.get("suppressed", False)
+                    and not finding.get("history", False)
                 )
             ]
 
@@ -549,13 +593,19 @@ class InspectAddon:
                     if float(f.get("confidence", 0.0)) >= _threshold
                 ]
             )
+            _has_effective = bool(_effective_findings)
             _do_mask  = bool(_ctrl.get("mask_on_detect") and _mask_candidates)
             _do_block = (
-                not _do_mask and (
+                _has_effective and not _do_mask and (
                     (_pa in ("mask", "block") and _ctrl.get("block_on_mask")) or
                     (_pa == "alert"           and _ctrl.get("block_on_alert"))
                 )
             )
+
+            if not _has_effective and _findings:
+                lines.append(
+                    f"  {C.DIM}[DLP] effective finding 없음(억제/히스토리/threshold 미달) → policy 미적용{C.RESET}"
+                )
 
             if _do_mask and _mask_candidates:
                 # 마스킹 적용 후 flow.request.content 교체
@@ -689,6 +739,18 @@ class InspectAddon:
         content_type = flow.response.headers.get("content-type", "")
         if "event-stream" in content_type:
             flow.response.stream = True
+            return
+        # 요청 body에 stream:true 포함 시 (타겟 호스트 스트리밍 API)
+        host = flow.request.pretty_host
+        # stream 여부: HOST 헤더도 확인
+        _h = host if host in TARGET_HOSTS else flow.request.headers.get("host", "").split(":")[0].lower()
+        if _h in TARGET_HOSTS and flow.request.content:
+            try:
+                req_body = json.loads(flow.request.content)
+                if req_body.get("stream") is True:
+                    flow.response.stream = True
+            except Exception:
+                pass
 
 
 def _summarize_request(obj: dict, provider: str, lines: list, url: str = "") -> dict:

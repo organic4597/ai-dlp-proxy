@@ -7,6 +7,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from db import init_db, close_db
@@ -79,11 +80,31 @@ app.include_router(rules.router,     prefix=prefix, tags=["rules"])
 app.include_router(assets.router,    prefix=prefix, tags=["assets"])
 app.include_router(allowlist.router, prefix=prefix, tags=["allowlist"])
 
-# 프로덕션: 빌드된 SvelteKit static 파일 서빙
+# 프로덕션: 빌드된 SvelteKit static 파일 서빙 (SPA 폴백 포함)
 _static = Path(__file__).parent.parent / "frontend" / "build"
+_certs_dir = Path(__file__).parent.parent.parent / "certs"
+
+# CA 인증서 다운로드 — Windows/macOS/Linux/Android 설치용
+# http://<pi-ip>:8765/certs/windows/mitmproxy-ca.p12
+if _certs_dir.exists():
+    app.mount("/certs", StaticFiles(directory=str(_certs_dir)), name="certs")
+    log.info(f"Certs dir served at /certs: {_certs_dir}")
+
 if _static.exists():
-    app.mount("/", StaticFiles(directory=str(_static), html=True), name="static")
-    log.info(f"Static files: {_static}")
+    # _app/ 디렉토리 — JS/CSS 번들 등 해시된 정적 에셋
+    _app_dir = _static / "_app"
+    if _app_dir.exists():
+        app.mount("/_app", StaticFiles(directory=str(_app_dir)), name="static-app")
+
+    @app.get("/{full_path:path}")
+    async def spa_fallback(full_path: str):
+        """SPA 폴백: 실제 파일이면 직접 서빙, 아니면 index.html 반환."""
+        candidate = _static / full_path
+        if candidate.is_file():
+            return FileResponse(str(candidate))
+        return FileResponse(str(_static / "index.html"))
+
+    log.info(f"Static files (SPA mode): {_static}")
 
 
 @app.get("/api/health")

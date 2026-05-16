@@ -29,6 +29,7 @@ export const api = {
   pipeline: {
     stats:     () => req<unknown>('/pipeline/stats'),
     snapshots: (range_h = 1) => req<unknown[]>(`/pipeline/snapshots?range_h=${range_h}`),
+    slmHealth: () => req<{ status: string; model?: string; device?: string; dtype?: string; error?: string; url?: string }>('/slm/health'),
   },
   control: {
     get: () => req<unknown>('/control'),

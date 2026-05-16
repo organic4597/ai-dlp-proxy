@@ -163,6 +163,7 @@ class SLMStage(Stage):
         self._n_gpu_layers = n_gpu_layers if n_gpu_layers is not None else _gpu_layers_for(self._compute_mode)
         self._verbose = verbose
         self._backend_preference = (backend or os.getenv("DLP_SLM_BACKEND", "auto")).lower()
+        self._api_url = os.getenv("DLP_SLM_API_URL", "http://localhost:8766").rstrip("/")
         self._active_backend = "uninitialized"
         self._llm: Any = None  # Llama 인스턴스 (지연 로드)
         self._load_error: str | None = None
@@ -170,8 +171,10 @@ class SLMStage(Stage):
         self._adapter_error: str | None = None
         self._adapter_stats_prev = {"chunks": 0, "infer_ms": 0.0, "errors": 0}
 
-        # 컴퓨팅 환경 로그 — CPU 전용이면 경고
-        if self._compute_mode == ComputeMode.CPU_ONLY:
+        # 컴퓨팅 환경 로그
+        if self._backend_preference == "api":
+            log.info("[SLM] API 모드 — 로컬 모델 미로드, URL: %s", self._api_url)
+        elif self._compute_mode == ComputeMode.CPU_ONLY:
             for line in _CPU_ONLY_WARNING_LINES:
                 log.warning(line)
         elif self._compute_mode == ComputeMode.APPLE_SILICON:
@@ -184,6 +187,8 @@ class SLMStage(Stage):
         return "slm"
 
     def runtime_warning_lines(self) -> list[str]:
+        if self._backend_preference == "api":
+            return []  # API 모드: 로컬 CPU 경고 불필요
         if self._compute_mode == ComputeMode.CPU_ONLY:
             return list(_CPU_ONLY_WARNING_LINES)
         return []
@@ -227,9 +232,154 @@ class SLMStage(Stage):
             log.warning("[SLM] adapter 로드 실패: %s", exc)
             return False
 
+    def _should_use_api(self) -> bool:
+        """API 백엔드 사용 여부 (제어 파일 > env var 순으로 읽음)."""
+        return self._current_backend() == "api"
+
+    def _current_backend(self) -> str:
+        """현재 유효한 백엔드 값. 우선순위: env var(auto 제외) > 제어 파일 > 초기화 값."""
+        env_val = os.getenv("DLP_SLM_BACKEND", "").lower()
+        if env_val and env_val != "auto":
+            return env_val
+        try:
+            data = json.loads(Path("/tmp/dlp-control.json").read_text(encoding="utf-8"))
+            b = str(data.get("slm_backend", "")).lower()
+            if b and b != "auto":
+                return b
+        except Exception:
+            pass
+        return self._backend_preference  # 초기화 시 저장된 값
+
+    def _current_api_url(self) -> str:
+        """현재 유효한 API URL. 우선순위: env var > 제어 파일 > 초기화 값."""
+        env_val = os.getenv("DLP_SLM_API_URL", "")
+        if env_val:
+            return env_val.rstrip("/")
+        try:
+            data = json.loads(Path("/tmp/dlp-control.json").read_text(encoding="utf-8"))
+            url = str(data.get("slm_api_url", "")).strip()
+            if url:
+                return url.rstrip("/")
+        except Exception:
+            pass
+        return self._api_url  # 초기화 시 저장된 기본값
+
+    def _ensure_api_ready(self) -> bool:
+        """API 서버 연결 확인 (비차단, 실패해도 경고만 출력)."""
+        import urllib.request
+        import urllib.error
+        url = self._current_api_url()
+        try:
+            with urllib.request.urlopen(
+                f"{url}/health", timeout=2
+            ) as resp:
+                data = json.loads(resp.read().decode())
+                return data.get("status") in ("ok", "loading")
+        except Exception as exc:
+            log.warning("[SLM] API 서버 연결 확인 실패: %s — %s", url, exc)
+            return False
+
+    def _scan_with_api(self, targets: list, prior_findings: list[Finding]) -> list[Finding]:
+        """API 서버(/detect_batch)를 통한 일괄 PII 탐지."""
+        import urllib.request
+        import urllib.error
+
+        api_url = self._current_api_url()
+        texts = [getattr(t, "text", "") or "" for t in targets]
+        prior_ranges_per_text = [
+            [[s, e] for s, e in self._prior_ranges_for_target(t, prior_findings)]
+            for t in targets
+        ]
+
+        payload_obj: dict[str, object] = {"texts": texts}
+        # 일부 구버전 API 서버는 다중 텍스트 + prior_ranges_per_text 조합에서 500을 반환할 수 있음.
+        # prior 정보가 실제로 있을 때만 필드를 포함한다.
+        if any(prior_ranges_per_text):
+            payload_obj["prior_ranges_per_text"] = prior_ranges_per_text
+
+        t0 = time.monotonic()
+
+        def _post_detect_batch(obj: dict[str, object]) -> dict:
+            payload = json.dumps(obj).encode("utf-8")
+            req = urllib.request.Request(
+                f"{api_url}/detect_batch",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode())
+
+        try:
+            result = _post_detect_batch(payload_obj)
+        except Exception as exc:
+            if "prior_ranges_per_text" not in payload_obj:
+                log.warning("[SLM] API 호출 실패: %s — %s", api_url, exc)
+                SLMStage._infer_stats["errors"] += 1
+                return []
+            # 호환성 fallback: prior_ranges_per_text 제외 후 1회 재시도
+            log.warning(
+                "[SLM] API 호출 실패(우선 요청): %s — %s; prior_ranges_per_text 제외 후 재시도",
+                api_url,
+                exc,
+            )
+            try:
+                result = _post_detect_batch({"texts": texts})
+            except Exception as retry_exc:
+                log.warning("[SLM] API 호출 실패(재시도): %s — %s", api_url, retry_exc)
+                SLMStage._infer_stats["errors"] += 1
+                return []
+
+        elapsed_ms = round((time.monotonic() - t0) * 1000)
+        SLMStage._infer_stats["total_calls"] += 1
+        SLMStage._infer_stats["elapsed_ms_sum"] += elapsed_ms
+        buf = SLMStage._infer_stats["elapsed_ms_p95_buf"]
+        buf.append(elapsed_ms)
+        if len(buf) > 100:
+            buf.pop(0)
+        SLMStage._infer_stats["backend"] = "api"
+        self._active_backend = "api"
+
+        findings: list[Finding] = []
+        for target, detections in zip(targets, result.get("results", [])):
+            text = getattr(target, "text", "") or ""
+            base_offset = int(getattr(target, "base_offset", 0))
+            for item in detections:
+                rule = str(item.get("rule", "slm_pii"))
+                start = int(item.get("start", -1))
+                end = int(item.get("end", -1))
+                if not (0 <= start < end <= len(text)):
+                    continue
+                match_text = str(item.get("text", "")).strip() or text[start:end]
+                confidence = float(item.get("confidence", 0.85))
+                if confidence < CONFIDENCE_THRESHOLD:
+                    continue
+                ctx_before = text[max(0, start - 60): start]
+                ctx_after = text[end: end + 60]
+                findings.append(Finding(
+                    stage="slm",
+                    rule=rule,
+                    severity=Severity.HIGH,
+                    field_path=getattr(target, "field_path", ""),
+                    role=getattr(target, "role", ""),
+                    match_text=match_text,
+                    match_start=base_offset + start,
+                    match_end=base_offset + end,
+                    context_before=ctx_before,
+                    context_after=ctx_after,
+                    confidence=confidence,
+                    history=getattr(target, "history", False),
+                    metadata={"slm_rule": rule, "slm_backend": "api"},
+                ))
+
+        SLMStage._infer_stats["total_findings"] += len(findings)
+        return findings
+
     # ── 모델 로드 (최초 scan 호출 시 1회) ────────────────────────────────────
 
     def _ensure_loaded(self) -> bool:
+        if self._backend_preference == "api":
+            return True  # API 모드: 로컬 모델 로드 불필요
         if self._should_prefer_adapter() and self._ensure_adapter_loaded():
             return True
         if self._llm is not None:
@@ -341,6 +491,9 @@ class SLMStage(Stage):
         타깃별 구분자로 오프셋을 추적해 findings를 올바른 target에 매핑.
         """
         with self._lock:
+            if self._should_use_api():
+                return self._scan_with_api(targets, prior_findings)
+
             if not self._ensure_loaded():
                 return []
 

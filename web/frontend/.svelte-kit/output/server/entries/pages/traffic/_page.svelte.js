@@ -18,12 +18,30 @@ function _page($$renderer, $$props) {
     let summary = {};
     let filterAction = "all";
     let autoScroll = true;
+    function toExcerpt(messages, maxLen = 220) {
+      if (!Array.isArray(messages)) return "";
+      const chunks = [];
+      for (const m of messages) {
+        if (!m || typeof m !== "object") continue;
+        const rec = m;
+        const role = typeof rec.role === "string" ? rec.role : "";
+        const text = typeof rec.text === "string" ? rec.text : "";
+        if (!text.trim()) continue;
+        chunks.push(role ? `[${role}] ${text.trim()}` : text.trim());
+        if (chunks.join(" ").length >= maxLen) break;
+      }
+      return chunks.join(" ").slice(0, maxLen);
+    }
     function rowKey(row) {
       return String(row.request_id ?? row.id);
     }
     const unsub = sse.on("scan_result", (ev) => {
       const e = ev;
-      const normalized = { ...e, request_id: String(e.request_id ?? e.id) };
+      const normalized = {
+        ...e,
+        request_id: String(e.request_id ?? e.id),
+        prompt_excerpt: e.prompt_excerpt ?? toExcerpt(e.messages)
+      };
       rows = [
         normalized,
         ...rows.filter((r) => rowKey(r) !== rowKey(normalized)).slice(0, 498)
